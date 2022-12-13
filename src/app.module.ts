@@ -6,6 +6,7 @@ import Joi from 'joi';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MySqlConfigModule } from './config/database/config.module';
 import { MySqlConfigService } from './config/database/config.service';
+import { CommunityModule } from './community/community.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { MySqlConfigService } from './config/database/config.service';
       useClass: MySqlConfigService,
       inject: [MySqlConfigService],
     }),
+    CommunityModule,
   ],
   controllers: [AppController],
   providers: [AppService],

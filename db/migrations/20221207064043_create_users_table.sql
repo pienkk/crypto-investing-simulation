@@ -7,7 +7,7 @@ CREATE TABLE users(
   nickname VARCHAR(40),
   money DECIMAL(12,2),
   description VARCHAR(300),
-  create_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
 -- migrate:down
 DROP TABLE users;
