@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -10,9 +11,9 @@ import {
 import { CommunityService } from './community.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
-import { GetPostListsDto } from './dto/get-post.dto';
+import { QueryDto } from './dto/query.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { PostDetail, Posts } from './entity/post.entity';
+import { Posts } from './entity/post.entity';
 import { Reply } from './entity/reply.entity';
 
 @Controller('community')
@@ -20,12 +21,12 @@ export class CommunityController {
   constructor(private readonly communityService: CommunityService) {}
 
   @Get()
-  getAll(@Query() pageNation: GetPostListsDto): Promise<[Posts[], number]> {
+  getAll(@Query() pageNation: QueryDto): Promise<[Posts[], number]> {
     return this.communityService.getPosts(pageNation);
   }
 
   @Get(':postId')
-  getOne(@Param('postId') postId: number): Promise<PostDetail> {
+  getOne(@Param('postId') postId: number): Promise<Posts> {
     return this.communityService.getPostOne(postId);
   }
 
@@ -42,10 +43,15 @@ export class CommunityController {
     return this.communityService.updatePost(postId, updatePostDto);
   }
 
+  @Delete(':postId')
+  removePost(@Param('postId') postId: number): Promise<void> {
+    return this.communityService.removePost(postId);
+  }
+
   @Get('reply/:postId')
   getReplies(
     @Param('postId') postId: number,
-    @Query() pageNation: GetPostListsDto,
+    @Query() pageNation: QueryDto,
   ): Promise<[Reply[], number]> {
     return this.communityService.getReplies(postId, pageNation);
   }
@@ -61,5 +67,10 @@ export class CommunityController {
     @Body() updateReplyDto: CreateReplyDto,
   ): Promise<void> {
     return this.communityService.updateReply(replyId, updateReplyDto);
+  }
+
+  @Delete('reply/:replyId')
+  removeReply(@Param('replyId') replyId: number): Promise<void> {
+    return this.communityService.removeReply(replyId);
   }
 }

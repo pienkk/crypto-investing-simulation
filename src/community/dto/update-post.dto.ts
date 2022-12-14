@@ -1,9 +1,14 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdatePostDto {
   @IsString()
-  readonly title?: string;
+  @IsOptional()
+  readonly title: string;
 
   @IsString()
-  readonly description?: string;
+  @IsOptional()
+  readonly description: string;
+
+  @IsNumber() // jwt 생성후 삭제
+  readonly userId: number;
 }

@@ -3,7 +3,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Posts } from './post.entity';
@@ -22,7 +21,7 @@ export class Reply {
   @Column()
   postId: number;
 
-  @ManyToOne(() => Posts)
+  @ManyToOne(() => Posts, (post) => post.replies, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'postId' })
   post: Posts;
 }

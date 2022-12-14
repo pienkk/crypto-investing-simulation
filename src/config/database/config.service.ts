@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { Posts } from 'src/community/entity/post.entity';
 import { Reply } from 'src/community/entity/reply.entity';
+import { User } from 'src/user/entity/user.entity';
 
 @Injectable()
 export class MySqlConfigService implements TypeOrmOptionsFactory {
@@ -17,7 +18,7 @@ export class MySqlConfigService implements TypeOrmOptionsFactory {
       host: this.configService.get<string>('DB_HOST'),
       database: this.configService.get<string>('DB_DATABASE'),
       logging: true,
-      entities: [Posts, Reply],
+      entities: [Posts, Reply, User],
     };
   }
 }

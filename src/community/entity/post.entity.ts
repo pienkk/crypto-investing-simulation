@@ -1,8 +1,10 @@
+import { User } from 'src/user/entity/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -24,9 +26,11 @@ export class Posts {
 
   @Column()
   userId: number;
-}
 
-export class PostDetail extends Posts {
-  @OneToMany(() => Reply, (reply) => reply.post, { eager: true })
-  reply: Reply[];
+  @OneToMany(() => Reply, (reply) => reply.post, { cascade: true })
+  replies: Reply[];
+
+  @ManyToOne(() => User, (user) => user.post)
+  @JoinColumn({ name: 'userId' })
+  user: User;
 }
