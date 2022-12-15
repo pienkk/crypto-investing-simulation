@@ -1,7 +1,7 @@
 import { IsDate, IsNumber, IsString } from 'class-validator';
 import { ResponseUserDto } from 'src/user/dto/response-user.dto';
 import { Posts } from '../entity/post.entity';
-import { ReplyListDto, ResponseReplyDto } from './response-reply.dto';
+import { ResponseReplyDto } from './response-reply.dto';
 export class ResponsePostsDto {
   @IsNumber()
   private id: number;

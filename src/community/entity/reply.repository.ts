@@ -1,7 +1,7 @@
 import { CustomRepository } from 'src/config/typeorm/typeorm-ex.decorator';
 import { Repository } from 'typeorm';
 import { CreateReplyDto } from '../dto/create-reply.dto';
-import { QueryDto } from '../dto/query.dto';
+import { QueryDto } from '../dto/community-query.dto';
 import { Reply } from './reply.entity';
 
 @CustomRepository(Reply)

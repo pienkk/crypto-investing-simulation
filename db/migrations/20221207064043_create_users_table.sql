@@ -2,11 +2,11 @@
 CREATE TABLE users(
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   socialId BIGINT NOT NULL,
-  socialType INT(4),
-  email VARCHAR(50),
-  nickname VARCHAR(40),
-  money DECIMAL(12,2),
-  description VARCHAR(300),
+  socialType INT(4) NOT NULL,
+  email VARCHAR(50) NOT NULL,
+  nickname VARCHAR(40) NOT NULL,
+  money DECIMAL(12,2) NOT NULL,
+  description VARCHAR(300) NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
 -- migrate:down

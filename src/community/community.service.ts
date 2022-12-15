@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
-import { QueryDto } from './dto/query.dto';
+import { QueryDto } from './dto/community-query.dto';
 import {
   PostDetailDto,
   PostListDto,

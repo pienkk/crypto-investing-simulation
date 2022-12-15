@@ -11,7 +11,7 @@ import {
 import { CommunityService } from './community.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
-import { QueryDto } from './dto/query.dto';
+import { QueryDto } from './dto/community-query.dto';
 import { PostDetailDto, PostListDto } from './dto/response-post.dto';
 import { ReplyListDto } from './dto/response-reply.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
