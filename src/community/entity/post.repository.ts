@@ -20,9 +20,9 @@ export class PostRepository extends Repository<Posts> {
       .getManyAndCount();
   }
 
-  async getOne(postId: number): Promise<Posts> {
+  async getPostByOne(postId: number): Promise<Posts> {
     return await this.createQueryBuilder('posts')
-      .leftJoinAndSelect('posts.replies', 'replies')
+      .innerJoinAndSelect('posts.user', 'user')
       .where('posts.id = :postId', { postId })
       .getOne();
   }

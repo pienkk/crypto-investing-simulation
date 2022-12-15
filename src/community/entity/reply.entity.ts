@@ -1,5 +1,7 @@
+import { User } from 'src/user/entity/user.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -21,7 +23,14 @@ export class Reply {
   @Column()
   postId: number;
 
+  @CreateDateColumn()
+  created_at: Date;
+
   @ManyToOne(() => Posts, (post) => post.replies, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'postId' })
   post: Posts;
+
+  @ManyToOne(() => User, (user) => user.replies)
+  @JoinColumn({ name: 'userId' })
+  user: User;
 }

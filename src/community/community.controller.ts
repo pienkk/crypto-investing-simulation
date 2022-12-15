@@ -12,6 +12,8 @@ import { CommunityService } from './community.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
 import { QueryDto } from './dto/query.dto';
+import { PostDetailDto, PostListDto } from './dto/response-post.dto';
+import { ReplyListDto } from './dto/response-reply.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Posts } from './entity/post.entity';
 import { Reply } from './entity/reply.entity';
@@ -21,13 +23,13 @@ export class CommunityController {
   constructor(private readonly communityService: CommunityService) {}
 
   @Get()
-  getAll(@Query() pageNation: QueryDto): Promise<[Posts[], number]> {
+  getPosts(@Query() pageNation: QueryDto): Promise<PostListDto> {
     return this.communityService.getPosts(pageNation);
   }
 
   @Get(':postId')
-  getOne(@Param('postId') postId: number): Promise<Posts> {
-    return this.communityService.getPostOne(postId);
+  getPostDetail(@Param('postId') postId: number): Promise<PostDetailDto> {
+    return this.communityService.getPostDetail(postId);
   }
 
   @Post()
@@ -52,7 +54,7 @@ export class CommunityController {
   getReplies(
     @Param('postId') postId: number,
     @Query() pageNation: QueryDto,
-  ): Promise<[Reply[], number]> {
+  ): Promise<ReplyListDto> {
     return this.communityService.getReplies(postId, pageNation);
   }
 

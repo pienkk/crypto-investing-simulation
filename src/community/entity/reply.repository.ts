@@ -10,11 +10,12 @@ export class ReplyRepository extends Repository<Reply> {
     postId: number,
     { page, number }: QueryDto,
   ): Promise<[Reply[], number]> {
-    return await this.findAndCount({
-      where: { postId },
-      take: number,
-      skip: (page - 1) * number,
-    });
+    return await this.createQueryBuilder('replies')
+      .innerJoinAndSelect('replies.user', 'user')
+      .where('replies.postId = :postId', { postId })
+      .take(number)
+      .skip(page - 1)
+      .getManyAndCount();
   }
 
   async createReply(createReplyDto: CreateReplyDto): Promise<Reply> {

@@ -1,4 +1,6 @@
+import { Exclude } from 'class-transformer';
 import { Posts } from 'src/community/entity/post.entity';
+import { Reply } from 'src/community/entity/reply.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('users')
@@ -13,6 +15,7 @@ export class User {
   description: string;
 
   @Column()
+  @Exclude()
   email: string;
 
   @Column()
@@ -20,4 +23,7 @@ export class User {
 
   @OneToMany(() => Posts, (post) => post.user)
   post: Posts[];
+
+  @OneToMany(() => Reply, (reply) => reply.user)
+  replies: Reply;
 }

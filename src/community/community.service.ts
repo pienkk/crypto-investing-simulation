@@ -2,6 +2,12 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
 import { QueryDto } from './dto/query.dto';
+import {
+  PostDetailDto,
+  PostListDto,
+  ResponsePostsDto,
+} from './dto/response-post.dto';
+import { ReplyListDto, ResponseReplyDto } from './dto/response-reply.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Posts } from './entity/post.entity';
 import { PostRepository } from './entity/post.repository';
@@ -15,15 +21,29 @@ export class CommunityService {
     private replyRepository: ReplyRepository,
   ) {}
 
-  getPosts(GetPostListsDto: QueryDto): Promise<[Posts[], number]> {
-    return this.postRepository.getPostLists(GetPostListsDto);
+  async getPosts(GetPostListsDto: QueryDto): Promise<PostListDto> {
+    const [postList, number] = await this.postRepository.getPostLists(
+      GetPostListsDto,
+    );
+    const post = ResponsePostsDto.fromEntities(postList);
+
+    return { post, number };
   }
 
-  async getPostOne(postId: number): Promise<Posts> {
-    const post = await this.postRepository.getOne(postId);
-    if (!post) throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
+  async getPostDetail(postId: number): Promise<PostDetailDto> {
+    const postDetail = await this.postRepository.getPostByOne(postId);
+    if (!postDetail)
+      throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
 
-    return post;
+    const [reply, number] = await this.replyRepository.getReplyLists(postId, {
+      page: 1,
+      number: 10,
+    });
+
+    const replies = ResponseReplyDto.fromEntities(reply);
+    const post = ResponsePostsDto.fromEntity(postDetail);
+
+    return { post, reply: replies, number };
   }
 
   createPost(createPostDto: CreatePostDto): Promise<Posts> {
@@ -42,12 +62,13 @@ export class CommunityService {
         "Don't have post permisson",
         HttpStatus.BAD_REQUEST,
       );
+
     this.postRepository.updatePost(postId, updatePostDto);
     return;
   }
 
   async removePost(postId: number): Promise<void> {
-    const post = await this.postRepository.getOne(postId);
+    const post = await this.postRepository.getPostByOne(postId);
     if (!post)
       throw new HttpException(
         "Don't have permisson OR Not found post",
@@ -60,13 +81,21 @@ export class CommunityService {
     return;
   }
 
-  getReplies(postId: number, pageNation: QueryDto): Promise<[Reply[], number]> {
-    return this.replyRepository.getReplyLists(postId, pageNation);
+  async getReplies(
+    postId: number,
+    pageNation: QueryDto,
+  ): Promise<ReplyListDto> {
+    const [replies, number] = await this.replyRepository.getReplyLists(
+      postId,
+      pageNation,
+    );
+    const reply = ResponseReplyDto.fromEntities(replies);
+    return { reply, number };
   }
 
   async createReply(createReplyDto: CreateReplyDto): Promise<Reply> {
     const { postId } = createReplyDto;
-    const postExist = await this.postRepository.getOne(postId);
+    const postExist = await this.postRepository.getPostByOne(postId);
     if (!postExist)
       throw new HttpException(
         'This post does not exist.',

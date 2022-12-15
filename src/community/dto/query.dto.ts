@@ -11,5 +11,5 @@ export class QueryDto {
 
   @IsString()
   @IsOptional()
-  readonly title: string = '';
+  readonly title?: string = '';
 }
