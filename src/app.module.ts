@@ -9,6 +9,7 @@ import { MySqlConfigService } from './config/database/config.service';
 import { CommunityModule } from './community/community.module';
 import { UserModule } from './user/user.module';
 import { MarketModule } from './market/market.module';
+import { BinanceModule } from './binance/binance.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { MarketModule } from './market/market.module';
     CommunityModule,
     UserModule,
     MarketModule,
+    BinanceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

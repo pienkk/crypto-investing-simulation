@@ -6,8 +6,8 @@ import { MarketService } from './market.service';
 export class MarketController {
   constructor(private readonly marketService: MarketService) {}
 
-  @Get()
-  updateCoinsInfo() {
-    return this.marketService.updateCoinInfo();
-  }
+  // @Get()
+  // updateCoinsInfo() {
+  //   return this.marketService.updateCoinInfo();
+  // }
 }

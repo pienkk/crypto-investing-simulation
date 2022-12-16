@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { HttpModule } from '@nestjs/axios';
 import { TypeOrmExModule } from 'src/config/typeorm/typeorm-ex.module';
 import { CoinRepository } from './entity/coin.repository';
 import { MarketController } from './market.controller';
@@ -12,7 +11,6 @@ import { CoinHistoryRepository } from './entity/coinHistory.repository';
       CoinRepository,
       CoinHistoryRepository,
     ]),
-    HttpModule,
   ],
   controllers: [MarketController],
   providers: [MarketService],
