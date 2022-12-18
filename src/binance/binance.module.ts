@@ -6,7 +6,10 @@ import { CoinRepository } from 'src/market/entity/coin.repository';
 import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  imports: [TypeOrmExModule.forCustomRepository([CoinRepository]), HttpModule],
+  imports: [
+    TypeOrmExModule.forCustomRepository([CoinRepository]),
+    HttpModule.register({ timeout: 4000, maxRedirects: 4 }),
+  ],
   providers: [BinanceService, BinanceGateway],
 })
 export class BinanceModule {}

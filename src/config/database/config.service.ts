@@ -19,7 +19,7 @@ export class MySqlConfigService implements TypeOrmOptionsFactory {
       port: +this.configService.get<number>('DB_PORT'),
       host: this.configService.get<string>('DB_HOST'),
       database: this.configService.get<string>('DB_DATABASE'),
-      logging: true,
+      logging: false,
       entities: [Posts, Reply, User, Coin, CoinHistory],
     };
   }

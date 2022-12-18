@@ -32,9 +32,9 @@ export class CoinValueDto {
     dto.oneHourPrice = Number(entity[22][4]);
     dto.fourHourPrice = Number(entity[20][4]);
     dto.oneDayPrice = Number(entity[0][4]);
-    dto.oneDayVolume = Number(
-      entity.reduce((a, b) => Number(a) + Number(b[5]), 0),
-    );
+    // dto.oneDayVolume = Number(
+    //   entity.reduce((a, b) => Number(a) + Number(b[5]), 0),
+    // );
     return dto;
   }
 
@@ -50,7 +50,7 @@ export class CoinValueDto {
     entity.oneHourPrice = dto.oneHourPrice;
     entity.fourHourPrice = dto.fourHourPrice;
     entity.oneDayPrice = dto.oneDayPrice;
-    entity.oneDayVolume = dto.oneDayVolume;
+    // entity.oneDayVolume = dto.oneDayVolume;
     return entity;
   }
 
