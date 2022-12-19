@@ -1,13 +1,6 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { Coin } from './coin.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('coinPriceHistories')
+@Entity('coinHistories')
 export class CoinHistory {
   @PrimaryGeneratedColumn()
   id: number;
@@ -16,21 +9,8 @@ export class CoinHistory {
   price: number;
 
   @Column()
-  oneHourPrice: number;
+  symbol: string;
 
   @Column()
-  fourHourPrice: number;
-
-  @Column()
-  oneDayPrice: number;
-
-  @Column()
-  oneDayVolum: number;
-
-  @Column()
-  quantity: number;
-
-  @OneToOne(() => Coin)
-  @JoinColumn()
-  coin: Coin;
+  eventTime: number;
 }

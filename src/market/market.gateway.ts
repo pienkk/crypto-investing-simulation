@@ -1,3 +1,4 @@
+import { ValidationPipe } from '@nestjs/common';
 import {
   MessageBody,
   SubscribeMessage,
@@ -5,6 +6,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { MarketQueryDto } from './dto/market-query.dto';
 import { CoinRepository } from './entity/coin.repository';
 
 @WebSocketGateway(8080, { transports: ['websocket'] })
@@ -14,8 +16,13 @@ export class MarketGateway {
   server: Server;
 
   @SubscribeMessage('markets')
-  handleMessage(@MessageBody() data) {
-    console.log(data);
-    this.server.emit('message', data);
+  async handleMessage(@MessageBody() query: MarketQueryDto) {
+    const data = await this.coinRepository.getMarketData(query);
+
+    const interval = setInterval(async () => {
+      return await this.coinRepository.getMarketData(query);
+    }, 1000);
+    clearInterval(interval);
+    return data;
   }
 }

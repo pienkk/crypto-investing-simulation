@@ -11,9 +11,9 @@ export class MarketQueryDto {
 
   @IsNumber()
   @IsOptional()
-  readonly page: number;
+  readonly page: number = 1;
 
   @IsNumber()
   @IsOptional()
-  readonly number: number;
+  readonly number: number = 50;
 }

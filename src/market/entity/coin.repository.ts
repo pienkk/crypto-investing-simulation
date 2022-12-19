@@ -2,6 +2,7 @@ import { CustomRepository } from 'src/config/typeorm/typeorm-ex.decorator';
 import { Repository } from 'typeorm';
 import { MarketQueryDto } from '../dto/market-query.dto';
 import { Coin } from './coin.entity';
+import { CoinHistory } from './coinsHistory.entity';
 
 @CustomRepository(Coin)
 export class CoinRepository extends Repository<Coin> {
@@ -29,7 +30,24 @@ export class CoinRepository extends Repository<Coin> {
     });
   }
 
-  async getMarketData({ number, page, filter, order }: MarketQueryDto) {
+  updateBeforePrice(beforePrice: CoinHistory[], hour: number) {
+    beforePrice.forEach((el) => {
+      const qb = this.createQueryBuilder().update();
+
+      if (hour === 1) qb.set({ oneHourPrice: el.price });
+      if (hour === 4) qb.set({ fourHourPrice: el.price });
+      if (hour === 24) qb.set({ oneDayPrice: el.price });
+
+      qb.where('symbol = :symbol', { symbol: el.symbol }).execute();
+    });
+  }
+
+  async getMarketData({
+    number = 50,
+    page = 1,
+    filter = 'ticker',
+    order = 'ASC',
+  }: MarketQueryDto) {
     const qb = await this.createQueryBuilder('c')
       .select([
         'c.id',
@@ -38,19 +56,16 @@ export class CoinRepository extends Repository<Coin> {
         'c.image',
         'c.symbol',
         'c.price',
-        '(c.price - oneHourPrice) / oneHourPrice * 100 AS oneHourDiff',
-        '(c.price - fourHourPrice) / fourHourPrice * 100 AS fourHourDiff',
-        '(c.price - oneDayPrice) / oneDayPrice * 100 AS oneDayDiff',
-        'oneDayVolume',
-        'price * quantity AS marketCap',
+        '((c.price - c.oneHourPrice) / c.oneHourPrice * 100) AS oneHourDiff',
+        '(c.price - c.fourHourPrice) / c.fourHourPrice * 100 AS fourHourDiff',
+        '(c.price - c.oneDayPrice) / c.oneDayPrice * 100 AS oneDayDiff',
+        'c.oneDayVolume',
+        'c.price * c.quantity AS c_marketCap',
       ])
       .take(number)
       .skip(page - 1);
     if (order === 'DESC') qb.orderBy({ [filter]: 'DESC' });
     if (order === 'ASC') qb.orderBy({ [filter]: 'ASC' });
-    return qb.getManyAndCount();
-    // if (filter === 'name') qb.orderBy({[filter]: 'DESC' });
-    // if (filter === 'price') qb.orderBy({ 'c.price': order });
-    // if(filter === )
+    return qb.getRawMany();
   }
 }
