@@ -13,31 +13,31 @@ const ONEDAY = 86400;
 
 @Injectable()
 export class BinanceService {
-  async getBinance(coin: Coin[]) {
-    const date = new Date().getTime();
-    // try {
-    return await Promise.all(
-      coin.map(async (el: Coin) => {
-        return (
-          await firstValueFrom(
-            this.http
-              .get(
-                `https://api.binance.com/api/v3/klines?symbol=${el.symbol}&interval=1h&limit=24&endTime=${date}`,
-              )
-              .pipe(
-                catchError((error: AxiosError) => {
-                  console.log(error);
-                  throw error;
-                }),
-              ),
-          )
-        ).data;
-      }),
-    );
-    // } catch (error) {
-    //   throw error;
-    // }
-  }
+  // async getBinance(coin: Coin[]) {
+  //   const date = new Date().getTime();
+  // try {
+  // return await Promise.all(
+  //   coin.map(async (el: Coin) => {
+  //     return (
+  //       await firstValueFrom(
+  //         this.http
+  //           .get(
+  //             `https://api.binance.com/api/v3/klines?symbol=${el.symbol}&interval=1h&limit=24&endTime=${date}`,
+  //           )
+  //           .pipe(
+  //             catchError((error: AxiosError) => {
+  //               console.log(error);
+  //               throw error;
+  //             }),
+  //           ),
+  //       )
+  //     ).data;
+  //   }),
+  // );
+  // } catch (error) {
+  //   throw error;
+  // }
+  // }
 
   constructor(
     private readonly coinRepository: CoinRepository,
@@ -70,7 +70,7 @@ export class BinanceService {
       );
       this.coinRepository.updateBeforePrice(oneDayBefore, 24);
 
-      this.coinHistoriyRepo.removeBeforePrice(ONEDAY + ONEDAY);
-    }, 3000);
+      this.coinHistoriyRepo.removeBeforePrice(date - (ONEDAY + ONEHOUR));
+    }, 10000);
   }
 }
