@@ -1,7 +1,7 @@
 import { CustomRepository } from 'src/config/typeorm/typeorm-ex.decorator';
 import { Repository } from 'typeorm';
 import { CreatePostDto } from '../dto/create-post.dto';
-import { QueryDto } from '../dto/query.dto';
+import { QueryDto } from '../dto/community-query.dto';
 import { UpdatePostDto } from '../dto/update-post.dto';
 import { Posts } from './post.entity';
 
