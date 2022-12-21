@@ -1,7 +1,7 @@
 import { symbol } from 'joi';
 import { CustomRepository } from 'src/config/typeorm/typeorm-ex.decorator';
 import { Repository } from 'typeorm';
-import { CoinHistory } from './coinsHistory.entity';
+import { CoinHistory } from './coinHistory.entity';
 
 @CustomRepository(CoinHistory)
 export class CoinHistoryRepository extends Repository<CoinHistory> {

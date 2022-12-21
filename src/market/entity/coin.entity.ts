@@ -1,4 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { ColumnTransform } from 'src/config/database/columnTrans';
+import { Trade } from 'src/trade/entity/trade.entity';
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('coins')
 export class Coin {
@@ -17,21 +19,48 @@ export class Coin {
   @Column()
   image: string;
 
-  @Column()
+  @Column('decimal', {
+    precision: 15,
+    scale: 7,
+    transformer: new ColumnTransform(),
+  })
   price: number;
 
-  @Column()
+  @Column('decimal', {
+    precision: 15,
+    scale: 7,
+    transformer: new ColumnTransform(),
+  })
   oneHourPrice: number;
 
-  @Column()
+  @Column('decimal', {
+    precision: 15,
+    scale: 7,
+    transformer: new ColumnTransform(),
+  })
   fourHourPrice: number;
 
-  @Column()
+  @Column('decimal', {
+    precision: 15,
+    scale: 7,
+    transformer: new ColumnTransform(),
+  })
   oneDayPrice: number;
 
-  @Column()
+  @Column('decimal', {
+    precision: 20,
+    scale: 7,
+    transformer: new ColumnTransform(),
+  })
   oneDayVolume: number;
 
-  @Column()
+  @Column('decimal', {
+    precision: 20,
+    scale: 6,
+    transformer: new ColumnTransform(),
+  })
   quantity: number;
+
+  @OneToOne(() => Trade, (trade) => trade.coin)
+  trade: Trade;
 }

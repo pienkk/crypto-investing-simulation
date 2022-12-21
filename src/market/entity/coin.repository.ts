@@ -2,7 +2,7 @@ import { CustomRepository } from 'src/config/typeorm/typeorm-ex.decorator';
 import { Repository } from 'typeorm';
 import { MarketQueryDto } from '../dto/market-query.dto';
 import { Coin } from './coin.entity';
-import { CoinHistory } from './coinsHistory.entity';
+import { CoinHistory } from './coinHistory.entity';
 
 @CustomRepository(Coin)
 export class CoinRepository extends Repository<Coin> {
@@ -24,7 +24,11 @@ export class CoinRepository extends Repository<Coin> {
     coinInfo.forEach(async (el) => {
       await this.createQueryBuilder()
         .update(Coin)
-        .set({ price: el.curDayClose, oneDayVolume: el.volumeQuote })
+        .set({
+          price: el.curDayClose,
+          oneDayPrice: el.open,
+          oneDayVolume: el.volumeQuote,
+        })
         .where('symbol = :symbol', { symbol: el.symbol })
         .execute();
     });
@@ -36,7 +40,6 @@ export class CoinRepository extends Repository<Coin> {
 
       if (hour === 1) qb.set({ oneHourPrice: el.price });
       if (hour === 4) qb.set({ fourHourPrice: el.price });
-      if (hour === 24) qb.set({ oneDayPrice: el.price });
 
       qb.where('symbol = :symbol', { symbol: el.symbol }).execute();
     });
