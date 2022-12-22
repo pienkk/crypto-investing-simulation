@@ -6,8 +6,7 @@ import { Wallet } from './wallet.entity';
 @CustomRepository(Wallet)
 export class WalletRepository extends Repository<Wallet> {
   async getCoin(userId: number, coinId: number): Promise<Wallet> {
-    console.log(userId, coinId);
-    return this.findOneBy({ userId, coinId });
+    return await this.findOneBy({ userId, coinId });
   }
 
   async insertCoin(tradeEntity: Trade) {
@@ -18,7 +17,6 @@ export class WalletRepository extends Repository<Wallet> {
       quantity: tradeEntity.quantity,
     });
     this.save(wallet);
-    // this.createQueryBuilder().insert().values(wallet).
   }
 
   async updateCoin(tradeEntity: Trade, wallet: Wallet) {

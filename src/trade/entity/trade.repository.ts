@@ -1,7 +1,6 @@
 import { CustomRepository } from 'src/config/typeorm/typeorm-ex.decorator';
 import { Wallet } from 'src/wallet/wallet.entity';
 import { Repository } from 'typeorm';
-import { CreateTradeDto } from '../dto/create.trade.dto';
 import { Trade } from './trade.entity';
 
 @CustomRepository(Trade)
@@ -45,10 +44,10 @@ export class TradeRepository extends Repository<Trade> {
   }
 
   async sellCoin(trade: Trade, wallet: Wallet) {
-    console.log(wallet);
     return await this.createQueryBuilder('t')
       .update()
       .set({
+        status: 1,
         sellPrice: trade.coin.price,
         gainMoney: (trade.coin.price - wallet.purchasePrice) * trade.quantity,
         gainPercent:

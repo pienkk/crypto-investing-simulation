@@ -1,6 +1,13 @@
 import { ColumnTransform } from 'src/config/database/columnTrans';
 import { Trade } from 'src/trade/entity/trade.entity';
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Wallet } from 'src/wallet/wallet.entity';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity('coins')
 export class Coin {
@@ -63,4 +70,7 @@ export class Coin {
 
   @OneToOne(() => Trade, (trade) => trade.coin)
   trade: Trade;
+
+  @OneToMany(() => Wallet, (wallet) => wallet.coin)
+  wallet: Wallet[];
 }

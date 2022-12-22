@@ -4,10 +4,10 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
   Query,
 } from '@nestjs/common';
+import { symbol } from 'joi';
 import { CreateTradeDto } from './dto/create.trade.dto';
 import { TradeService } from './trade.service';
 
@@ -20,6 +20,14 @@ export class TradeController {
     return this.tradeService.getTradeAll(userId);
   }
 
+  @Get(':symbol')
+  getAmountAndCoin(
+    @Param('symbol') symbol: string,
+    @Query('userId') userId: number,
+  ) {
+    return this.tradeService.getAmount(userId, symbol);
+  }
+
   @Post()
   createTrade(@Body() createTradeDto: CreateTradeDto) {
     return this.tradeService.createTrade(createTradeDto);
@@ -29,10 +37,5 @@ export class TradeController {
   cancelTrade(@Param('tradeId') tradeId: number) {
     this.tradeService.cancelTrade(tradeId);
     return;
-  }
-
-  @Get('test')
-  test() {
-    return this.tradeService.coin();
   }
 }

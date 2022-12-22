@@ -10,6 +10,15 @@ export class CoinRepository extends Repository<Coin> {
     return await this.find();
   }
 
+  async getAmountByTrade(userId: number, symbol: string) {
+    return await this.createQueryBuilder('c')
+      .leftJoinAndSelect('c.wallet', 'wallet')
+      .leftJoinAndSelect('wallet.user', 'user')
+      .where('symbol = :symbol', { symbol })
+      .andWhere('user.id = :userId', { userId })
+      .getOne();
+  }
+
   async updateCoinByREST(coinInfo: Coin[]): Promise<void> {
     coinInfo.forEach(async (el) => {
       await this.createQueryBuilder()
