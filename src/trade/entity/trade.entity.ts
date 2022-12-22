@@ -1,76 +1,78 @@
 import { ColumnTransform } from 'src/config/database/columnTrans';
-import { Trade } from 'src/trade/entity/trade.entity';
-import { Wallet } from 'src/wallet/wallet.entity';
+import { Coin } from 'src/market/entity/coin.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
-  OneToMany,
+  JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { PurchaseStatus, TradeStatus } from '../enum/trade.status.enum';
 
-@Entity('coins')
-export class Coin {
+@Entity('tradeHistories')
+export class Trade {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  name: string;
+  userId: number;
 
   @Column()
-  ticker: string;
+  coinId: number;
 
-  @Column()
-  symbol: string;
+  @Column({ enum: PurchaseStatus })
+  isPurchase: PurchaseStatus;
 
-  @Column()
-  image: string;
-
-  @Column('decimal', {
-    precision: 15,
-    scale: 7,
-    transformer: new ColumnTransform(),
-  })
-  price: number;
+  @Column({ enum: TradeStatus })
+  status: TradeStatus;
 
   @Column('decimal', {
     precision: 15,
     scale: 7,
-    transformer: new ColumnTransform(),
-  })
-  oneHourPrice: number;
-
-  @Column('decimal', {
-    precision: 15,
-    scale: 7,
-    transformer: new ColumnTransform(),
-  })
-  fourHourPrice: number;
-
-  @Column('decimal', {
-    precision: 15,
-    scale: 7,
-    transformer: new ColumnTransform(),
-  })
-  oneDayPrice: number;
-
-  @Column('decimal', {
-    precision: 20,
-    scale: 7,
-    transformer: new ColumnTransform(),
-  })
-  oneDayVolume: number;
-
-  @Column('decimal', {
-    precision: 20,
-    scale: 6,
     transformer: new ColumnTransform(),
   })
   quantity: number;
 
-  @OneToOne(() => Trade, (trade) => trade.coin)
-  trade: Trade;
+  @Column('decimal', {
+    precision: 15,
+    scale: 7,
+    transformer: new ColumnTransform(),
+  })
+  buyPrice: number;
 
-  @OneToMany(() => Wallet, (wallet) => wallet.coin)
-  wallet: Wallet[];
+  @Column('decimal', {
+    precision: 15,
+    scale: 7,
+    transformer: new ColumnTransform(),
+  })
+  sellPrice: number;
+
+  @Column('decimal', {
+    precision: 15,
+    scale: 7,
+    transformer: new ColumnTransform(),
+  })
+  fee: number;
+
+  @Column('decimal', {
+    precision: 15,
+    scale: 7,
+    transformer: new ColumnTransform(),
+  })
+  gainMoney: number;
+
+  @Column('decimal', {
+    precision: 15,
+    scale: 7,
+    transformer: new ColumnTransform(),
+  })
+  gainPercent: number;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @OneToOne(() => Coin, (coin) => coin.trade)
+  @JoinColumn()
+  coin: Coin;
 }

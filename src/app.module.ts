@@ -10,6 +10,7 @@ import { CommunityModule } from './community/community.module';
 import { UserModule } from './user/user.module';
 import { MarketModule } from './market/market.module';
 import { BinanceModule } from './binance/binance.module';
+import { TradeModule } from './trade/trade.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { BinanceModule } from './binance/binance.module';
     UserModule,
     MarketModule,
     BinanceModule,
+    TradeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

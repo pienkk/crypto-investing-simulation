@@ -31,21 +31,15 @@ export class PostRepository extends Repository<Posts> {
     return await this.save(createPostDto);
   }
 
-  async updatePost(id: number, updatePostDto: UpdatePostDto): Promise<void> {
-    await await this.update(id, updatePostDto);
-    return;
+  async updatePost(id: number, updatePostDto: UpdatePostDto) {
+    return await this.update(id, updatePostDto);
   }
 
-  async removePost(post: Posts): Promise<void> {
-    console.log(post);
-    const a = await this.remove(post);
-    console.log(a);
-    return;
+  async removePost(post: Posts) {
+    return await this.delete(post);
   }
 
-  async getPostExistByUser(userId: number): Promise<boolean> {
-    const result = await this.findOneBy({ id: userId });
-    if (!result) return false;
-    return true;
+  async getPostExistByUser(postId: number, userId: number): Promise<Posts> {
+    return await this.findOneBy({ id: postId, userId: userId });
   }
 }

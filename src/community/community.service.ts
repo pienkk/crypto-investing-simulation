@@ -56,14 +56,21 @@ export class CommunityService {
     updatePostDto: UpdatePostDto,
   ): Promise<void> {
     const { userId } = updatePostDto;
-    const postPermisson = await this.postRepository.getPostExistByUser(userId);
+    const postPermisson = await this.postRepository.getPostExistByUser(
+      postId,
+      userId,
+    );
+    console.log(postPermisson);
     if (!postPermisson)
       throw new HttpException(
         "Don't have post permisson",
         HttpStatus.BAD_REQUEST,
       );
 
-    this.postRepository.updatePost(postId, updatePostDto);
+    const result = await this.postRepository.updatePost(postId, updatePostDto);
+    if (result.affected !== 1)
+      throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
+
     return;
   }
 
@@ -74,10 +81,11 @@ export class CommunityService {
         "Don't have permisson OR Not found post",
         HttpStatus.BAD_REQUEST,
       );
-    return this.postRepository.removePost(post);
-    // const result = await this.postRepository.removePost(postId);
-    // if (result.affected)
-    //   throw new HttpException('This post does not exist', HttpStatus.NOT_FOUND);
+
+    const result = await this.postRepository.removePost(post);
+    if (result.affected !== 1)
+      throw new HttpException('This post does not exist', HttpStatus.NOT_FOUND);
+
     return;
   }
 

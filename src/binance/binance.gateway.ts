@@ -10,11 +10,11 @@ export class BinanceGateway {
     private readonly coinRepository: CoinRepository,
     private readonly coinHistoryRepository: CoinHistoryRepository,
   ) {
-    this.binance = Binance();
-    this.binance.ws.allMiniTickers((tickers) => {
-      const filteredUS = tickers.filter((el) => el.symbol.includes('USDT'));
-      this.coinRepository.updateCoinByWS(filteredUS);
-      this.coinHistoryRepository.insertCoinHistoriesByWS(filteredUS);
-    });
+    // this.binance = Binance();
+    // this.binance.ws.allMiniTickers((tickers) => {
+    //   const filteredUS = tickers.filter((el) => el.symbol.includes('USDT'));
+    //   this.coinRepository.updateCoinByWS(filteredUS);
+    //   this.coinHistoryRepository.insertCoinHistoriesByWS(filteredUS);
+    // });
   }
 }
