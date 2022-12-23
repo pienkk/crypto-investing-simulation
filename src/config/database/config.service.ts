@@ -7,7 +7,7 @@ import { Coin } from 'src/market/entity/coin.entity';
 import { CoinHistory } from 'src/market/entity/coinHistory.entity';
 import { Trade } from 'src/trade/entity/trade.entity';
 import { User } from 'src/user/entity/user.entity';
-import { Wallet } from 'src/wallet/wallet.entity';
+import { Wallet } from 'src/wallet/entity/wallet.entity';
 
 @Injectable()
 export class MySqlConfigService implements TypeOrmOptionsFactory {
