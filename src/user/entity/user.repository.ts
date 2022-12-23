@@ -17,4 +17,18 @@ export class UserRepository extends Repository<User> {
       .where('id = :id', { id: userId })
       .execute();
   }
+
+  async getWallet(userId: number) {
+    return await this.createQueryBuilder('u')
+      .leftJoin('u.wallet', 'w')
+      .innerJoin('w.coin', 'c')
+      .select([
+        'u.nickname',
+        'u.money',
+        '(SUM(c.price * w.quantity) + u.money - 1000000) / 10000  AS totalYeildPercent',
+        '(SUM(c.price * w.quantity) + u.money - 1000000) AS totalYeildMoney',
+      ])
+      .where('u.id = :userId', { userId })
+      .getRawOne();
+  }
 }

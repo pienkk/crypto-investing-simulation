@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CoinRepository } from 'src/market/entity/coin.repository';
 import { UserRepository } from 'src/user/entity/user.repository';
-import { WalletRepository } from 'src/wallet/wallet.repository';
+import { WalletRepository } from 'src/wallet/entity/wallet.repository';
 import { CreateTradeDto } from './dto/create.trade.dto';
 import { ResponseAmountDto } from './dto/response.amount.dto';
 import { ResponseTradeDto } from './dto/response.trade.dto';

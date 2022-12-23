@@ -1,6 +1,6 @@
 import { ColumnTransform } from 'src/config/database/columnTrans';
 import { Trade } from 'src/trade/entity/trade.entity';
-import { Wallet } from 'src/wallet/wallet.entity';
+import { Wallet } from 'src/wallet/entity/wallet.entity';
 import {
   Column,
   Entity,

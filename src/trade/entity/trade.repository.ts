@@ -1,5 +1,5 @@
 import { CustomRepository } from 'src/config/typeorm/typeorm-ex.decorator';
-import { Wallet } from 'src/wallet/wallet.entity';
+import { Wallet } from 'src/wallet/entity/wallet.entity';
 import { Repository } from 'typeorm';
 import { Trade } from './trade.entity';
 

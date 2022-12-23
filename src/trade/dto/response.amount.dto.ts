@@ -1,6 +1,6 @@
 import { IsNumber, IsString } from 'class-validator';
 import { Coin } from 'src/market/entity/coin.entity';
-import { Wallet } from 'src/wallet/wallet.entity';
+import { Wallet } from 'src/wallet/entity/wallet.entity';
 
 export class ResponseAmountDto {
   @IsNumber()
