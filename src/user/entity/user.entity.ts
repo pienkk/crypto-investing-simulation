@@ -2,6 +2,7 @@ import { Exclude } from 'class-transformer';
 import { Posts } from 'src/community/entity/post.entity';
 import { Reply } from 'src/community/entity/reply.entity';
 import { ColumnTransform } from 'src/config/database/columnTrans';
+import { Trade } from 'src/trade/entity/trade.entity';
 import { Wallet } from 'src/wallet/entity/wallet.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -35,4 +36,7 @@ export class User {
 
   @OneToMany(() => Wallet, (wallet) => wallet.user)
   wallet: Wallet[];
+
+  @OneToMany(() => Trade, (trade) => trade.user)
+  trade: Trade[];
 }

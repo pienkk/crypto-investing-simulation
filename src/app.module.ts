@@ -12,6 +12,7 @@ import { MarketModule } from './market/market.module';
 import { BinanceModule } from './binance/binance.module';
 import { TradeModule } from './trade/trade.module';
 import { WalletModule } from './wallet/wallet.module';
+import { RankingModule } from './ranking/ranking.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { WalletModule } from './wallet/wallet.module';
     BinanceModule,
     TradeModule,
     WalletModule,
+    RankingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
