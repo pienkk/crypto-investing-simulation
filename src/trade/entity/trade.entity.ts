@@ -1,10 +1,12 @@
 import { ColumnTransform } from 'src/config/database/columnTrans';
 import { Coin } from 'src/market/entity/coin.entity';
+import { User } from 'src/user/entity/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -75,4 +77,8 @@ export class Trade {
   @OneToOne(() => Coin, (coin) => coin.trade)
   @JoinColumn()
   coin: Coin;
+
+  @ManyToOne(() => User, (user) => user.trade)
+  @JoinColumn({ name: 'userId' })
+  user: User;
 }
