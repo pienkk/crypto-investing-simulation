@@ -13,6 +13,8 @@ import { BinanceModule } from './binance/binance.module';
 import { TradeModule } from './trade/trade.module';
 import { WalletModule } from './wallet/wallet.module';
 import { RankingModule } from './ranking/ranking.module';
+import { GlobalExceptionFilter } from 'src/util/exception/http-exception.filter';
+import { APP_FILTER } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -43,6 +45,9 @@ import { RankingModule } from './ranking/ranking.module';
     RankingModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_FILTER, useClass: GlobalExceptionFilter },
+  ],
 })
 export class AppModule {}
