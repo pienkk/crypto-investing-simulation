@@ -1,16 +1,21 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsString } from 'class-validator';
 
 export class ResponseMoneyRankDto {
   @IsNumber()
+  @ApiProperty({ description: '유저 id' })
   private id: number;
 
   @IsString()
+  @ApiProperty({ description: '유저 닉네임' })
   private nickname: string;
 
   @IsNumber()
+  @ApiProperty({ description: '소지금 + 코인 가액의 합' })
   private totalMoney: number;
 
   @IsNumber()
+  @ApiProperty({ description: '순 수익률' })
   private yieldPercent: number;
 
   static fromEntity(entity: MoneyRank): ResponseMoneyRankDto {

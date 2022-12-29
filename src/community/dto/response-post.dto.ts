@@ -5,19 +5,19 @@ import { Posts } from '../entity/post.entity';
 import { ResponseReplyDto } from './response-reply.dto';
 export class ResponsePostsDto {
   @IsNumber()
-  @ApiProperty()
+  @ApiProperty({ description: '게시글 Id' })
   private id: number;
 
   @IsString()
-  @ApiProperty()
+  @ApiProperty({ description: '게시글 제목' })
   private title: string;
 
   @IsString()
-  @ApiProperty()
+  @ApiProperty({ description: '게시글 내용' })
   private description: string;
 
   @IsDate()
-  @ApiProperty()
+  @ApiProperty({ description: '게시글 생성 날짜' })
   private created_at: Date;
 
   @ApiProperty()

@@ -1,18 +1,22 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsString } from 'class-validator';
 import { Coin } from 'src/market/entity/coin.entity';
-import { Wallet } from 'src/wallet/entity/wallet.entity';
 
 export class ResponseAmountDto {
   @IsNumber()
+  @ApiProperty({ description: '코인 id' })
   private id: number;
 
   @IsString()
+  @ApiProperty({ description: '코인 이름' })
   private name: string;
 
   @IsNumber()
+  @ApiProperty({ description: '소지 갯수' })
   private quantity: number;
 
   @IsNumber()
+  @ApiProperty({ description: '소지 금액' })
   private money: number;
 
   static fromDto(entity: Coin): ResponseAmountDto {

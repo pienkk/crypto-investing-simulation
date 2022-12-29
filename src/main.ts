@@ -19,8 +19,8 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalExceptionFilter());
 
   const options = new DocumentBuilder()
-    .setTitle('example')
-    .setDescription('dd')
+    .setTitle('CryptoBy API Document')
+    .setDescription('가상화폐 모의투자 API')
     .setVersion('1.0.0')
     .build();
 

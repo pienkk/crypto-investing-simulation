@@ -12,11 +12,7 @@ import { CommunityService } from './community.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
 import { QueryDto } from './dto/community-query.dto';
-import {
-  PostDetailDto,
-  PostListDto,
-  ResponsePostsDto,
-} from './dto/response-post.dto';
+import { PostDetailDto, PostListDto } from './dto/response-post.dto';
 import { ReplyListDto } from './dto/response-reply.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Posts } from './entity/post.entity';
@@ -26,10 +22,8 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiProperty,
   ApiQuery,
   ApiTags,
-  getSchemaPath,
 } from '@nestjs/swagger';
 
 @ApiTags('Community')
@@ -83,7 +77,7 @@ export class CommunityController {
   }
 
   @Delete(':postId')
-  @ApiProperty({
+  @ApiOperation({
     summary: '커뮤니티 게시글 삭제 API',
     description: '게시글을 삭제한다.',
   })
@@ -92,6 +86,11 @@ export class CommunityController {
   }
 
   @Get('reply/:postId')
+  @ApiOperation({
+    summary: '게시글 댓글 조회 API',
+    description: '댓글 조회 query parameter를 이용한 페이지네이션',
+  })
+  @ApiQuery({ type: QueryDto })
   getReplies(
     @Param('postId') postId: number,
     @Query() pageNation: QueryDto,
@@ -100,11 +99,21 @@ export class CommunityController {
   }
 
   @Post('reply')
+  @ApiOperation({
+    summary: '게시글 댓글 작성 API',
+    description: '댓글을 생성한다',
+  })
+  @ApiCreatedResponse({ description: '댓글을 생성한다', type: CreateReplyDto })
   createReply(@Body() createReplyDto: CreateReplyDto): Promise<Reply> {
     return this.communityService.createReply(createReplyDto);
   }
 
   @Patch('reply/:replyId')
+  @ApiOperation({
+    summary: '게시글 댓글 수정 API',
+    description: '댓글을 수정한다.',
+  })
+  @ApiBody({ type: CreateReplyDto })
   updateReply(
     @Param('replyId') replyId: number,
     @Body() updateReplyDto: CreateReplyDto,
@@ -113,6 +122,10 @@ export class CommunityController {
   }
 
   @Delete('reply/:replyId')
+  @ApiOperation({
+    summary: '게시글 댓글 삭제 API',
+    description: '댓글을 삭제한다.',
+  })
   removeReply(@Param('replyId') replyId: number): Promise<void> {
     return this.communityService.removeReply(replyId);
   }
