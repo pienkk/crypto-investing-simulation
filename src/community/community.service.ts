@@ -17,8 +17,8 @@ import { ReplyRepository } from './entity/reply.repository';
 @Injectable()
 export class CommunityService {
   constructor(
-    private postRepository: PostRepository,
-    private replyRepository: ReplyRepository,
+    private readonly postRepository: PostRepository,
+    private readonly replyRepository: ReplyRepository,
   ) {}
 
   async postValidation(postId: number, userId?: number): Promise<Posts> {

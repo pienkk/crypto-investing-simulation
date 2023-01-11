@@ -13,6 +13,7 @@ export class WalletService {
   async getWallet(userId: number): Promise<ResponseWallet> {
     const wallets = await this.walletRepository.getWallet(userId);
     const user = await this.userRepository.getWallet(userId);
+
     return ResponseWallet.toResponse(wallets, user);
   }
 }

@@ -55,6 +55,7 @@ export class ResponseWalletDto {
 
     return dto;
   }
+
   static fromEntities(entities: RawWalletQuery[]): ResponseWalletDto[] {
     return entities.map((el) => this.fromEntity(el));
   }
