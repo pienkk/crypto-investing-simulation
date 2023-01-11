@@ -23,7 +23,7 @@ export class MarketGateway {
       return await this.coinRepository.getMarketData(query);
     }, 1000);
     clearInterval(interval);
-    console.log(data);
+
     this.server.emit('message', data);
 
     return data;
