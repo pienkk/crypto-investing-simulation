@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsString, Max, Min } from 'class-validator';
 import { Trade } from '../entity/trade.entity';
 
@@ -5,18 +6,25 @@ export class CreateTradeDto {
   @IsNumber()
   @Min(0)
   @Max(1)
+  @ApiProperty({
+    description: '코인 구매/판매 여부 0 = 구매 , 1 = 판매',
+    required: true,
+  })
   private readonly isPurchase: number;
 
   @IsNumber()
+  @ApiProperty({ description: '거래 가격', required: true })
   private readonly price: number;
 
   @IsNumber()
+  @ApiProperty({ description: '거래 수량', required: true })
   private readonly quantity: number;
 
   @IsNumber()
   private readonly userId: number;
 
   @IsNumber()
+  @ApiProperty({ description: '코인 id', required: true })
   private readonly coinId: number;
 
   static toEntity(dto: CreateTradeDto): Trade {
