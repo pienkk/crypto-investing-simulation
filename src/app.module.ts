@@ -20,8 +20,7 @@ import { APP_FILTER } from '@nestjs/core';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath:
-        process.env.NODE_ENV === 'dev' ? './env/dev.env' : './env/test.env',
+      envFilePath: '.env',
       validationSchema: Joi.object({
         DB_TYPE: Joi.string().required(),
         DB_HOST: Joi.string().required(),

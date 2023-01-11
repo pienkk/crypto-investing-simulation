@@ -72,7 +72,7 @@ export class CommunityController {
   updatePost(
     @Param('postId') postId: number,
     @Body() updatePostDto: UpdatePostDto,
-  ): Promise<void> {
+  ): Promise<boolean> {
     return this.communityService.updatePost(postId, updatePostDto);
   }
 
@@ -81,7 +81,7 @@ export class CommunityController {
     summary: '커뮤니티 게시글 삭제 API',
     description: '게시글을 삭제한다.',
   })
-  removePost(@Param('postId') postId: number): Promise<void> {
+  removePost(@Param('postId') postId: number): Promise<boolean> {
     return this.communityService.removePost(postId);
   }
 
@@ -117,7 +117,7 @@ export class CommunityController {
   updateReply(
     @Param('replyId') replyId: number,
     @Body() updateReplyDto: CreateReplyDto,
-  ): Promise<void> {
+  ): Promise<boolean> {
     return this.communityService.updateReply(replyId, updateReplyDto);
   }
 
@@ -126,7 +126,7 @@ export class CommunityController {
     summary: '게시글 댓글 삭제 API',
     description: '댓글을 삭제한다.',
   })
-  removeReply(@Param('replyId') replyId: number): Promise<void> {
+  removeReply(@Param('replyId') replyId: number): Promise<boolean> {
     return this.communityService.removeReply(replyId);
   }
 }

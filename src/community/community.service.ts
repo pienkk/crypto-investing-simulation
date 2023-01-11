@@ -21,119 +21,138 @@ export class CommunityService {
     private replyRepository: ReplyRepository,
   ) {}
 
+  async postValidation(postId: number, userId?: number): Promise<Posts> {
+    const post = await this.postRepository.findOneBy({ id: postId });
+
+    if (!post) {
+      throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (userId && post.userId !== userId) {
+      throw new HttpException(
+        "Don't have post permisson",
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return post;
+  }
+
   async getPosts(GetPostListsDto: QueryDto): Promise<PostListDto> {
     const [postList, number] = await this.postRepository.getPostLists(
       GetPostListsDto,
     );
     const post = ResponsePostsDto.fromEntities(postList);
+    const result: PostListDto = { post, number };
+    console.log(result);
 
-    return { post, number };
+    return result;
   }
 
   async getPostDetail(postId: number): Promise<PostDetailDto> {
-    const postDetail = await this.postRepository.getPostByOne(postId);
-    if (!postDetail)
-      throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
+    const postDetail = await this.postValidation(postId);
 
-    const [reply, number] = await this.replyRepository.getReplyLists(postId, {
+    const [replies, number] = await this.replyRepository.getReplyLists(postId, {
       page: 1,
       number: 10,
     });
 
-    const replies = ResponseReplyDto.fromEntities(reply);
+    const reply = ResponseReplyDto.fromEntities(replies);
     const post = ResponsePostsDto.fromEntity(postDetail);
 
-    return { post, reply: replies, number };
+    const responsePost: PostDetailDto = { post, reply, number };
+
+    return responsePost;
   }
 
-  createPost(createPostDto: CreatePostDto): Promise<Posts> {
-    const post = this.postRepository.createPost(createPostDto);
-    return post;
+  async createPost(createPostDto: CreatePostDto): Promise<Posts> {
+    const post = this.postRepository.create(createPostDto);
+
+    return await this.postRepository.save(post);
   }
 
   async updatePost(
     postId: number,
     updatePostDto: UpdatePostDto,
-  ): Promise<void> {
+  ): Promise<boolean> {
     const { userId } = updatePostDto;
-    const postPermisson = await this.postRepository.getPostExistByUser(
-      postId,
-      userId,
-    );
-    console.log(postPermisson);
-    if (!postPermisson)
-      throw new HttpException(
-        "Don't have post permisson",
-        HttpStatus.BAD_REQUEST,
-      );
+    await this.postValidation(postId, userId);
 
-    const result = await this.postRepository.updatePost(postId, updatePostDto);
-    if (result.affected !== 1)
+    const result = await this.postRepository.update(postId, updatePostDto);
+    if (result.affected !== 1) {
       throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
+    }
 
-    return;
+    return true;
   }
 
-  async removePost(postId: number): Promise<void> {
-    const post = await this.postRepository.getPostByOne(postId);
-    if (!post)
-      throw new HttpException(
-        "Don't have permisson OR Not found post",
-        HttpStatus.BAD_REQUEST,
-      );
+  async removePost(postId: number): Promise<boolean> {
+    const post = await this.postValidation(postId);
 
-    const result = await this.postRepository.removePost(post);
-    if (result.affected !== 1)
+    const result = await this.postRepository.delete(post);
+    if (result.affected !== 1) {
       throw new HttpException('This post does not exist', HttpStatus.NOT_FOUND);
+    }
 
-    return;
+    return true;
   }
 
-  async getReplies(
-    postId: number,
-    pageNation: QueryDto,
-  ): Promise<ReplyListDto> {
+  async getReplies(postId: number, queryDto: QueryDto): Promise<ReplyListDto> {
+    await this.postValidation(postId);
+
     const [replies, number] = await this.replyRepository.getReplyLists(
       postId,
-      pageNation,
+      queryDto,
     );
+
     const reply = ResponseReplyDto.fromEntities(replies);
-    return { reply, number };
+    const responseReplyList: ReplyListDto = { reply, number };
+
+    return responseReplyList;
   }
 
   async createReply(createReplyDto: CreateReplyDto): Promise<Reply> {
     const { postId } = createReplyDto;
-    const postExist = await this.postRepository.getPostByOne(postId);
-    if (!postExist)
+    await this.postValidation(postId);
+
+    const reply = this.replyRepository.create(createReplyDto);
+    return await this.replyRepository.save(reply);
+  }
+
+  async replyValidation(replyId: number): Promise<Reply> {
+    // JWT 로직 추가 후 유저 아이디 검증 추가
+    const reply = await this.replyRepository.findOneBy({ id: replyId });
+
+    if (!reply)
       throw new HttpException(
-        'This post does not exist.',
-        HttpStatus.NOT_FOUND,
+        'This reply does not exist.',
+        HttpStatus.BAD_REQUEST,
       );
 
-    const reply = this.replyRepository.createReply(createReplyDto);
     return reply;
   }
 
-  updateReply(replyId: number, updateReplyDto: CreateReplyDto): Promise<void> {
-    const reply = this.replyRepository.getReplyExistByUser(replyId);
-    if (!reply)
-      throw new HttpException(
-        'This reply does not exist.',
-        HttpStatus.BAD_REQUEST,
-      );
+  async updateReply(
+    replyId: number,
+    updateReplyDto: CreateReplyDto,
+  ): Promise<boolean> {
+    await this.replyValidation(replyId);
 
-    return this.replyRepository.updateReply(replyId, updateReplyDto);
+    const result = await this.replyRepository.update(replyId, updateReplyDto);
+    if (result.affected !== 1) {
+      throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
+    }
+
+    return true;
   }
 
-  removeReply(replyId: number): Promise<void> {
-    const reply = this.replyRepository.getReplyExistByUser(replyId);
-    if (!reply)
-      throw new HttpException(
-        'This reply does not exist.',
-        HttpStatus.BAD_REQUEST,
-      );
+  async removeReply(replyId: number): Promise<boolean> {
+    await this.replyValidation(replyId);
 
-    this.replyRepository.removeReply(replyId);
-    return;
+    const result = await this.replyRepository.delete({ id: replyId });
+    if (result.affected !== 1) {
+      throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
+    }
+
+    return true;
   }
 }
