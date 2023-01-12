@@ -42,24 +42,26 @@ export class CommunityService {
       GetPostListsDto,
     );
     const post = ResponsePostsDto.fromEntities(postList);
-    const result: PostListDto = { post, number };
-    console.log(result);
+    const responsePosts: PostListDto = { post, number };
 
-    return result;
+    return responsePosts;
   }
 
-  async getPostDetail(postId: number): Promise<PostDetailDto> {
-    const postDetail = await this.postValidation(postId);
+  async getPostDetail(postId: number): Promise<ResponsePostsDto> {
+    await this.postValidation(postId);
+    const postDetail = await this.postRepository.getPostDetail(postId);
 
-    const [replies, number] = await this.replyRepository.getReplyLists(postId, {
-      page: 1,
-      number: 10,
-    });
+    this.postRepository.update(postId, { hits: () => 'hits + 1' });
 
-    const reply = ResponseReplyDto.fromEntities(replies);
+    // const [replies, number] = await this.replyRepository.getReplyLists(postId, {
+    //   page: 1,
+    //   number: 10,
+    // });
+
+    // const reply = ResponseReplyDto.fromEntities(replies);
     const post = ResponsePostsDto.fromEntity(postDetail);
 
-    const responsePost: PostDetailDto = { post, reply, number };
+    const responsePost: ResponsePostsDto = post;
 
     return responsePost;
   }

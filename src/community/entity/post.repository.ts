@@ -5,6 +5,13 @@ import { Posts } from './post.entity';
 
 @CustomRepository(Posts)
 export class PostRepository extends Repository<Posts> {
+  async getPostDetail(postId: number): Promise<Posts> {
+    return await this.createQueryBuilder('post')
+      .innerJoinAndSelect('post.user', 'user')
+      .where('post.id = :id', { id: postId })
+      .getOne();
+  }
+
   async getPostLists({
     page,
     number,

@@ -4,6 +4,8 @@ CREATE TABLE posts(
   userId INT NOT NULL,
   title VARCHAR(100) NOT NULL,
   description VARCHAR(1000) NOT NULL,
+  hits INT NOT NULL DEFAULT 0,
+  label VARCHAR(10) NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT posts_user_fkey FOREIGN KEY (userId) REFERENCES users (id)
 )

@@ -25,6 +25,14 @@ export class Posts {
   @ApiProperty()
   description: string;
 
+  @Column()
+  @ApiProperty()
+  hits: number;
+
+  @Column()
+  @ApiProperty()
+  label: string;
+
   @CreateDateColumn()
   @ApiProperty()
   created_at: Date;

@@ -4,6 +4,7 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { QueryFailedError } from 'typeorm';
@@ -32,11 +33,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       default:
         status = HttpStatus.INTERNAL_SERVER_ERROR;
     }
-    response.status(status).json({
-      statusCode: status,
+
+    const error = {
       message: (exception as any).message,
-      timestamp: new Date().toISOString(),
+      statusCode: status,
+      code,
       path: request.url,
-    });
+      timestamp: new Date(),
+    };
+
+    Logger.error(JSON.stringify(error));
+
+    response.status(status).json(error);
   }
 }
