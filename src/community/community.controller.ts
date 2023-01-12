@@ -12,7 +12,11 @@ import { CommunityService } from './community.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
 import { QueryDto } from './dto/community-query.dto';
-import { PostDetailDto, PostListDto } from './dto/response-post.dto';
+import {
+  PostDetailDto,
+  PostListDto,
+  ResponsePostsDto,
+} from './dto/response-post.dto';
 import { ReplyListDto } from './dto/response-reply.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Posts } from './entity/post.entity';
@@ -48,7 +52,7 @@ export class CommunityController {
     description: '게시글 상세 조회, 댓글 조회',
   })
   @ApiOkResponse({ type: PostDetailDto })
-  getPostDetail(@Param('postId') postId: number): Promise<PostDetailDto> {
+  getPostDetail(@Param('postId') postId: number): Promise<ResponsePostsDto> {
     return this.communityService.getPostDetail(postId);
   }
 

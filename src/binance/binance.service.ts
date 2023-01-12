@@ -51,7 +51,7 @@ export class BinanceService {
     //   await this.coinRepository.updateCoinByREST(historyEntities);
     // }, 60000);
     ///------------//
-    const updatePriceHistories = setInterval(async () => {
+    setInterval(async () => {
       const date = Math.floor(new Date().getTime() / 1000);
       const oneHourBefore = await this.coinHistoriyRepo.getBeforePrice(
         date - ONEHOUR,

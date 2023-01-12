@@ -16,6 +16,14 @@ export class ResponsePostsDto {
   @ApiProperty({ description: '게시글 내용' })
   private description: string;
 
+  @IsNumber()
+  @ApiProperty({ description: '게시글 조회수' })
+  private hits: number;
+
+  @IsString()
+  @ApiProperty({ description: '게시글 카테고리' })
+  private label: string;
+
   @IsDate()
   @ApiProperty({ description: '게시글 생성 날짜' })
   private created_at: Date;
@@ -29,6 +37,8 @@ export class ResponsePostsDto {
     dto.title = entity.title;
     dto.description = entity.description;
     dto.created_at = entity.created_at;
+    dto.hits = entity.hits;
+    dto.label = entity.label;
 
     const user = ResponseUserDto.fromEntity(entity.user);
     dto.user = user;
