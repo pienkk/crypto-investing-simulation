@@ -18,12 +18,18 @@ export class ResponseIncomeRankDto {
   @ApiProperty({ description: '실현 수익 률' })
   private incomePercent: number;
 
+  @IsNumber()
+  @ApiProperty({ description: '랭킹' })
+  private ranking: number;
+
   static fromEntity(entity: RawQueryEntity): ResponseIncomeRankDto {
     const dto = new ResponseIncomeRankDto();
     dto.id = entity.ID;
     dto.nickname = entity.nickName;
     dto.incomeMoney = Number(entity.incomeMoney);
     dto.incomePercent = Number(entity.incomePercent);
+    dto.ranking = Number(entity.ranking);
+
     return dto;
   }
 
@@ -37,4 +43,5 @@ interface RawQueryEntity {
   nickName: string;
   incomeMoney: string;
   incomePercent: string;
+  ranking: string;
 }

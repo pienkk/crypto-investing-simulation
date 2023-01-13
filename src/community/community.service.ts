@@ -53,17 +53,7 @@ export class CommunityService {
 
     this.postRepository.update(postId, { hits: () => 'hits + 1' });
 
-    // const [replies, number] = await this.replyRepository.getReplyLists(postId, {
-    //   page: 1,
-    //   number: 10,
-    // });
-
-    // const reply = ResponseReplyDto.fromEntities(replies);
-    const post = ResponsePostsDto.fromEntity(postDetail);
-
-    const responsePost: ResponsePostsDto = post;
-
-    return responsePost;
+    return ResponsePostsDto.fromEntity(postDetail);
   }
 
   async createPost(createPostDto: CreatePostDto): Promise<Posts> {

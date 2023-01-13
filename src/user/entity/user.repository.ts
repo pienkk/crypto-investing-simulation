@@ -35,6 +35,7 @@ export class UserRepository extends Repository<User> {
         'u.nickName',
         '(SUM (c.price * w.quantity) + u.money) AS totalMoney',
         '(SUM (c.price * w.quantity) + u.money ) / 10000 AS yieldPercent',
+        'rank() over (order by ((c.price * w.quantity) + u.money) desc) as ranking',
       ])
       .groupBy('u.id')
       .orderBy('totalMoney', 'ASC')
@@ -50,6 +51,7 @@ export class UserRepository extends Repository<User> {
         'u.nickName',
         'SUM(th.sellPrice * th.quantity) - SUM(th.buyPrice * th.quantity) AS incomeMoney',
         '(SUM(th.sellPrice * th.quantity) - SUM(th.buyPrice * th.quantity)) / SUM(th.buyPrice * th.quantity) * 100 AS incomePercent',
+        'rank() over (order by (SUM(th.sellPrice * th.quantity) - SUM(th.buyPrice * th.quantity)) desc) as ranking ',
       ])
       .where('th.status = 1')
       .groupBy('th.userId')

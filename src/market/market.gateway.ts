@@ -9,7 +9,7 @@ import { Server } from 'socket.io';
 import { MarketQueryDto } from './dto/market-query.dto';
 import { CoinRepository } from './entity/coin.repository';
 
-@WebSocketGateway(8080, { transports: ['websocket'] })
+@WebSocketGateway(8080, { transposrts: ['websocket'] })
 export class MarketGateway {
   constructor(private readonly coinRepository: CoinRepository) {}
   @WebSocketServer()

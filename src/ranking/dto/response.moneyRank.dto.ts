@@ -18,12 +18,17 @@ export class ResponseMoneyRankDto {
   @ApiProperty({ description: '순 수익률' })
   private yieldPercent: number;
 
+  @IsNumber()
+  @ApiProperty({ description: '랭킹' })
+  private ranking: number;
+
   static fromEntity(entity: MoneyRank): ResponseMoneyRankDto {
     const dto = new ResponseMoneyRankDto();
     dto.id = entity.ID;
     dto.nickname = entity.nickName;
     dto.totalMoney = Number(entity.totalMoney);
     dto.yieldPercent = Number(entity.yieldPercent);
+    dto.ranking = Number(entity.ranking);
 
     return dto;
   }
@@ -38,4 +43,5 @@ interface MoneyRank {
   nickName: string;
   totalMoney: string;
   yieldPercent: string;
+  ranking: string;
 }

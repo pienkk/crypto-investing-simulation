@@ -8,6 +8,7 @@ export class RankingService {
   constructor(private readonly userRepository: UserRepository) {}
   async getMoneyRanking(): Promise<ResponseMoneyRankDto[]> {
     const entity = await this.userRepository.getMoneyRank();
+    console.log(entity);
 
     return ResponseMoneyRankDto.fromEntities(entity);
   }
