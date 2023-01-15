@@ -16,6 +16,7 @@ import { RankingModule } from './ranking/ranking.module';
 import { GlobalExceptionFilter } from 'src/util/exception/http-exception.filter';
 import { APP_FILTER } from '@nestjs/core';
 import { LoggerMiddleware } from './middleware/logger.middleware';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
     TradeModule,
     WalletModule,
     RankingModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
