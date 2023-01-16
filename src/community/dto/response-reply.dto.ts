@@ -5,18 +5,18 @@ import { Reply } from '../entity/reply.entity';
 
 export class ResponseReplyDto {
   @IsNumber()
-  @ApiProperty()
+  @ApiProperty({ description: '댓글id' })
   private id: number;
 
   @IsString()
-  @ApiProperty()
+  @ApiProperty({ description: '코멘트' })
   private comment: string;
 
   @IsDate()
-  @ApiProperty()
+  @ApiProperty({ description: '작성 날짜' })
   private created_at: Date;
 
-  @ApiProperty()
+  @ApiProperty({ description: '유저 정보' })
   private user: ResponseUserDto;
 
   static fromEntity(entity: Reply): ResponseReplyDto {

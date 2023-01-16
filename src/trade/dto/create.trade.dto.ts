@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString, Max, Min } from 'class-validator';
+import { IsNumber, Max, Min } from 'class-validator';
 import { Trade } from '../entity/trade.entity';
 
 export class CreateTradeDto {
@@ -21,15 +21,12 @@ export class CreateTradeDto {
   private readonly quantity: number;
 
   @IsNumber()
-  private readonly userId: number;
-
-  @IsNumber()
   @ApiProperty({ description: '코인 id', required: true })
   private readonly coinId: number;
 
-  static toEntity(dto: CreateTradeDto): Trade {
+  static toEntity(dto: CreateTradeDto, userId: number): Trade {
     const entity = new Trade();
-    entity.userId = dto.userId;
+    entity.userId = userId;
     entity.coinId = dto.coinId;
     entity.isPurchase = dto.isPurchase;
     entity.status = 0;

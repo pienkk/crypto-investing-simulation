@@ -30,16 +30,20 @@ export class TradeService {
     return ResponseAmountDto.fromDto(amount);
   }
 
-  async createTrade(createTradeDto: CreateTradeDto): Promise<Trade> {
-    const tradeEntity = CreateTradeDto.toEntity(createTradeDto);
+  async createTrade(
+    createTradeDto: CreateTradeDto,
+    userId: number,
+  ): Promise<Trade> {
+    const tradeEntity = CreateTradeDto.toEntity(createTradeDto, userId);
 
     return await this.tradeRepository.save(tradeEntity);
   }
 
-  async cancelTrade(tradeId: number): Promise<boolean> {
+  async cancelTrade(tradeId: number, userId: number): Promise<boolean> {
     const tradeHistory = await this.tradeRepository.findOneBy({
       id: tradeId,
       status: 0,
+      userId,
     });
 
     if (!tradeHistory) {
@@ -55,6 +59,7 @@ export class TradeService {
 
     return true;
   }
+
   insertCoin(tradeEntity: Trade) {
     const wallet = this.walletRepository.create({
       coinId: tradeEntity.coinId,

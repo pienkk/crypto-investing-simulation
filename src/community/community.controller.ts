@@ -7,10 +7,11 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { CommunityService } from './community.service';
 import { CreatePostDto } from './dto/create-post.dto';
-import { CreateReplyDto } from './dto/create-reply.dto';
+import { CreateReplyDto, UpdateReplyDto } from './dto/create-reply.dto';
 import { QueryDto } from './dto/community-query.dto';
 import {
   PostDetailDto,
@@ -29,6 +30,10 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/security/auth.guard';
+import { CurrentUser } from 'src/auth/security/auth.user.param';
+import { User } from 'src/user/entity/user.entity';
+import { JwtPayload } from 'src/auth/jwt-payload.interface';
 
 @ApiTags('Community')
 @Controller('community')
@@ -63,8 +68,12 @@ export class CommunityController {
   })
   @ApiCreatedResponse({ description: '게시글을 생성한다.', type: Posts })
   @ApiBody({ type: CreatePostDto })
-  createPost(@Body() createPostDto: CreatePostDto): Promise<Posts> {
-    return this.communityService.createPost(createPostDto);
+  @UseGuards(JwtAuthGuard)
+  createPost(
+    @CurrentUser() user: JwtPayload,
+    @Body() createPostDto: CreatePostDto,
+  ): Promise<Posts> {
+    return this.communityService.createPost(createPostDto, user.id);
   }
 
   @Patch(':postId')
@@ -73,11 +82,13 @@ export class CommunityController {
     description: '게시글을 수정한다.',
   })
   @ApiBody({ type: UpdatePostDto })
+  @UseGuards(JwtAuthGuard)
   updatePost(
+    @CurrentUser() user: JwtPayload,
     @Param('postId') postId: number,
     @Body() updatePostDto: UpdatePostDto,
   ): Promise<boolean> {
-    return this.communityService.updatePost(postId, updatePostDto);
+    return this.communityService.updatePost(postId, updatePostDto, user.id);
   }
 
   @Delete(':postId')
@@ -85,8 +96,12 @@ export class CommunityController {
     summary: '커뮤니티 게시글 삭제 API',
     description: '게시글을 삭제한다.',
   })
-  removePost(@Param('postId') postId: number): Promise<boolean> {
-    return this.communityService.removePost(postId);
+  @UseGuards(JwtAuthGuard)
+  removePost(
+    @CurrentUser() user: JwtPayload,
+    @Param('postId') postId: number,
+  ): Promise<boolean> {
+    return this.communityService.removePost(postId, user.id);
   }
 
   @Get('reply/:postId')
@@ -108,8 +123,12 @@ export class CommunityController {
     description: '댓글을 생성한다',
   })
   @ApiCreatedResponse({ description: '댓글을 생성한다', type: CreateReplyDto })
-  createReply(@Body() createReplyDto: CreateReplyDto): Promise<Reply> {
-    return this.communityService.createReply(createReplyDto);
+  @UseGuards(JwtAuthGuard)
+  createReply(
+    @CurrentUser() user: JwtPayload,
+    @Body() createReplyDto: CreateReplyDto,
+  ): Promise<Reply> {
+    return this.communityService.createReply(createReplyDto, user.id);
   }
 
   @Patch('reply/:replyId')
@@ -117,12 +136,14 @@ export class CommunityController {
     summary: '게시글 댓글 수정 API',
     description: '댓글을 수정한다.',
   })
-  @ApiBody({ type: CreateReplyDto })
+  @ApiBody({ type: UpdateReplyDto })
+  @UseGuards(JwtAuthGuard)
   updateReply(
+    @CurrentUser() user: JwtPayload,
     @Param('replyId') replyId: number,
-    @Body() updateReplyDto: CreateReplyDto,
+    @Body() updateReplyDto: UpdateReplyDto,
   ): Promise<boolean> {
-    return this.communityService.updateReply(replyId, updateReplyDto);
+    return this.communityService.updateReply(replyId, updateReplyDto, user.id);
   }
 
   @Delete('reply/:replyId')
@@ -130,7 +151,11 @@ export class CommunityController {
     summary: '게시글 댓글 삭제 API',
     description: '댓글을 삭제한다.',
   })
-  removeReply(@Param('replyId') replyId: number): Promise<boolean> {
-    return this.communityService.removeReply(replyId);
+  @UseGuards(JwtAuthGuard)
+  removeReply(
+    @CurrentUser() user: JwtPayload,
+    @Param('replyId') replyId: number,
+  ): Promise<boolean> {
+    return this.communityService.removeReply(replyId, user.id);
   }
 }

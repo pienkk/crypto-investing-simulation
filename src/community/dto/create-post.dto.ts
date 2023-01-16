@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreatePostDto {
   @IsString()
@@ -11,8 +11,4 @@ export class CreatePostDto {
   @IsNotEmpty()
   @ApiProperty({ description: '내용', required: true })
   readonly description: string;
-
-  @IsNumber() // user 기능 생성후 삭제
-  @ApiProperty({ description: '유저아이디' })
-  readonly userId: number;
 }
