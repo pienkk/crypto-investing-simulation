@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
-import { CreateReplyDto } from './dto/create-reply.dto';
+import { CreateReplyDto, UpdateReplyDto } from './dto/create-reply.dto';
 import { QueryDto } from './dto/community-query.dto';
 import {
   PostDetailDto,
@@ -56,8 +56,11 @@ export class CommunityService {
     return ResponsePostsDto.fromEntity(postDetail);
   }
 
-  async createPost(createPostDto: CreatePostDto): Promise<Posts> {
-    const post = this.postRepository.create(createPostDto);
+  async createPost(
+    createPostDto: CreatePostDto,
+    userId: number,
+  ): Promise<Posts> {
+    const post = this.postRepository.create({ ...createPostDto, userId });
 
     return await this.postRepository.save(post);
   }
@@ -65,8 +68,8 @@ export class CommunityService {
   async updatePost(
     postId: number,
     updatePostDto: UpdatePostDto,
+    userId: number,
   ): Promise<boolean> {
-    const { userId } = updatePostDto;
     await this.postValidation(postId, userId);
 
     const result = await this.postRepository.update(postId, updatePostDto);
@@ -77,10 +80,10 @@ export class CommunityService {
     return true;
   }
 
-  async removePost(postId: number): Promise<boolean> {
-    const post = await this.postValidation(postId);
+  async removePost(postId: number, userId: number): Promise<boolean> {
+    const post = await this.postValidation(postId, userId);
 
-    const result = await this.postRepository.delete(post);
+    const result = await this.postRepository.delete(post.id);
     if (result.affected !== 1) {
       throw new HttpException('This post does not exist', HttpStatus.NOT_FOUND);
     }
@@ -102,16 +105,18 @@ export class CommunityService {
     return responseReplyList;
   }
 
-  async createReply(createReplyDto: CreateReplyDto): Promise<Reply> {
+  async createReply(
+    createReplyDto: CreateReplyDto,
+    userId: number,
+  ): Promise<Reply> {
     const { postId } = createReplyDto;
-    await this.postValidation(postId);
+    await this.postValidation(postId, userId);
 
-    const reply = this.replyRepository.create(createReplyDto);
+    const reply = this.replyRepository.create({ ...createReplyDto, userId });
     return await this.replyRepository.save(reply);
   }
 
-  async replyValidation(replyId: number): Promise<Reply> {
-    // JWT 로직 추가 후 유저 아이디 검증 추가
+  async replyValidation(replyId: number, userId: number): Promise<Reply> {
     const reply = await this.replyRepository.findOneBy({ id: replyId });
 
     if (!reply)
@@ -120,14 +125,22 @@ export class CommunityService {
         HttpStatus.BAD_REQUEST,
       );
 
+    if (reply.userId !== userId) {
+      throw new HttpException(
+        "Don't have reply permisson",
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     return reply;
   }
 
   async updateReply(
     replyId: number,
-    updateReplyDto: CreateReplyDto,
+    updateReplyDto: UpdateReplyDto,
+    userId: number,
   ): Promise<boolean> {
-    await this.replyValidation(replyId);
+    await this.replyValidation(replyId, userId);
 
     const result = await this.replyRepository.update(replyId, updateReplyDto);
     if (result.affected !== 1) {
@@ -137,8 +150,8 @@ export class CommunityService {
     return true;
   }
 
-  async removeReply(replyId: number): Promise<boolean> {
-    await this.replyValidation(replyId);
+  async removeReply(replyId: number, userId: number): Promise<boolean> {
+    await this.replyValidation(replyId, userId);
 
     const result = await this.replyRepository.delete({ id: replyId });
     if (result.affected !== 1) {

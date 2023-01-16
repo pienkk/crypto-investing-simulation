@@ -4,15 +4,11 @@ import { IsNumber, IsOptional, IsString } from 'class-validator';
 export class UpdatePostDto {
   @IsString()
   @IsOptional()
-  @ApiProperty()
+  @ApiProperty({ description: '제목', required: true })
   readonly title: string;
 
   @IsString()
   @IsOptional()
-  @ApiProperty()
+  @ApiProperty({ description: '내용', required: true })
   readonly description: string;
-
-  @IsNumber() // jwt 생성후 삭제
-  @ApiProperty()
-  readonly userId: number;
 }

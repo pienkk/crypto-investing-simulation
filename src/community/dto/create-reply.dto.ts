@@ -3,14 +3,16 @@ import { IsNumber, IsString } from 'class-validator';
 
 export class CreateReplyDto {
   @IsString()
-  @ApiProperty()
+  @ApiProperty({ description: '코멘트', required: true })
   readonly comment: string;
 
   @IsNumber()
-  @ApiProperty()
-  readonly userId: number;
-
-  @IsNumber()
-  @ApiProperty()
+  @ApiProperty({ description: '포스트ID', required: true })
   readonly postId: number;
+}
+
+export class UpdateReplyDto {
+  @IsString()
+  @ApiProperty({ description: '코멘트', required: true })
+  readonly comment: string;
 }
