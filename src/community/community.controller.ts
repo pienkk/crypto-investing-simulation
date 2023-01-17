@@ -18,7 +18,7 @@ import {
   PostListDto,
   ResponsePostsDto,
 } from './dto/response-post.dto';
-import { ReplyListDto } from './dto/response-reply.dto';
+import { ReplyListDto, ResponseReplyDto } from './dto/response-reply.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Posts } from './entity/post.entity';
 import { Reply } from './entity/reply.entity';
@@ -107,14 +107,10 @@ export class CommunityController {
   @Get('reply/:postId')
   @ApiOperation({
     summary: '게시글 댓글 조회 API',
-    description: '댓글 조회 query parameter를 이용한 페이지네이션',
+    description: '댓글 조회',
   })
-  @ApiQuery({ type: QueryDto })
-  getReplies(
-    @Param('postId') postId: number,
-    @Query() pageNation: QueryDto,
-  ): Promise<ReplyListDto> {
-    return this.communityService.getReplies(postId, pageNation);
+  getReplies(@Param('postId') postId: number): Promise<ResponseReplyDto[]> {
+    return this.communityService.getReplies(postId);
   }
 
   @Post('reply')
@@ -127,7 +123,7 @@ export class CommunityController {
   createReply(
     @CurrentUser() user: JwtPayload,
     @Body() createReplyDto: CreateReplyDto,
-  ): Promise<Reply> {
+  ): Promise<ResponseReplyDto[]> {
     return this.communityService.createReply(createReplyDto, user.id);
   }
 

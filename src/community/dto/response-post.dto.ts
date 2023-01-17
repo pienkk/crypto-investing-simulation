@@ -37,7 +37,7 @@ export class ResponsePostsDto {
     dto.title = entity.title;
     dto.description = entity.description;
     dto.created_at = entity.created_at;
-    dto.hits = entity.hits;
+    dto.hits = entity.hits + 1;
     dto.label = entity.label;
 
     const user = ResponseUserDto.fromEntity(entity.user);

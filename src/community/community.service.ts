@@ -91,29 +91,26 @@ export class CommunityService {
     return true;
   }
 
-  async getReplies(postId: number, queryDto: QueryDto): Promise<ReplyListDto> {
+  async getReplies(postId: number): Promise<ResponseReplyDto[]> {
     await this.postValidation(postId);
 
-    const [replies, number] = await this.replyRepository.getReplyLists(
-      postId,
-      queryDto,
-    );
+    const replies = await this.replyRepository.getReplyLists(postId);
 
-    const reply = ResponseReplyDto.fromEntities(replies);
-    const responseReplyList: ReplyListDto = { reply, number };
-
-    return responseReplyList;
+    return ResponseReplyDto.fromEntities(replies);
   }
 
   async createReply(
     createReplyDto: CreateReplyDto,
     userId: number,
-  ): Promise<Reply> {
+  ): Promise<ResponseReplyDto[]> {
     const { postId } = createReplyDto;
     await this.postValidation(postId, userId);
 
     const reply = this.replyRepository.create({ ...createReplyDto, userId });
-    return await this.replyRepository.save(reply);
+    await this.replyRepository.save(reply);
+
+    const replies = await this.replyRepository.getReplyLists(postId);
+    return ResponseReplyDto.fromEntities(replies);
   }
 
   async replyValidation(replyId: number, userId: number): Promise<Reply> {

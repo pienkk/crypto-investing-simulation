@@ -24,6 +24,7 @@ export class ResponseReplyDto {
     dto.id = entity.id;
     dto.comment = entity.comment;
     dto.created_at = entity.created_at;
+
     const user = ResponseUserDto.fromEntity(entity.user);
     dto.user = user;
     return dto;
