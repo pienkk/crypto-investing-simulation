@@ -28,6 +28,10 @@ export class ResponsePostsDto {
   @ApiProperty({ description: '게시글 생성 날짜' })
   private created_at: Date;
 
+  @IsNumber()
+  @ApiProperty({ description: '댓글 수' })
+  private repliesCount: number;
+
   @ApiProperty()
   private user: ResponseUserDto;
 
@@ -37,8 +41,9 @@ export class ResponsePostsDto {
     dto.title = entity.title;
     dto.description = entity.description;
     dto.created_at = entity.created_at;
-    dto.hits = entity.hits + 1;
+    dto.hits = entity.hits;
     dto.label = entity.label;
+    dto.repliesCount = entity.replies.length;
 
     const user = ResponseUserDto.fromEntity(entity.user);
     dto.user = user;
@@ -48,6 +53,10 @@ export class ResponsePostsDto {
 
   static fromEntities(entities: Posts[]): ResponsePostsDto[] {
     return entities.map((entity) => ResponsePostsDto.fromEntity(entity));
+  }
+  static hitsPlus(entity: ResponsePostsDto) {
+    entity.hits += 1;
+    return entity;
   }
 }
 

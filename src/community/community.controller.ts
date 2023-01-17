@@ -18,10 +18,9 @@ import {
   PostListDto,
   ResponsePostsDto,
 } from './dto/response-post.dto';
-import { ReplyListDto, ResponseReplyDto } from './dto/response-reply.dto';
+import { ResponseReplyDto } from './dto/response-reply.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Posts } from './entity/post.entity';
-import { Reply } from './entity/reply.entity';
 import {
   ApiBody,
   ApiCreatedResponse,
@@ -32,7 +31,6 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/security/auth.guard';
 import { CurrentUser } from 'src/auth/security/auth.user.param';
-import { User } from 'src/user/entity/user.entity';
 import { JwtPayload } from 'src/auth/jwt-payload.interface';
 
 @ApiTags('Community')
@@ -69,11 +67,13 @@ export class CommunityController {
   @ApiCreatedResponse({ description: '게시글을 생성한다.', type: Posts })
   @ApiBody({ type: CreatePostDto })
   @UseGuards(JwtAuthGuard)
-  createPost(
+  async createPost(
     @CurrentUser() user: JwtPayload,
     @Body() createPostDto: CreatePostDto,
-  ): Promise<Posts> {
-    return this.communityService.createPost(createPostDto, user.id);
+  ) {
+    await this.communityService.createPost(createPostDto, user.id);
+
+    return { status: 'good' };
   }
 
   @Patch(':postId')
@@ -100,7 +100,7 @@ export class CommunityController {
   removePost(
     @CurrentUser() user: JwtPayload,
     @Param('postId') postId: number,
-  ): Promise<boolean> {
+  ): Promise<{ status: boolean }> {
     return this.communityService.removePost(postId, user.id);
   }
 
@@ -151,7 +151,7 @@ export class CommunityController {
   removeReply(
     @CurrentUser() user: JwtPayload,
     @Param('replyId') replyId: number,
-  ): Promise<boolean> {
+  ): Promise<{ status: boolean }> {
     return this.communityService.removeReply(replyId, user.id);
   }
 }

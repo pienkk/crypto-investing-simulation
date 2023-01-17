@@ -8,6 +8,7 @@ export class PostRepository extends Repository<Posts> {
   async getPostDetail(postId: number): Promise<Posts> {
     return await this.createQueryBuilder('post')
       .innerJoinAndSelect('post.user', 'user')
+      .leftJoinAndSelect('post.replies', 'reply')
       .where('post.id = :id', { id: postId })
       .getOne();
   }
@@ -19,9 +20,11 @@ export class PostRepository extends Repository<Posts> {
   }: QueryDto): Promise<[Posts[], number]> {
     return await this.createQueryBuilder('post')
       .innerJoinAndSelect('post.user', 'user')
+      .leftJoinAndSelect('post.replies', 'reply')
       .where('post.title LIKE :title', { title: `%${title}%` })
       .take(number)
       .skip(page - 1)
+      .orderBy('post.created_at', 'DESC')
       .getManyAndCount();
   }
 

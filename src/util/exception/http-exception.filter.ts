@@ -1,5 +1,6 @@
 import {
   ArgumentsHost,
+  BadRequestException,
   Catch,
   ExceptionFilter,
   HttpException,
@@ -22,6 +23,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     switch (exception.constructor) {
       case HttpException:
         status = (exception as HttpException).getStatus();
+        message = (exception as HttpException).getResponse();
         break;
 
       case QueryFailedError:
@@ -30,12 +32,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         code = (exception as any).code;
         break;
 
+      case BadRequestException:
+        status = (exception as any).status;
+        message = (exception as any).response.message;
+        break;
+
       default:
         status = HttpStatus.INTERNAL_SERVER_ERROR;
     }
 
     const error = {
-      message: (exception as any).message,
+      message,
       statusCode: status,
       code,
       path: request.url,
