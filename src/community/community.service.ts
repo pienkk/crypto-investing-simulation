@@ -2,12 +2,8 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto, UpdateReplyDto } from './dto/create-reply.dto';
 import { QueryDto } from './dto/community-query.dto';
-import {
-  PostDetailDto,
-  PostListDto,
-  ResponsePostsDto,
-} from './dto/response-post.dto';
-import { ReplyListDto, ResponseReplyDto } from './dto/response-reply.dto';
+import { PostListDto, ResponsePostsDto } from './dto/response-post.dto';
+import { ResponseReplyDto } from './dto/response-reply.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Posts } from './entity/post.entity';
 import { PostRepository } from './entity/post.repository';
@@ -41,6 +37,7 @@ export class CommunityService {
     const [postList, number] = await this.postRepository.getPostLists(
       GetPostListsDto,
     );
+
     const post = ResponsePostsDto.fromEntities(postList);
     const responsePosts: PostListDto = { post, number };
 
@@ -53,7 +50,9 @@ export class CommunityService {
 
     this.postRepository.update(postId, { hits: () => 'hits + 1' });
 
-    return ResponsePostsDto.fromEntity(postDetail);
+    const post = ResponsePostsDto.fromEntity(postDetail);
+
+    return ResponsePostsDto.hitsPlus(post);
   }
 
   async createPost(
@@ -80,7 +79,10 @@ export class CommunityService {
     return true;
   }
 
-  async removePost(postId: number, userId: number): Promise<boolean> {
+  async removePost(
+    postId: number,
+    userId: number,
+  ): Promise<{ status: boolean }> {
     const post = await this.postValidation(postId, userId);
 
     const result = await this.postRepository.delete(post.id);
@@ -88,32 +90,29 @@ export class CommunityService {
       throw new HttpException('This post does not exist', HttpStatus.NOT_FOUND);
     }
 
-    return true;
+    return { status: true };
   }
 
-  async getReplies(postId: number, queryDto: QueryDto): Promise<ReplyListDto> {
+  async getReplies(postId: number): Promise<ResponseReplyDto[]> {
     await this.postValidation(postId);
 
-    const [replies, number] = await this.replyRepository.getReplyLists(
-      postId,
-      queryDto,
-    );
+    const replies = await this.replyRepository.getReplyLists(postId);
 
-    const reply = ResponseReplyDto.fromEntities(replies);
-    const responseReplyList: ReplyListDto = { reply, number };
-
-    return responseReplyList;
+    return ResponseReplyDto.fromEntities(replies);
   }
 
   async createReply(
     createReplyDto: CreateReplyDto,
     userId: number,
-  ): Promise<Reply> {
+  ): Promise<ResponseReplyDto[]> {
     const { postId } = createReplyDto;
     await this.postValidation(postId, userId);
 
     const reply = this.replyRepository.create({ ...createReplyDto, userId });
-    return await this.replyRepository.save(reply);
+    await this.replyRepository.save(reply);
+
+    const replies = await this.replyRepository.getReplyLists(postId);
+    return ResponseReplyDto.fromEntities(replies);
   }
 
   async replyValidation(replyId: number, userId: number): Promise<Reply> {
@@ -150,7 +149,10 @@ export class CommunityService {
     return true;
   }
 
-  async removeReply(replyId: number, userId: number): Promise<boolean> {
+  async removeReply(
+    replyId: number,
+    userId: number,
+  ): Promise<{ status: boolean }> {
     await this.replyValidation(replyId, userId);
 
     const result = await this.replyRepository.delete({ id: replyId });
@@ -158,6 +160,6 @@ export class CommunityService {
       throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
     }
 
-    return true;
+    return { status: true };
   }
 }

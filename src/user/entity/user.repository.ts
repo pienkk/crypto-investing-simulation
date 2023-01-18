@@ -26,20 +26,38 @@ export class UserRepository extends Repository<User> {
       .getRawOne();
   }
 
+  // async getMoneyRank() {
+  //   return await this.createQueryBuilder('u')
+  //     .leftJoin('u.wallet', 'w')
+  //     .leftJoin('w.coin', 'c')
+  //     .select([
+  //       'u.ID',
+  //       'u.nickName',
+  //       '(SUM (c.price * w.quantity) + u.money) AS totalMoney',
+  //       '(SUM (c.price * w.quantity) + u.money ) / 10000 AS yieldPercent',
+  //       'rank() over (order by ((c.price * w.quantity) + u.money) desc) as ranking',
+  //     ])
+  //     // .where('w.id != null')
+  //     .groupBy('u.ID')
+  //     // .addGroupBy('u.nickName')
+  //     .orderBy('ranking', 'DESC')
+  //     .take(10)
+  //     .getRawMany();
+  // }
   async getMoneyRank() {
     return await this.createQueryBuilder('u')
       .leftJoin('u.wallet', 'w')
-      .innerJoin('w.coin', 'c')
+      .leftJoin('w.coin', 'c')
       .select([
         'u.ID',
         'u.nickName',
-        '(SUM (c.price * w.quantity) + u.money) AS totalMoney',
-        '(SUM (c.price * w.quantity) + u.money ) / 10000 AS yieldPercent',
-        'rank() over (order by ((c.price * w.quantity) + u.money) desc) as ranking',
+        'u.money AS totalMoney',
+        'u.money / 10000 AS yieldPercent',
+        'rank() over (order by u.money desc) as ranking',
       ])
-      .groupBy('u.id')
-      .orderBy('totalMoney', 'ASC')
-      .take(5)
+      .groupBy('u.ID')
+      .orderBy('ranking', 'ASC')
+      .take(10)
       .getRawMany();
   }
 
@@ -55,8 +73,8 @@ export class UserRepository extends Repository<User> {
       ])
       .where('th.status = 1')
       .groupBy('th.userId')
-      .orderBy(order, 'ASC')
-      .take(5)
+      .orderBy(order, 'DESC')
+      .take(10)
       .getRawMany();
   }
 }

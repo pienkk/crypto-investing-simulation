@@ -11,4 +11,9 @@ export class CreatePostDto {
   @IsNotEmpty()
   @ApiProperty({ description: '내용', required: true })
   readonly description: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ description: '게시글 라벨', required: true })
+  readonly label: string;
 }
