@@ -120,8 +120,8 @@ export class CommunityService {
 
     if (!reply)
       throw new HttpException(
-        'This reply does not exist.',
-        HttpStatus.BAD_REQUEST,
+        'This reply does not exist',
+        HttpStatus.NOT_FOUND,
       );
 
     if (reply.userId !== userId) {
@@ -138,7 +138,7 @@ export class CommunityService {
     replyId: number,
     updateReplyDto: UpdateReplyDto,
     userId: number,
-  ): Promise<boolean> {
+  ): Promise<{ status: true }> {
     await this.replyValidation(replyId, userId);
 
     const result = await this.replyRepository.update(replyId, updateReplyDto);
@@ -146,7 +146,7 @@ export class CommunityService {
       throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
     }
 
-    return true;
+    return { status: true };
   }
 
   async removeReply(

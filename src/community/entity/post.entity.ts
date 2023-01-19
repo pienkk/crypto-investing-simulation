@@ -14,31 +14,31 @@ import { Reply } from './reply.entity';
 @Entity()
 export class Posts {
   @PrimaryGeneratedColumn()
-  @ApiProperty()
+  @ApiProperty({ description: '게시글 id' })
   id: number;
 
   @Column()
-  @ApiProperty()
+  @ApiProperty({ description: '게시글 제목' })
   title: string;
 
   @Column()
-  @ApiProperty()
+  @ApiProperty({ description: '게시글 내용' })
   description: string;
 
   @Column()
-  @ApiProperty()
+  @ApiProperty({ description: '조회수' })
   hits: number;
 
   @Column()
-  @ApiProperty()
+  @ApiProperty({ description: '카테고리' })
   label: string;
 
   @CreateDateColumn()
-  @ApiProperty()
+  @ApiProperty({ description: '게시글 생성 시간' })
   created_at: Date;
 
   @Column()
-  @ApiProperty()
+  @ApiProperty({ description: '유저 id' })
   userId: number;
 
   @OneToMany(() => Reply, (reply) => reply.post, { cascade: true })

@@ -24,7 +24,7 @@ export class RankingController {
     summary: '수익금 랭킹 조회 API',
     description: '수익금 랭킹 순위를 조회한다.',
   })
-  @ApiOkResponse({ type: ResponseIncomeRankDto, isArray: true })
+  @ApiOkResponse({ type: [ResponseIncomeRankDto] })
   getIncomeRanking(): Promise<ResponseIncomeRankDto[]> {
     return this.rankingService.getIncomeRanking('incomeMoney');
   }
@@ -34,7 +34,7 @@ export class RankingController {
     summary: '수익률 랭킹 조회 API',
     description: '수익률 랭킹 순위를 조회한다.',
   })
-  @ApiOkResponse({ type: ResponseIncomeRankDto, isArray: true })
+  @ApiOkResponse({ type: [ResponseIncomeRankDto] })
   getIncomePercentRanking(): Promise<ResponseIncomeRankDto[]> {
     return this.rankingService.getIncomeRanking('incomePercent');
   }

@@ -20,10 +20,12 @@ import {
 } from './dto/response-post.dto';
 import { ResponseReplyDto } from './dto/response-reply.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { Posts } from './entity/post.entity';
 import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
@@ -55,6 +57,7 @@ export class CommunityController {
     description: '게시글 상세 조회, 댓글 조회',
   })
   @ApiOkResponse({ type: PostDetailDto })
+  @ApiNotFoundResponse({ description: 'Post not found' })
   getPostDetail(@Param('postId') postId: number): Promise<ResponsePostsDto> {
     return this.communityService.getPostDetail(postId);
   }
@@ -64,13 +67,14 @@ export class CommunityController {
     summary: '커뮤니티 게시글 생성 API',
     description: '게시글을 생성한다.',
   })
-  @ApiCreatedResponse({ description: '게시글을 생성한다.', type: Posts })
+  @ApiCreatedResponse({ description: '{ status: "good" }' })
   @ApiBody({ type: CreatePostDto })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async createPost(
     @CurrentUser() user: JwtPayload,
     @Body() createPostDto: CreatePostDto,
-  ) {
+  ): Promise<{ status: string }> {
     await this.communityService.createPost(createPostDto, user.id);
 
     return { status: 'good' };
@@ -81,7 +85,11 @@ export class CommunityController {
     summary: '커뮤니티 게시글 수정 API',
     description: '게시글을 수정한다.',
   })
+  @ApiOkResponse({ description: '{ status: "true" }' })
+  @ApiNotFoundResponse({ description: 'Post not found' })
+  @ApiBadRequestResponse({ description: "Don't have post permisson" })
   @ApiBody({ type: UpdatePostDto })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   updatePost(
     @CurrentUser() user: JwtPayload,
@@ -96,6 +104,10 @@ export class CommunityController {
     summary: '커뮤니티 게시글 삭제 API',
     description: '게시글을 삭제한다.',
   })
+  @ApiOkResponse({ description: '{ status: "true" }' })
+  @ApiNotFoundResponse({ description: 'Post not found' })
+  @ApiBadRequestResponse({ description: "Don't have post permisson" })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   removePost(
     @CurrentUser() user: JwtPayload,
@@ -109,6 +121,8 @@ export class CommunityController {
     summary: '게시글 댓글 조회 API',
     description: '댓글 조회',
   })
+  @ApiOkResponse({ description: 'Response Success', type: [ResponseReplyDto] })
+  @ApiNotFoundResponse({ description: 'Post not found' })
   getReplies(@Param('postId') postId: number): Promise<ResponseReplyDto[]> {
     return this.communityService.getReplies(postId);
   }
@@ -118,7 +132,12 @@ export class CommunityController {
     summary: '게시글 댓글 작성 API',
     description: '댓글을 생성한다',
   })
-  @ApiCreatedResponse({ description: '댓글을 생성한다', type: CreateReplyDto })
+  @ApiCreatedResponse({
+    description: '댓글을 생성한다',
+    type: [ResponseReplyDto],
+  })
+  @ApiNotFoundResponse({ description: 'Post not found' })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   createReply(
     @CurrentUser() user: JwtPayload,
@@ -133,12 +152,16 @@ export class CommunityController {
     description: '댓글을 수정한다.',
   })
   @ApiBody({ type: UpdateReplyDto })
+  @ApiOkResponse({ description: '{ status: true }' })
+  @ApiNotFoundResponse({ description: 'This reply does not exist' })
+  @ApiBadRequestResponse({ description: "Don't have reply permisson" })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   updateReply(
     @CurrentUser() user: JwtPayload,
     @Param('replyId') replyId: number,
     @Body() updateReplyDto: UpdateReplyDto,
-  ): Promise<boolean> {
+  ): Promise<{ status: boolean }> {
     return this.communityService.updateReply(replyId, updateReplyDto, user.id);
   }
 
@@ -147,6 +170,10 @@ export class CommunityController {
     summary: '게시글 댓글 삭제 API',
     description: '댓글을 삭제한다.',
   })
+  @ApiOkResponse({ description: '{ status: true }' })
+  @ApiNotFoundResponse({ description: 'This reply does not exist' })
+  @ApiBadRequestResponse({ description: "Don't have reply permisson" })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   removeReply(
     @CurrentUser() user: JwtPayload,

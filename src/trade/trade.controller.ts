@@ -8,8 +8,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -34,6 +36,7 @@ export class TradeController {
     description: '코인 거래 목록을 조회한다.',
   })
   @ApiOkResponse({ type: ResponseTradeDto, isArray: true })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   getTradeHistories(
     @CurrentUser() user: JwtPayload,
@@ -47,6 +50,7 @@ export class TradeController {
     description: '코인 정보, 유저 소지금액, 코인 소지 개수를 조회한다.',
   })
   @ApiOkResponse({ type: ResponseAmountDto })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   getAmountAndCoin(
     @CurrentUser() user: JwtPayload,
@@ -62,6 +66,7 @@ export class TradeController {
   })
   @ApiCreatedResponse({ description: '코인을 주문한다.', type: Trade })
   @ApiBody({ type: CreateTradeDto })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   createTrade(
     @CurrentUser() user: JwtPayload,
@@ -75,6 +80,11 @@ export class TradeController {
     summary: '코인 거래 취소 API',
     description: '코인 거래중인 내역을 취소한다.',
   })
+  @ApiOkResponse({ description: 'true' })
+  @ApiForbiddenResponse({
+    description: 'You can only cancel the trade by processing',
+  })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   cancelTrade(
     @CurrentUser() user: JwtPayload,
