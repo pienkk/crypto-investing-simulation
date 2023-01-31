@@ -34,10 +34,3 @@ export class ResponseReplyDto {
     return entities.map((entity) => ResponseReplyDto.fromEntity(entity));
   }
 }
-
-export class ReplyListDto {
-  readonly reply: ResponseReplyDto[];
-
-  @IsNumber()
-  readonly number: number;
-}
