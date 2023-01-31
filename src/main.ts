@@ -22,6 +22,10 @@ async function bootstrap() {
     .setTitle('CryptoBy API Document')
     .setDescription('가상화폐 모의투자 API')
     .setVersion('1.0.0')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'Token' },
+      'access-token',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, options);

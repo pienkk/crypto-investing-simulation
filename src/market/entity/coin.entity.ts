@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { ColumnTransform } from 'src/config/database/columnTrans';
 import { Trade } from 'src/trade/entity/trade.entity';
 import { Wallet } from 'src/wallet/entity/wallet.entity';
@@ -12,18 +13,23 @@ import {
 @Entity('coins')
 export class Coin {
   @PrimaryGeneratedColumn()
+  @ApiProperty({ description: '코인 id' })
   id: number;
 
   @Column()
+  @ApiProperty({ description: '코인 이름' })
   name: string;
 
   @Column()
+  @ApiProperty({ description: '코인 티커' })
   ticker: string;
 
   @Column()
+  @ApiProperty({ description: '코인 심볼' })
   symbol: string;
 
   @Column()
+  @ApiProperty({ description: '코인 이미지' })
   image: string;
 
   @Column('decimal', {
@@ -31,6 +37,7 @@ export class Coin {
     scale: 7,
     transformer: new ColumnTransform(),
   })
+  @ApiProperty({ description: '코인 가격' })
   price: number;
 
   @Column('decimal', {
