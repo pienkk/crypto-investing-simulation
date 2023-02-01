@@ -8,6 +8,8 @@ export class ReplyRepository extends Repository<Reply> {
     return await this.createQueryBuilder('reply')
       .innerJoinAndSelect('reply.user', 'user')
       .where('reply.postId = :postId', { postId })
+      .orderBy('reply.replyId', 'ASC')
+      .addOrderBy('reply.created_at', 'ASC')
       .getMany();
   }
 }

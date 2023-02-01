@@ -28,6 +28,10 @@ export class Reply {
   @ApiProperty({ description: '게시글 id' })
   postId: number;
 
+  @Column()
+  @ApiProperty({ description: '부모 댓글 id' })
+  replyId: number;
+
   @CreateDateColumn()
   @ApiProperty({ description: ' 댓글 생성 시간' })
   created_at: Date;

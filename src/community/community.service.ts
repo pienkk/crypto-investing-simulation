@@ -108,8 +108,22 @@ export class CommunityService {
     const { postId } = createReplyDto;
     await this.postValidation(postId, userId);
 
+    if (createReplyDto.replyId) {
+      const reply = this.replyRepository.findOneBy({
+        id: createReplyDto.replyId,
+      });
+      if (!reply)
+        throw new HttpException('Reply is not found', HttpStatus.NOT_FOUND);
+    }
     const reply = this.replyRepository.create({ ...createReplyDto, userId });
-    await this.replyRepository.save(reply);
+    const savedReply = await this.replyRepository.save(reply);
+
+    if (!savedReply.replyId) {
+      await this.replyRepository.save({
+        ...savedReply,
+        replyId: savedReply.id,
+      });
+    }
 
     const replies = await this.replyRepository.getReplyLists(postId);
     return ResponseReplyDto.fromEntities(replies);

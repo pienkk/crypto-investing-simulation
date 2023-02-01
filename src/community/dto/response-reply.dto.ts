@@ -12,6 +12,10 @@ export class ResponseReplyDto {
   @ApiProperty({ description: '코멘트' })
   private comment: string;
 
+  @IsNumber()
+  @ApiProperty({ description: '부모 댓글id' })
+  private replyId: number;
+
   @IsDate()
   @ApiProperty({ description: '작성 날짜' })
   private created_at: Date;
@@ -23,6 +27,7 @@ export class ResponseReplyDto {
     const dto = new ResponseReplyDto();
     dto.id = entity.id;
     dto.comment = entity.comment;
+    dto.replyId = entity.replyId;
     dto.created_at = entity.created_at;
 
     const user = ResponseUserDto.fromEntity(entity.user);
