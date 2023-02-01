@@ -22,6 +22,7 @@ export class PostRepository extends Repository<Posts> {
       .innerJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.replies', 'reply')
       .where('post.title LIKE :title', { title: `%${title}%` })
+      .andWhere('post.deleted_at is null')
       .take(number)
       .skip(page - 1)
       .orderBy('post.created_at', 'DESC')
@@ -32,6 +33,7 @@ export class PostRepository extends Repository<Posts> {
     return await this.createQueryBuilder('post')
       .innerJoinAndSelect('post.user', 'user')
       .where('post.id = :postId', { postId })
+      .andWhere('post.deleted_at is null')
       .getOne();
   }
 }

@@ -33,8 +33,12 @@ export class Reply {
   replyId: number;
 
   @CreateDateColumn()
-  @ApiProperty({ description: ' 댓글 생성 시간' })
+  @ApiProperty({ description: '댓글 생성 시간' })
   created_at: Date;
+
+  @Column()
+  @ApiProperty({ description: '댓글 삭제 시간' })
+  deleted_at: Date;
 
   @ManyToOne(() => Posts, (post) => post.replies, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'postId' })

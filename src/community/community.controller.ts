@@ -74,10 +74,10 @@ export class CommunityController {
   async createPost(
     @CurrentUser() user: JwtPayload,
     @Body() createPostDto: CreatePostDto,
-  ): Promise<{ status: string }> {
-    await this.communityService.createPost(createPostDto, user.id);
+  ): Promise<{ status: string; postId: number }> {
+    const post = await this.communityService.createPost(createPostDto, user.id);
 
-    return { status: 'good' };
+    return { status: 'good', postId: post.id };
   }
 
   @Patch(':postId')

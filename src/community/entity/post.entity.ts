@@ -33,13 +33,17 @@ export class Posts {
   @ApiProperty({ description: '카테고리' })
   label: string;
 
+  @Column()
+  @ApiProperty({ description: '유저 id' })
+  userId: number;
+
   @CreateDateColumn()
   @ApiProperty({ description: '게시글 생성 시간' })
   created_at: Date;
 
   @Column()
-  @ApiProperty({ description: '유저 id' })
-  userId: number;
+  @ApiProperty({ description: '게시글 삭제 시간' })
+  deleted_at: Date;
 
   @OneToMany(() => Reply, (reply) => reply.post, { cascade: true })
   replies: Reply[];

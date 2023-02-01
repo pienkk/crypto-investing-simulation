@@ -20,6 +20,9 @@ export class ResponseReplyDto {
   @ApiProperty({ description: '작성 날짜' })
   private created_at: Date;
 
+  @ApiProperty({ description: '삭제 시간' })
+  private deleted_at: Date;
+
   @ApiProperty({ description: '유저 정보' })
   private user: ResponseUserDto;
 
@@ -29,6 +32,7 @@ export class ResponseReplyDto {
     dto.comment = entity.comment;
     dto.replyId = entity.replyId;
     dto.created_at = entity.created_at;
+    dto.deleted_at = entity.deleted_at;
 
     const user = ResponseUserDto.fromEntity(entity.user);
     dto.user = user;
