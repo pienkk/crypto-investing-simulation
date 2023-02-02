@@ -5,7 +5,7 @@ export class QueryDto {
   @IsNumber()
   @IsOptional()
   @ApiProperty({ description: '페이지', default: 1, required: false })
-  readonly page: number = 1;
+  readonly page?: number = 1;
 
   @IsNumber()
   @IsOptional()
@@ -14,7 +14,7 @@ export class QueryDto {
     default: 10,
     required: false,
   })
-  readonly number: number = 10;
+  readonly number?: number = 10;
 
   @IsString()
   @IsOptional()

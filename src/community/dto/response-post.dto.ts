@@ -6,34 +6,34 @@ import { ResponseReplyDto } from './response-reply.dto';
 export class ResponsePostsDto {
   @IsNumber()
   @ApiProperty({ description: '게시글 Id' })
-  private id: number;
+  id: number;
 
   @IsString()
   @ApiProperty({ description: '게시글 제목' })
-  private title: string;
+  title: string;
 
   @IsString()
   @ApiProperty({ description: '게시글 내용' })
-  private description: string;
+  description: string;
 
   @IsNumber()
   @ApiProperty({ description: '게시글 조회수' })
-  private hits: number;
+  hits: number;
 
   @IsString()
   @ApiProperty({ description: '게시글 카테고리' })
-  private label: string;
+  label: string;
 
   @IsDate()
   @ApiProperty({ description: '게시글 생성 날짜' })
-  private created_at: Date;
+  created_at: Date;
 
   @IsNumber()
   @ApiProperty({ description: '댓글 수' })
-  private repliesCount: number;
+  repliesCount: number;
 
   @ApiProperty()
-  private user: ResponseUserDto;
+  user: ResponseUserDto;
 
   static fromEntity(entity: Posts): ResponsePostsDto {
     const dto = new ResponsePostsDto();
@@ -54,6 +54,7 @@ export class ResponsePostsDto {
   static fromEntities(entities: Posts[]): ResponsePostsDto[] {
     return entities.map((entity) => ResponsePostsDto.fromEntity(entity));
   }
+
   static hitsPlus(entity: ResponsePostsDto) {
     entity.hits += 1;
     return entity;

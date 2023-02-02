@@ -66,8 +66,8 @@ export class CommunityService {
 
   async updatePost(
     postId: number,
-    updatePostDto: UpdatePostDto,
     userId: number,
+    updatePostDto: UpdatePostDto,
   ): Promise<boolean> {
     await this.postValidation(postId, userId);
 

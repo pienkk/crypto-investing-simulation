@@ -96,7 +96,7 @@ export class CommunityController {
     @Param('postId') postId: number,
     @Body() updatePostDto: UpdatePostDto,
   ): Promise<boolean> {
-    return this.communityService.updatePost(postId, updatePostDto, user.id);
+    return this.communityService.updatePost(postId, user.id, updatePostDto);
   }
 
   @Delete(':postId')

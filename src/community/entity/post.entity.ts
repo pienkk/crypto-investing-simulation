@@ -51,4 +51,11 @@ export class Posts {
   @ManyToOne(() => User, (user) => user.post)
   @JoinColumn({ name: 'userId' })
   user: User;
+
+  static of(params: Partial<Posts>): Posts {
+    const post = new Posts();
+    Object.assign(post, params);
+
+    return post;
+  }
 }
