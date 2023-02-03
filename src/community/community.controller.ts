@@ -162,7 +162,7 @@ export class CommunityController {
     @Param('replyId') replyId: number,
     @Body() updateReplyDto: UpdateReplyDto,
   ): Promise<{ status: boolean }> {
-    return this.communityService.updateReply(replyId, updateReplyDto, user.id);
+    return this.communityService.updateReply(replyId, user.id, updateReplyDto);
   }
 
   @Delete('reply/:replyId')

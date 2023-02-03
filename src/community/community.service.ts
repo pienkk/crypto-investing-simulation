@@ -108,10 +108,10 @@ export class CommunityService {
     userId: number,
   ): Promise<ResponseReplyDto[]> {
     const { postId } = createReplyDto;
-    await this.postValidation(postId, userId);
+    await this.postValidation(postId);
 
     if (createReplyDto.replyId) {
-      const reply = this.replyRepository.findOneBy({
+      const reply = await this.replyRepository.findOneBy({
         id: createReplyDto.replyId,
       });
 
@@ -154,8 +154,8 @@ export class CommunityService {
 
   async updateReply(
     replyId: number,
-    updateReplyDto: UpdateReplyDto,
     userId: number,
+    updateReplyDto: UpdateReplyDto,
   ): Promise<{ status: true }> {
     await this.replyValidation(replyId, userId);
 
@@ -176,6 +176,7 @@ export class CommunityService {
     reply.deleted_at = new Date();
 
     const removedReply = await this.replyRepository.save(reply);
+    console.log(removedReply);
     if (!removedReply.deleted_at) {
       throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
     }

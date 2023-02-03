@@ -47,4 +47,11 @@ export class Reply {
   @ManyToOne(() => User, (user) => user.replies)
   @JoinColumn({ name: 'userId' })
   user: User;
+
+  static of(params: Partial<Reply>): Reply {
+    const reply = new Reply();
+    Object.assign(reply, params);
+
+    return reply;
+  }
 }
