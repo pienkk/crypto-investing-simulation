@@ -17,23 +17,21 @@ export class PostRepository extends Repository<Posts> {
     page,
     number,
     title,
+    categoryId,
   }: QueryDto): Promise<[Posts[], number]> {
-    return await this.createQueryBuilder('post')
+    const qb = this.createQueryBuilder('post')
       .innerJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.replies', 'reply')
       .where('post.title LIKE :title', { title: `%${title}%` })
       .andWhere('post.deleted_at is null')
+      .andWhere('reply.deleted_at is null');
+    if (categoryId !== 0) {
+      qb.andWhere('post.categoryId = :categoryId ', { categoryId });
+    }
+    return await qb
       .take(number)
       .skip(page - 1)
       .orderBy('post.created_at', 'DESC')
       .getManyAndCount();
-  }
-
-  async getPostByOne(postId: number): Promise<Posts> {
-    return await this.createQueryBuilder('post')
-      .innerJoinAndSelect('post.user', 'user')
-      .where('post.id = :postId', { postId })
-      .andWhere('post.deleted_at is null')
-      .getOne();
   }
 }

@@ -30,8 +30,8 @@ export class Posts {
   hits: number;
 
   @Column()
-  @ApiProperty({ description: '카테고리' })
-  label: string;
+  @ApiProperty({ description: '카테고리 id' })
+  categoryId: number;
 
   @Column()
   @ApiProperty({ description: '유저 id' })

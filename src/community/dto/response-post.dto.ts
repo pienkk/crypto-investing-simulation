@@ -20,9 +20,9 @@ export class ResponsePostsDto {
   @ApiProperty({ description: '게시글 조회수' })
   hits: number;
 
-  @IsString()
-  @ApiProperty({ description: '게시글 카테고리' })
-  label: string;
+  @IsNumber()
+  @ApiProperty({ description: '카테고리 id' })
+  categoryId: number;
 
   @IsDate()
   @ApiProperty({ description: '게시글 생성 날짜' })
@@ -42,7 +42,7 @@ export class ResponsePostsDto {
     dto.description = entity.description;
     dto.created_at = entity.created_at;
     dto.hits = entity.hits;
-    dto.label = entity.label;
+    dto.categoryId = entity.categoryId;
     dto.repliesCount = entity.replies.length;
 
     const user = ResponseUserDto.fromEntity(entity.user);

@@ -58,7 +58,12 @@ export class CommunityController {
   })
   @ApiOkResponse({ type: PostDetailDto })
   @ApiNotFoundResponse({ description: 'Post not found' })
-  getPostDetail(@Param('postId') postId: number): Promise<ResponsePostsDto> {
+  // @UseGuards(JwtAuthGuard)
+  getPostDetail(
+    @CurrentUser() user: JwtPayload,
+    @Param('postId') postId: number,
+  ): Promise<ResponsePostsDto> {
+    console.log(user);
     return this.communityService.getPostDetail(postId);
   }
 

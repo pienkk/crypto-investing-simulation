@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class QueryDto {
   @IsNumber()
@@ -15,6 +15,11 @@ export class QueryDto {
     required: false,
   })
   readonly number?: number = 10;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ description: '게시글 카테고리', required: true })
+  readonly categoryId: number;
 
   @IsString()
   @IsOptional()

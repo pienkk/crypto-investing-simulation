@@ -35,7 +35,7 @@ describe('CommunityService', () => {
       title: '첫번째 게시글',
       description: '첫번째 내용',
       hits: 3,
-      label: '잡담',
+      categoryId: 1,
       userId: 1,
       created_at: new Date('2023-02-02'),
       deleted_at: null,
@@ -52,7 +52,7 @@ describe('CommunityService', () => {
   });
 
   describe('getPosts', () => {
-    const fetchQueryDto: QueryDto = { page: 1 };
+    const fetchQueryDto: QueryDto = { page: 1, categoryId: 1 };
     const user: User = User.of({
       id: 1,
       nickname: '피엔',
@@ -64,7 +64,7 @@ describe('CommunityService', () => {
         title: '첫번째 게시글',
         description: '첫번째 내용',
         hits: 22,
-        label: '잡담',
+        categoryId: 1,
         created_at: new Date('2023-02-01'),
         replies: [],
         user,
@@ -74,7 +74,7 @@ describe('CommunityService', () => {
         title: '두번째 게시글',
         description: '두번째 내용',
         hits: 22,
-        label: '잡담',
+        categoryId: 1,
         created_at: new Date('2023-02-01'),
         replies: [],
         user,
@@ -86,7 +86,7 @@ describe('CommunityService', () => {
         title: '첫번째 게시글',
         description: '첫번째 내용',
         hits: 22,
-        label: '잡담',
+        categoryId: 1,
         created_at: new Date('2023-02-01'),
         repliesCount: 0,
         user,
@@ -96,7 +96,7 @@ describe('CommunityService', () => {
         title: '두번째 게시글',
         description: '두번째 내용',
         hits: 22,
-        label: '잡담',
+        categoryId: 1,
         created_at: new Date('2023-02-01'),
         repliesCount: 0,
         user,
@@ -127,7 +127,7 @@ describe('CommunityService', () => {
       title: '첫번째 게시글',
       description: '첫번째 내용',
       hits: 3,
-      label: '잡담',
+      categoryId: 1,
       created_at: new Date('2023-02-01'),
     });
     const existingPostDetail = Posts.of({ ...existingPost, replies: [], user });
@@ -175,7 +175,7 @@ describe('CommunityService', () => {
     const createPostDto: CreatePostDto = {
       title: '첫 글',
       description: '첫번째 내용',
-      label: '잡담',
+      categoryId: 1,
     };
     const createPost = Posts.of({ ...createPostDto, userId });
     const savedPost = Posts.of({
@@ -211,7 +211,7 @@ describe('CommunityService', () => {
     const updatePostDto: UpdatePostDto = {
       title: '수정한 제목',
       description: '수정한 내용',
-      label: '잡담',
+      categoryId: 1,
     };
 
     it('게시글 수정 성공 시 true값을 반환한다.', async () => {
@@ -279,7 +279,7 @@ describe('CommunityService', () => {
       title: '첫번째 게시글',
       description: '첫번째 내용',
       hits: 3,
-      label: '잡담',
+      categoryId: 1,
       userId: 1,
       created_at: new Date('2023-02-02'),
       deleted_at: null,

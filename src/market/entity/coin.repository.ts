@@ -60,7 +60,7 @@ export class CoinRepository extends Repository<Coin> {
     filter = 'ticker',
     order = 'ASC',
   }: MarketQueryDto) {
-    const qb = await this.createQueryBuilder('c')
+    const qb = this.createQueryBuilder('c')
       .select([
         'c.id',
         'c.name',
@@ -78,6 +78,6 @@ export class CoinRepository extends Repository<Coin> {
       .skip(page - 1);
     if (order === 'DESC') qb.orderBy({ [filter]: 'DESC' });
     if (order === 'ASC') qb.orderBy({ [filter]: 'ASC' });
-    return qb.getRawMany();
+    return await qb.getRawMany();
   }
 }
