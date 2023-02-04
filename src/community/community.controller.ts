@@ -58,7 +58,12 @@ export class CommunityController {
   })
   @ApiOkResponse({ type: PostDetailDto })
   @ApiNotFoundResponse({ description: 'Post not found' })
-  getPostDetail(@Param('postId') postId: number): Promise<ResponsePostsDto> {
+  // @UseGuards(JwtAuthGuard)
+  getPostDetail(
+    @CurrentUser() user: JwtPayload,
+    @Param('postId') postId: number,
+  ): Promise<ResponsePostsDto> {
+    console.log(user);
     return this.communityService.getPostDetail(postId);
   }
 
@@ -74,10 +79,10 @@ export class CommunityController {
   async createPost(
     @CurrentUser() user: JwtPayload,
     @Body() createPostDto: CreatePostDto,
-  ): Promise<{ status: string }> {
-    await this.communityService.createPost(createPostDto, user.id);
+  ): Promise<{ status: string; postId: number }> {
+    const post = await this.communityService.createPost(createPostDto, user.id);
 
-    return { status: 'good' };
+    return { status: 'good', postId: post.id };
   }
 
   @Patch(':postId')
@@ -96,7 +101,7 @@ export class CommunityController {
     @Param('postId') postId: number,
     @Body() updatePostDto: UpdatePostDto,
   ): Promise<boolean> {
-    return this.communityService.updatePost(postId, updatePostDto, user.id);
+    return this.communityService.updatePost(postId, user.id, updatePostDto);
   }
 
   @Delete(':postId')
@@ -162,7 +167,7 @@ export class CommunityController {
     @Param('replyId') replyId: number,
     @Body() updateReplyDto: UpdateReplyDto,
   ): Promise<{ status: boolean }> {
-    return this.communityService.updateReply(replyId, updateReplyDto, user.id);
+    return this.communityService.updateReply(replyId, user.id, updateReplyDto);
   }
 
   @Delete('reply/:replyId')

@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class QueryDto {
   @IsNumber()
   @IsOptional()
   @ApiProperty({ description: '페이지', default: 1, required: false })
-  readonly page: number = 1;
+  readonly page?: number = 1;
 
   @IsNumber()
   @IsOptional()
@@ -14,7 +14,12 @@ export class QueryDto {
     default: 10,
     required: false,
   })
-  readonly number: number = 10;
+  readonly number?: number = 10;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({ description: '게시글 카테고리', required: true })
+  readonly categoryId: number;
 
   @IsString()
   @IsOptional()

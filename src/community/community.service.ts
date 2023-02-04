@@ -20,7 +20,7 @@ export class CommunityService {
   async postValidation(postId: number, userId?: number): Promise<Posts> {
     const post = await this.postRepository.findOneBy({ id: postId });
 
-    if (!post) {
+    if (!post || post.deleted_at) {
       throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
     }
 
@@ -66,8 +66,8 @@ export class CommunityService {
 
   async updatePost(
     postId: number,
-    updatePostDto: UpdatePostDto,
     userId: number,
+    updatePostDto: UpdatePostDto,
   ): Promise<boolean> {
     await this.postValidation(postId, userId);
 
@@ -85,8 +85,10 @@ export class CommunityService {
   ): Promise<{ status: boolean }> {
     const post = await this.postValidation(postId, userId);
 
-    const result = await this.postRepository.delete(post.id);
-    if (result.affected !== 1) {
+    post.deleted_at = new Date();
+    const removePost = await this.postRepository.save(post);
+
+    if (!removePost.deleted_at) {
       throw new HttpException('This post does not exist', HttpStatus.NOT_FOUND);
     }
 
@@ -106,10 +108,26 @@ export class CommunityService {
     userId: number,
   ): Promise<ResponseReplyDto[]> {
     const { postId } = createReplyDto;
-    await this.postValidation(postId, userId);
+    await this.postValidation(postId);
+
+    if (createReplyDto.replyId) {
+      const reply = await this.replyRepository.findOneBy({
+        id: createReplyDto.replyId,
+      });
+
+      if (!reply)
+        throw new HttpException('Reply is not found', HttpStatus.NOT_FOUND);
+    }
 
     const reply = this.replyRepository.create({ ...createReplyDto, userId });
-    await this.replyRepository.save(reply);
+    const savedReply = await this.replyRepository.save(reply);
+
+    if (!savedReply.replyId) {
+      await this.replyRepository.save({
+        ...savedReply,
+        replyId: savedReply.id,
+      });
+    }
 
     const replies = await this.replyRepository.getReplyLists(postId);
     return ResponseReplyDto.fromEntities(replies);
@@ -118,7 +136,7 @@ export class CommunityService {
   async replyValidation(replyId: number, userId: number): Promise<Reply> {
     const reply = await this.replyRepository.findOneBy({ id: replyId });
 
-    if (!reply)
+    if (!reply || reply.deleted_at)
       throw new HttpException(
         'This reply does not exist',
         HttpStatus.NOT_FOUND,
@@ -136,8 +154,8 @@ export class CommunityService {
 
   async updateReply(
     replyId: number,
-    updateReplyDto: UpdateReplyDto,
     userId: number,
+    updateReplyDto: UpdateReplyDto,
   ): Promise<{ status: true }> {
     await this.replyValidation(replyId, userId);
 
@@ -153,10 +171,13 @@ export class CommunityService {
     replyId: number,
     userId: number,
   ): Promise<{ status: boolean }> {
-    await this.replyValidation(replyId, userId);
+    const reply = await this.replyValidation(replyId, userId);
 
-    const result = await this.replyRepository.delete({ id: replyId });
-    if (result.affected !== 1) {
+    reply.deleted_at = new Date();
+
+    const removedReply = await this.replyRepository.save(reply);
+    console.log(removedReply);
+    if (!removedReply.deleted_at) {
       throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
     }
 

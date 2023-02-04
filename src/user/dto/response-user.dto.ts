@@ -5,15 +5,15 @@ import { User } from '../entity/user.entity';
 export class ResponseUserDto {
   @IsNumber()
   @ApiProperty({ description: '유저 id' })
-  private id: number;
+  id: number;
 
   @IsString()
   @ApiProperty({ description: '유저 닉네임' })
-  private nickname: string;
+  nickname: string;
 
   @IsString()
   @ApiProperty({ description: '유저 소개' })
-  private description: string;
+  description: string;
 
   static fromEntity(entity: User): ResponseUserDto {
     const dto = new ResponseUserDto();

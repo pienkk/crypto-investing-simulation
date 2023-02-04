@@ -28,9 +28,17 @@ export class Reply {
   @ApiProperty({ description: '게시글 id' })
   postId: number;
 
+  @Column()
+  @ApiProperty({ description: '부모 댓글 id' })
+  replyId: number;
+
   @CreateDateColumn()
-  @ApiProperty({ description: ' 댓글 생성 시간' })
+  @ApiProperty({ description: '댓글 생성 시간' })
   created_at: Date;
+
+  @Column()
+  @ApiProperty({ description: '댓글 삭제 시간' })
+  deleted_at: Date;
 
   @ManyToOne(() => Posts, (post) => post.replies, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'postId' })
@@ -39,4 +47,11 @@ export class Reply {
   @ManyToOne(() => User, (user) => user.replies)
   @JoinColumn({ name: 'userId' })
   user: User;
+
+  static of(params: Partial<Reply>): Reply {
+    const reply = new Reply();
+    Object.assign(reply, params);
+
+    return reply;
+  }
 }

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreatePostDto {
   @IsString()
@@ -12,8 +12,8 @@ export class CreatePostDto {
   @ApiProperty({ description: '내용', required: true })
   readonly description: string;
 
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
-  @ApiProperty({ description: '게시글 라벨', required: true })
-  readonly label: string;
+  @ApiProperty({ description: '카테고리 id', required: true })
+  readonly categoryId: number;
 }

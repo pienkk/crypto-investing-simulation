@@ -39,4 +39,11 @@ export class User {
 
   @OneToMany(() => Trade, (trade) => trade.user)
   trade: Trade[];
+
+  static of(params: Partial<User>): User {
+    const user = new User();
+    Object.assign(user, params);
+
+    return user;
+  }
 }

@@ -6,7 +6,7 @@ CREATE TABLE replies(
   comment VARCHAR(400),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT repliy_user_fkey FOREIGN KEY (userId) REFERENCES users (id),
-  CONSTRAINT repliy_post_fkey FOREIGN KEY (postId) REFERENCES posts (id)
+  CONSTRAINT reply_post_fkey FOREIGN KEY (postId) REFERENCES posts (id) ON DELETE CASCADE
 )
 -- migrate:down
 DROP TABLE replies

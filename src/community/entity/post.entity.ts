@@ -30,16 +30,20 @@ export class Posts {
   hits: number;
 
   @Column()
-  @ApiProperty({ description: '카테고리' })
-  label: string;
+  @ApiProperty({ description: '카테고리 id' })
+  categoryId: number;
+
+  @Column()
+  @ApiProperty({ description: '유저 id' })
+  userId: number;
 
   @CreateDateColumn()
   @ApiProperty({ description: '게시글 생성 시간' })
   created_at: Date;
 
   @Column()
-  @ApiProperty({ description: '유저 id' })
-  userId: number;
+  @ApiProperty({ description: '게시글 삭제 시간' })
+  deleted_at: Date;
 
   @OneToMany(() => Reply, (reply) => reply.post, { cascade: true })
   replies: Reply[];
@@ -47,4 +51,11 @@ export class Posts {
   @ManyToOne(() => User, (user) => user.post)
   @JoinColumn({ name: 'userId' })
   user: User;
+
+  static of(params: Partial<Posts>): Posts {
+    const post = new Posts();
+    Object.assign(post, params);
+
+    return post;
+  }
 }
