@@ -34,4 +34,15 @@ export class PostRepository extends Repository<Posts> {
       .orderBy('post.created_at', 'DESC')
       .getManyAndCount();
   }
+
+  async getUserPosts(userId: number): Promise<[Posts[], number]> {
+    return await this.createQueryBuilder('post')
+      .innerJoinAndSelect('post.user', 'user')
+      .leftJoinAndSelect('post.replies', 'reply')
+      .where('post.deleted_at is null')
+      .andWhere('reply.deleted_at is null')
+      .andWhere('post.userId =:userId', { userId })
+      .orderBy('post.created_at', 'DESC')
+      .getManyAndCount();
+  }
 }
