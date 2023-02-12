@@ -24,8 +24,8 @@ export class ResponseMoneyRankDto {
 
   static fromEntity(entity: MoneyRank): ResponseMoneyRankDto {
     const dto = new ResponseMoneyRankDto();
-    dto.id = entity.ID;
-    dto.nickname = entity.nickName;
+    dto.id = entity.id;
+    dto.nickname = entity.nickname;
     dto.totalMoney = Number(entity.totalMoney);
     dto.yieldPercent = Number(entity.yieldPercent);
     dto.ranking = Number(entity.ranking);
@@ -39,8 +39,8 @@ export class ResponseMoneyRankDto {
 }
 
 interface MoneyRank {
-  ID: number;
-  nickName: string;
+  id: number;
+  nickname: string;
   totalMoney: string;
   yieldPercent: string;
   ranking: string;

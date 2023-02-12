@@ -34,6 +34,7 @@ import {
 import { JwtAuthGuard } from 'src/auth/security/auth.guard';
 import { CurrentUser } from 'src/auth/security/auth.user.param';
 import { JwtPayload } from 'src/auth/jwt-payload.interface';
+import { OptionalJwtAuthGuard } from 'src/auth/security/optionalAuth.guard';
 
 @ApiTags('Community')
 @Controller('community')
@@ -52,18 +53,17 @@ export class CommunityController {
   }
 
   @Get(':postId')
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({
     summary: '커뮤니티 상세글 조회 API',
     description: '게시글 상세 조회, 댓글 조회',
   })
   @ApiOkResponse({ type: PostDetailDto })
   @ApiNotFoundResponse({ description: 'Post not found' })
-  // @UseGuards(JwtAuthGuard)
   getPostDetail(
     @CurrentUser() user: JwtPayload,
     @Param('postId') postId: number,
   ): Promise<ResponsePostsDto> {
-    console.log(user);
     return this.communityService.getPostDetail(postId);
   }
 

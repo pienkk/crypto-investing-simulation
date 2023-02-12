@@ -49,8 +49,8 @@ export class UserRepository extends Repository<User> {
       .leftJoin('u.wallet', 'w')
       .leftJoin('w.coin', 'c')
       .select([
-        'u.ID',
-        'u.nickName',
+        'u.id as id',
+        'u.nickname as nickname',
         'u.money AS totalMoney',
         'u.money / 10000 AS yieldPercent',
         'rank() over (order by u.money desc) as ranking',
@@ -61,12 +61,28 @@ export class UserRepository extends Repository<User> {
       .getRawMany();
   }
 
+  async getRankByUser(userId: number) {
+    return await this.createQueryBuilder('user')
+      .leftJoin('user.wallet', 'wallet')
+      .leftJoin('wallet.coin', 'coin')
+      .select([
+        'user.id AS id',
+        'user.nickname AS nickname',
+        'user.money AS totalMoney',
+        'user.money / 10000 AS yieldPercent',
+        'rank() over (order by user.money desc) as ranking',
+      ])
+      .groupBy('user.id')
+      .orderBy('ranking', 'ASC')
+      .getRawOne();
+  }
+
   async getIncomeRank(order: string) {
     return await this.createQueryBuilder('u')
       .leftJoin('u.trade', 'th')
       .select([
-        'u.ID',
-        'u.nickName',
+        'u.id as id',
+        'u.nickname as nickname',
         'SUM(th.sellPrice * th.quantity) - SUM(th.buyPrice * th.quantity) AS incomeMoney',
         '(SUM(th.sellPrice * th.quantity) - SUM(th.buyPrice * th.quantity)) / SUM(th.buyPrice * th.quantity) * 100 AS incomePercent',
         'rank() over (order by (SUM(th.sellPrice * th.quantity) - SUM(th.buyPrice * th.quantity)) desc) as ranking ',
