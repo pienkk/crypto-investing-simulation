@@ -23,6 +23,11 @@ export class QueryDto {
 
   @IsString()
   @IsOptional()
-  @ApiProperty({ description: '작성글 검색어', required: false })
-  readonly title?: string = '';
+  @ApiProperty({ description: '검색어', required: false })
+  readonly content?: string = '';
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({ description: '작성자', required: false })
+  readonly nickname?: string = '';
 }
