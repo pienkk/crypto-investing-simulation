@@ -52,7 +52,7 @@ describe('CommunityService', () => {
   });
 
   describe('getPosts', () => {
-    const fetchQueryDto: QueryDto = { page: 1, categoryId: 1 };
+    const fetchQueryDto: QueryDto = { page: 1, categoryId: 1, content: '내용' };
     const user: User = User.of({
       id: 1,
       nickname: '피엔',
@@ -113,6 +113,21 @@ describe('CommunityService', () => {
       expect(postRepositoryGetPostListsSpy).toHaveBeenCalledWith(fetchQueryDto);
       expect(result).toEqual({ post: responsePosts, number: 2 });
     });
+
+    // it('게시글 목록 조회 시 content, nickname을 동시에 요청 했을 경우, 검색을 하지 못한다는 예외를 던진다.', async () => {
+    //   const queryDto: QueryDto = { ...fetchQueryDto, content: 'abc' };
+
+    //   const result = async () => {
+    //     return await communityService.getPosts(queryDto);
+    //   };
+
+    //   expect(result).rejects.toThrow(
+    //     new HttpException(
+    //       "Don't search nickname and content",
+    //       HttpStatus.BAD_REQUEST,
+    //     ),
+    //   );
+    // });
   });
 
   describe('getPostDetail', () => {
@@ -233,7 +248,7 @@ describe('CommunityService', () => {
         postId,
         updatePostDto,
       );
-      expect(result).toBe(true);
+      expect(result).toEqual({ status: true });
     });
 
     it('게시글 작성자가 일치하지 않을 시 권한이 없다는 예외를 던진다.', async () => {

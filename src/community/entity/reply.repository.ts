@@ -4,6 +4,7 @@ import { Reply } from './reply.entity';
 
 @CustomRepository(Reply)
 export class ReplyRepository extends Repository<Reply> {
+  // postId에 해당하는 게시글에 대한 댓글 리스트 반환
   async getReplyLists(postId: number): Promise<Reply[]> {
     return await this.createQueryBuilder('reply')
       .innerJoinAndSelect('reply.user', 'user')
@@ -13,6 +14,7 @@ export class ReplyRepository extends Repository<Reply> {
       .getMany();
   }
 
+  // userId에 해당하는 게시글에 대한 댓글 리스트 반환
   async getReplyByUser(userId: number): Promise<Reply[]> {
     return await this.createQueryBuilder('reply')
       .innerJoinAndSelect('reply.user', 'user')

@@ -41,9 +41,10 @@ export class CommunityService {
   }
 
   // 게시글 리스트
-  async getPosts(GetPostListsDto: QueryDto): Promise<PostListDto> {
-    const { content, nickname } = GetPostListsDto;
+  async getPosts(getPostListsDto: QueryDto): Promise<PostListDto> {
+    const { content, nickname } = getPostListsDto;
 
+    console.log(getPostListsDto);
     // 콘텐츠와 닉네임 동시에 검색 시도 할 경우
     if (content !== '' && nickname !== '') {
       throw new HttpException(
@@ -52,7 +53,7 @@ export class CommunityService {
       );
     }
     const [postList, number] = await this.postRepository.getPostLists(
-      GetPostListsDto,
+      getPostListsDto,
     );
 
     const post = ResponsePostsDto.fromEntities(postList);
@@ -88,7 +89,7 @@ export class CommunityService {
     postId: number,
     userId: number,
     updatePostDto: UpdatePostDto,
-  ): Promise<boolean> {
+  ): Promise<{ status: boolean }> {
     await this.postValidation(postId, userId);
 
     const result = await this.postRepository.update(postId, updatePostDto);
@@ -97,7 +98,7 @@ export class CommunityService {
       throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
     }
 
-    return true;
+    return { status: true };
   }
 
   // 게시글 삭제

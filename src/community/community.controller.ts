@@ -44,7 +44,7 @@ export class CommunityController {
   @Get()
   @ApiOperation({
     summary: '커뮤니티 게시글 목록 조회 API',
-    description: '게시글 검색, query parameter를 이용한 페이지네이션',
+    description: 'Query Parameter 조건에 해당하는 게시글 리스트를 반환한다.',
   })
   @ApiOkResponse({ type: PostListDto })
   @ApiQuery({ type: QueryDto })
@@ -56,7 +56,7 @@ export class CommunityController {
   @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({
     summary: '커뮤니티 상세글 조회 API',
-    description: '게시글 상세 조회, 댓글 조회',
+    description: '게시글 상세정보를 반환한다.',
   })
   @ApiOkResponse({ type: PostDetailDto })
   @ApiNotFoundResponse({ description: 'Post not found' })
@@ -70,7 +70,7 @@ export class CommunityController {
   @Post()
   @ApiOperation({
     summary: '커뮤니티 게시글 생성 API',
-    description: '게시글을 생성한다.',
+    description: '게시글을 생성 후 게시글 id를 반환한다.',
   })
   @ApiCreatedResponse({ description: '{ status: "good" }' })
   @ApiBody({ type: CreatePostDto })
@@ -88,7 +88,7 @@ export class CommunityController {
   @Patch(':postId')
   @ApiOperation({
     summary: '커뮤니티 게시글 수정 API',
-    description: '게시글을 수정한다.',
+    description: '게시글을 수정 후 성공 여부를 boolean으로 반환한다.',
   })
   @ApiOkResponse({ description: '{ status: "true" }' })
   @ApiNotFoundResponse({ description: 'Post not found' })
@@ -100,14 +100,14 @@ export class CommunityController {
     @CurrentUser() user: JwtPayload,
     @Param('postId') postId: number,
     @Body() updatePostDto: UpdatePostDto,
-  ): Promise<boolean> {
+  ): Promise<{ status: boolean }> {
     return this.communityService.updatePost(postId, user.id, updatePostDto);
   }
 
   @Delete(':postId')
   @ApiOperation({
     summary: '커뮤니티 게시글 삭제 API',
-    description: '게시글을 삭제한다.',
+    description: '게시글을 삭제 후 성공 여부를 boolean으로 반환한다.',
   })
   @ApiOkResponse({ description: '{ status: "true" }' })
   @ApiNotFoundResponse({ description: 'Post not found' })
@@ -124,7 +124,7 @@ export class CommunityController {
   @Get('reply/:postId')
   @ApiOperation({
     summary: '게시글 댓글 조회 API',
-    description: '댓글 조회',
+    description: 'postId 게시글에 해당하는 댓글 리스트를 반환한다.',
   })
   @ApiOkResponse({ description: 'Response Success', type: [ResponseReplyDto] })
   @ApiNotFoundResponse({ description: 'Post not found' })
@@ -135,10 +135,10 @@ export class CommunityController {
   @Post('reply')
   @ApiOperation({
     summary: '게시글 댓글 작성 API',
-    description: '댓글을 생성한다',
+    description: '댓글을 생성한 뒤 댓글 리스트를 반환한다.',
   })
   @ApiCreatedResponse({
-    description: '댓글을 생성한다',
+    description: '댓글을 생성한 뒤 댓글 리스트를 반환한다.',
     type: [ResponseReplyDto],
   })
   @ApiNotFoundResponse({ description: 'Post not found' })
@@ -154,7 +154,7 @@ export class CommunityController {
   @Patch('reply/:replyId')
   @ApiOperation({
     summary: '게시글 댓글 수정 API',
-    description: '댓글을 수정한다.',
+    description: '댓글을 수정한 뒤 성공 여부를 boolean값으로 반환한다.',
   })
   @ApiBody({ type: UpdateReplyDto })
   @ApiOkResponse({ description: '{ status: true }' })
@@ -173,7 +173,7 @@ export class CommunityController {
   @Delete('reply/:replyId')
   @ApiOperation({
     summary: '게시글 댓글 삭제 API',
-    description: '댓글을 삭제한다.',
+    description: '댓글을 삭제한 뒤 성공 여부를 boolean값으로 반환한다.',
   })
   @ApiOkResponse({ description: '{ status: true }' })
   @ApiNotFoundResponse({ description: 'This reply does not exist' })
