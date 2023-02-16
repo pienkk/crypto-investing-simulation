@@ -9,6 +9,10 @@ import { Posts } from './entity/post.entity';
 import { PostRepository } from './entity/post.repository';
 import { Reply } from './entity/reply.entity';
 import { ReplyRepository } from './entity/reply.repository';
+import { CreateLikeDto } from './dto/create-like.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Likes } from './entity/like.entity';
+import { Repository } from 'typeorm';
 
 /**
  * 커뮤니티 비즈니스 로직
@@ -18,6 +22,8 @@ export class CommunityService {
   constructor(
     private readonly postRepository: PostRepository,
     private readonly replyRepository: ReplyRepository,
+    @InjectRepository(Likes)
+    private readonly likeRepository: Repository<Likes>,
   ) {}
 
   // 게시글 유효성 검증 userId는 옵션값으로 유저의 유효성을 검증한다
@@ -212,6 +218,47 @@ export class CommunityService {
     const removedReply = await this.replyRepository.save(reply);
     // soft delete가 작동하지 않았을 경우
     if (!removedReply.deleted_at) {
+      throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
+    }
+
+    return { status: true };
+  }
+
+  // 좋아요 / 싫어요 추가
+  async createLike(
+    userId: number,
+    postId: number,
+    { isLike }: CreateLikeDto,
+  ): Promise<{ status: boolean }> {
+    const like = await this.likeRepository.findOne({
+      where: { userId, postId },
+    });
+
+    if (like) {
+      throw new HttpException('Already Like', HttpStatus.BAD_REQUEST);
+    }
+
+    await this.likeRepository.save({ userId, postId, isLike });
+
+    return { status: true };
+  }
+
+  // 좋아요 / 싫어요 삭제
+  async deleteLike(
+    userId: number,
+    postId: number,
+  ): Promise<{ status: boolean }> {
+    const like = await this.likeRepository.findOne({
+      where: { userId, postId },
+    });
+
+    if (!like) {
+      throw new HttpException("Don't find Like", HttpStatus.NOT_FOUND);
+    }
+
+    const result = await this.likeRepository.delete(like);
+
+    if (result.affected !== 1) {
       throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
     }
 

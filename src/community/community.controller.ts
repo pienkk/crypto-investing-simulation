@@ -35,6 +35,7 @@ import { JwtAuthGuard } from 'src/auth/security/auth.guard';
 import { CurrentUser } from 'src/auth/security/auth.user.param';
 import { JwtPayload } from 'src/auth/jwt-payload.interface';
 import { OptionalJwtAuthGuard } from 'src/auth/security/optionalAuth.guard';
+import { CreateLikeDto } from './dto/create-like.dto';
 
 @ApiTags('Community')
 @Controller('community')
@@ -185,5 +186,38 @@ export class CommunityController {
     @Param('replyId') replyId: number,
   ): Promise<{ status: boolean }> {
     return this.communityService.removeReply(replyId, user.id);
+  }
+
+  @Post('like/:postId')
+  @ApiOperation({
+    summary: '게시글 좋아요/싫어요 추가 API',
+    description: '게시글에 좋아요/ 싫어요를 한다',
+  })
+  @ApiOkResponse({ description: '{ status: true}' })
+  @ApiBadRequestResponse({ description: 'Already Like' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  createLike(
+    @CurrentUser() user: JwtPayload,
+    @Param('postId') postId: number,
+    @Body() createLikeDto: CreateLikeDto,
+  ): Promise<{ status: boolean }> {
+    return this.communityService.createLike(user.id, postId, createLikeDto);
+  }
+
+  @Delete('like/:postId')
+  @ApiOperation({
+    summary: '게시글 좋아요/싫어요 삭제 API',
+    description: '내가 게시글에 좋아요/싫어요 기록을 삭제한다.',
+  })
+  @ApiOkResponse({ description: '{ status: true }' })
+  @ApiNotFoundResponse({ description: "Don't find Like" })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  deleteLike(
+    @CurrentUser() user: JwtPayload,
+    @Param('postId') postId: number,
+  ): Promise<{ status: boolean }> {
+    return this.communityService.deleteLike(user.id, postId);
   }
 }
