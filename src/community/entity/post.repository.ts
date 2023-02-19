@@ -1,10 +1,11 @@
 import { CustomRepository } from 'src/config/typeorm/typeorm-ex.decorator';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { QueryDto } from '../dto/community-query.dto';
 import { Posts } from './post.entity';
 
 @CustomRepository(Posts)
 export class PostRepository extends Repository<Posts> {
+  // 게시글 상세 내용 반환
   async getPostDetail(postId: number): Promise<Posts> {
     return await this.createQueryBuilder('post')
       .innerJoinAndSelect('post.user', 'user')
@@ -13,12 +14,13 @@ export class PostRepository extends Repository<Posts> {
       .getOne();
   }
 
+  // 게시글 리스트 반환
   async getPostLists({
     page,
     number,
-    content,
     categoryId,
-    nickname,
+    search,
+    filter,
   }: QueryDto): Promise<[Posts[], number]> {
     const qb = this.createQueryBuilder('post')
       .innerJoinAndSelect('post.user', 'user')
@@ -26,20 +28,37 @@ export class PostRepository extends Repository<Posts> {
       .where('post.deleted_at is null')
       .andWhere('reply.deleted_at is null');
 
-    if (content !== '') {
-      qb.orWhere('post.title LIKE :content', { content: `%${content}%` })
-        .orWhere('post.description LIKE :content', { content: `%${content}%` })
-        .orWhere('reply.comment LIKE :content', { conetent: `%${content}%` });
+    // 게시글 제목, 내용 검색 시
+    if (search && filter === 'content') {
+      qb.andWhere(
+        new Brackets((qb) => {
+          qb.where('post.title LIKE :search', {
+            search: `%${search}%`,
+          }).orWhere('post.description LIKE :search', {
+            search: `%${search}%`,
+          });
+        }),
+      );
     }
 
-    if (nickname !== '') {
+    // 댓글 내용 검색 시
+    if (search && filter === 'reply') {
+      qb.andWhere('reply.comment LIKE :search', { search: `%${search}%` });
+    }
+
+    // 유저 닉네임 검색 시
+    if (search && filter === 'nickname') {
       qb.andWhere('user.nickname LIKE :nickname', {
-        nickname: `%${nickname}%`,
+        nickname: `%${search}%`,
       });
     }
+
+    // 카테고리 검색 시
     if (categoryId !== 0) {
       qb.andWhere('post.categoryId = :categoryId ', { categoryId });
     }
+
+    // pagenation
     return await qb
       .take(number)
       .skip((page - 1) * number)
@@ -47,6 +66,7 @@ export class PostRepository extends Repository<Posts> {
       .getManyAndCount();
   }
 
+  // userId가 작성한 게시글 리스트 반환
   async getUserPosts(userId: number): Promise<[Posts[], number]> {
     return await this.createQueryBuilder('post')
       .innerJoinAndSelect('post.user', 'user')

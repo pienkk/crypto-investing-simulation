@@ -1,13 +1,19 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from 'src/user/entity/user.entity';
+import { Repository } from 'typeorm';
 import { CommunityService } from './community.service';
 import { QueryDto } from './dto/community-query.dto';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto, UpdateReplyDto } from './dto/create-reply.dto';
-import { ResponsePostsDto } from './dto/response-post.dto';
+import {
+  ResponsePostDetailDto,
+  ResponsePostsDto,
+} from './dto/response-post.dto';
 import { ResponseReplyDto } from './dto/response-reply.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { Likes } from './entity/like.entity';
 import { Posts } from './entity/post.entity';
 import { PostRepository } from './entity/post.repository';
 import { Reply } from './entity/reply.entity';
@@ -17,17 +23,24 @@ describe('CommunityService', () => {
   let communityService: CommunityService;
   let postRepository: PostRepository;
   let replyRepository: ReplyRepository;
+  let likesRepository: Repository<Likes>;
   let existingPost: Posts;
   let existingReply: Reply;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CommunityService, PostRepository, ReplyRepository],
+      providers: [
+        CommunityService,
+        PostRepository,
+        ReplyRepository,
+        { provide: getRepositoryToken(Likes), useClass: Repository<Likes> },
+      ],
     }).compile();
 
     communityService = module.get<CommunityService>(CommunityService);
     postRepository = module.get<PostRepository>(PostRepository);
     replyRepository = module.get<ReplyRepository>(ReplyRepository);
+    // likesRepository = module.get<Repository<Likes>>(Repository<Likes>);
   });
   beforeEach(() => {
     existingPost = Posts.of({
@@ -131,34 +144,40 @@ describe('CommunityService', () => {
       created_at: new Date('2023-02-01'),
     });
     const existingPostDetail = Posts.of({ ...existingPost, replies: [], user });
-    const responsePost: ResponsePostsDto = {
+    const responsePost: ResponsePostDetailDto = {
       ...existingPost,
       user,
       repliesCount: 0,
+      isLike: null,
+      likeCount: 0,
+      unLikeCount: 0,
     };
 
     it('게시글 조회 시 조회수를 1증가 시키고 게시글 정보를 반환한다.', async () => {
-      const postRepositoryfindOneBySpy = jest
-        .spyOn(postRepository, 'findOneBy')
-        .mockResolvedValue(existingPost);
       const postRepositoryGetPostDetailSpy = jest
         .spyOn(postRepository, 'getPostDetail')
         .mockResolvedValue(existingPostDetail);
+      const likeRepositoryFindOneBySpy = jest
+        .spyOn(likesRepository, 'findOneBy')
+        .mockResolvedValue(null);
+      const likeRepositoryCountBySpyOne = jest
+        .spyOn(likesRepository, 'count')
+        .mockResolvedValue(0);
       const postRepositoryUpdateSpy = jest
         .spyOn(postRepository, 'update')
         .mockImplementation();
 
       const result = await communityService.getPostDetail(postId);
 
-      expect(postRepositoryfindOneBySpy).toHaveBeenCalledWith({ id: postId });
       expect(postRepositoryGetPostDetailSpy).toHaveBeenCalledWith(postId);
+      expect(postRepositoryUpdateSpy).toBeCalledWith(1);
       expect(result).toEqual({ ...responsePost, hits: 4 });
     });
 
     it('존재하지 않는 게시글 조회 시 게시글이 존재하지 않다는 예외를 던진다.', async () => {
       const postRepositoryfindOneBySpy = jest
-        .spyOn(postRepository, 'findOneBy')
-        .mockResolvedValue(undefined);
+        .spyOn(postRepository, 'getPostDetail')
+        .mockResolvedValue(null);
 
       const result = async () => {
         return await communityService.getPostDetail(postId);

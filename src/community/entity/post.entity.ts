@@ -9,6 +9,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Likes } from './like.entity';
 import { Reply } from './reply.entity';
 
 @Entity()
@@ -51,6 +52,9 @@ export class Posts {
   @ManyToOne(() => User, (user) => user.post)
   @JoinColumn({ name: 'userId' })
   user: User;
+
+  @OneToMany(() => Likes, (likes) => likes.post)
+  likes: Likes[];
 
   static of(params: Partial<Posts>): Posts {
     const post = new Posts();

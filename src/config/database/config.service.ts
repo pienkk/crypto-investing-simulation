@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
+import { Likes } from 'src/community/entity/like.entity';
 import { Posts } from 'src/community/entity/post.entity';
 import { Reply } from 'src/community/entity/reply.entity';
 import { Coin } from 'src/market/entity/coin.entity';
@@ -22,7 +23,7 @@ export class MySqlConfigService implements TypeOrmOptionsFactory {
       host: this.configService.get<string>('DB_HOST'),
       database: this.configService.get<string>('DB_DATABASE'),
       logging: true,
-      entities: [Posts, Reply, User, Coin, CoinHistory, Trade, Wallet],
+      entities: [Posts, Reply, User, Coin, CoinHistory, Trade, Wallet, Likes],
     };
   }
 }

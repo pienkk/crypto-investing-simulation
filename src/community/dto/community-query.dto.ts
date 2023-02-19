@@ -24,10 +24,10 @@ export class QueryDto {
   @IsString()
   @IsOptional()
   @ApiProperty({ description: '검색어', required: false })
-  readonly content?: string = '';
+  readonly search?: string = '';
 
   @IsString()
   @IsOptional()
-  @ApiProperty({ description: '작성자', required: false })
-  readonly nickname?: string = '';
+  @ApiProperty({ description: '검색 필터 종류', required: false })
+  readonly filter?: string = '';
 }

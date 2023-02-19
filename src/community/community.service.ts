@@ -2,13 +2,21 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto, UpdateReplyDto } from './dto/create-reply.dto';
 import { QueryDto } from './dto/community-query.dto';
-import { PostListDto, ResponsePostsDto } from './dto/response-post.dto';
+import {
+  PostListDto,
+  ResponsePostDetailDto,
+  ResponsePostsDto,
+} from './dto/response-post.dto';
 import { ResponseReplyDto } from './dto/response-reply.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Posts } from './entity/post.entity';
 import { PostRepository } from './entity/post.repository';
 import { Reply } from './entity/reply.entity';
 import { ReplyRepository } from './entity/reply.repository';
+import { CreateLikeDto } from './dto/create-like.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Likes } from './entity/like.entity';
+import { Repository } from 'typeorm';
 
 /**
  * 커뮤니티 비즈니스 로직
@@ -18,6 +26,8 @@ export class CommunityService {
   constructor(
     private readonly postRepository: PostRepository,
     private readonly replyRepository: ReplyRepository,
+    @InjectRepository(Likes)
+    private readonly likeRepository: Repository<Likes>,
   ) {}
 
   // 게시글 유효성 검증 userId는 옵션값으로 유저의 유효성을 검증한다
@@ -42,15 +52,6 @@ export class CommunityService {
 
   // 게시글 리스트
   async getPosts(GetPostListsDto: QueryDto): Promise<PostListDto> {
-    const { content, nickname } = GetPostListsDto;
-
-    // 콘텐츠와 닉네임 동시에 검색 시도 할 경우
-    if (content !== '' && nickname !== '') {
-      throw new HttpException(
-        "Don't search nickname and content",
-        HttpStatus.BAD_REQUEST,
-      );
-    }
     const [postList, number] = await this.postRepository.getPostLists(
       GetPostListsDto,
     );
@@ -62,15 +63,35 @@ export class CommunityService {
   }
 
   // 게시글 상세 정보
-  async getPostDetail(postId: number): Promise<ResponsePostsDto> {
-    await this.postValidation(postId);
+  async getPostDetail(
+    postId: number,
+    userId = 0,
+  ): Promise<ResponsePostDetailDto> {
     const postDetail = await this.postRepository.getPostDetail(postId);
+    if (!postDetail) {
+      throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
+    }
+
+    const like = await this.likeRepository.findOneBy({ postId, userId });
+    const likeCount = await this.likeRepository.countBy({
+      postId,
+      isLike: true,
+    });
+    const unlikeCount = await this.likeRepository.countBy({
+      postId,
+      isLike: false,
+    });
 
     this.postRepository.update(postId, { hits: () => 'hits + 1' });
 
-    const post = ResponsePostsDto.fromEntity(postDetail);
+    const post = ResponsePostDetailDto.fromEntity(
+      postDetail,
+      like,
+      likeCount,
+      unlikeCount,
+    );
 
-    return ResponsePostsDto.hitsPlus(post);
+    return ResponsePostDetailDto.hitsPlus(post);
   }
 
   // 게시글 생성
@@ -212,6 +233,47 @@ export class CommunityService {
     const removedReply = await this.replyRepository.save(reply);
     // soft delete가 작동하지 않았을 경우
     if (!removedReply.deleted_at) {
+      throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
+    }
+
+    return { status: true };
+  }
+
+  // 좋아요 / 싫어요 추가
+  async createLike(
+    userId: number,
+    postId: number,
+    { isLike }: CreateLikeDto,
+  ): Promise<{ status: boolean }> {
+    const like = await this.likeRepository.findOne({
+      where: { userId, postId },
+    });
+
+    if (like) {
+      throw new HttpException('Already Like', HttpStatus.BAD_REQUEST);
+    }
+
+    await this.likeRepository.save({ userId, postId, isLike });
+
+    return { status: true };
+  }
+
+  // 좋아요 / 싫어요 삭제
+  async deleteLike(
+    userId: number,
+    postId: number,
+  ): Promise<{ status: boolean }> {
+    const like = await this.likeRepository.findOne({
+      where: { userId, postId },
+    });
+
+    if (!like) {
+      throw new HttpException("Don't find Like", HttpStatus.NOT_FOUND);
+    }
+
+    const result = await this.likeRepository.delete(like);
+
+    if (result.affected !== 1) {
       throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
     }
 
