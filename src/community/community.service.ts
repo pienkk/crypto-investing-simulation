@@ -2,7 +2,11 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto, UpdateReplyDto } from './dto/create-reply.dto';
 import { QueryDto } from './dto/community-query.dto';
-import { PostListDto, ResponsePostsDto } from './dto/response-post.dto';
+import {
+  PostListDto,
+  ResponsePostDetailDto,
+  ResponsePostsDto,
+} from './dto/response-post.dto';
 import { ResponseReplyDto } from './dto/response-reply.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Posts } from './entity/post.entity';
@@ -48,15 +52,6 @@ export class CommunityService {
 
   // 게시글 리스트
   async getPosts(GetPostListsDto: QueryDto): Promise<PostListDto> {
-    const { content, nickname } = GetPostListsDto;
-
-    // 콘텐츠와 닉네임 동시에 검색 시도 할 경우
-    if (content !== '' && nickname !== '') {
-      throw new HttpException(
-        "Don't search nickname and content",
-        HttpStatus.BAD_REQUEST,
-      );
-    }
     const [postList, number] = await this.postRepository.getPostLists(
       GetPostListsDto,
     );
@@ -68,15 +63,35 @@ export class CommunityService {
   }
 
   // 게시글 상세 정보
-  async getPostDetail(postId: number): Promise<ResponsePostsDto> {
-    await this.postValidation(postId);
+  async getPostDetail(
+    postId: number,
+    userId = 0,
+  ): Promise<ResponsePostDetailDto> {
     const postDetail = await this.postRepository.getPostDetail(postId);
+    if (!postDetail) {
+      throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
+    }
+
+    const like = await this.likeRepository.findOneBy({ postId, userId });
+    const likeCount = await this.likeRepository.countBy({
+      postId,
+      isLike: true,
+    });
+    const unlikeCount = await this.likeRepository.countBy({
+      postId,
+      isLike: false,
+    });
 
     this.postRepository.update(postId, { hits: () => 'hits + 1' });
 
-    const post = ResponsePostsDto.fromEntity(postDetail);
+    const post = ResponsePostDetailDto.fromEntity(
+      postDetail,
+      like,
+      likeCount,
+      unlikeCount,
+    );
 
-    return ResponsePostsDto.hitsPlus(post);
+    return ResponsePostDetailDto.hitsPlus(post);
   }
 
   // 게시글 생성

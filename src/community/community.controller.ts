@@ -14,8 +14,8 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto, UpdateReplyDto } from './dto/create-reply.dto';
 import { QueryDto } from './dto/community-query.dto';
 import {
-  PostDetailDto,
   PostListDto,
+  ResponsePostDetailDto,
   ResponsePostsDto,
 } from './dto/response-post.dto';
 import { ResponseReplyDto } from './dto/response-reply.dto';
@@ -59,13 +59,13 @@ export class CommunityController {
     summary: '커뮤니티 상세글 조회 API',
     description: '게시글 상세 조회, 댓글 조회',
   })
-  @ApiOkResponse({ type: PostDetailDto })
+  @ApiOkResponse({ type: ResponsePostsDto })
   @ApiNotFoundResponse({ description: 'Post not found' })
   getPostDetail(
     @CurrentUser() user: JwtPayload,
     @Param('postId') postId: number,
-  ): Promise<ResponsePostsDto> {
-    return this.communityService.getPostDetail(postId);
+  ): Promise<ResponsePostDetailDto> {
+    return this.communityService.getPostDetail(postId, user.id);
   }
 
   @Post()

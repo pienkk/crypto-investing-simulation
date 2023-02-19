@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
 import { ResponseUserDto } from 'src/user/dto/response-user.dto';
+import { Likes } from '../entity/like.entity';
 import { Posts } from '../entity/post.entity';
-import { ResponseReplyDto } from './response-reply.dto';
 export class ResponsePostsDto {
   @IsNumber()
   @ApiProperty({ description: '게시글 Id' })
@@ -54,11 +54,6 @@ export class ResponsePostsDto {
   static fromEntities(entities: Posts[]): ResponsePostsDto[] {
     return entities.map((entity) => ResponsePostsDto.fromEntity(entity));
   }
-
-  static hitsPlus(entity: ResponsePostsDto) {
-    entity.hits += 1;
-    return entity;
-  }
 }
 
 export class PostListDto {
@@ -70,13 +65,79 @@ export class PostListDto {
   readonly number: number;
 }
 
-export class PostDetailDto {
-  @ApiProperty()
-  readonly post: ResponsePostsDto;
+export class ResponsePostDetailDto {
+  @IsNumber()
+  @ApiProperty({ description: '게시글 Id' })
+  id: number;
 
-  @ApiProperty({ type: [ResponseReplyDto] })
-  readonly reply: ResponseReplyDto[];
+  @IsString()
+  @ApiProperty({ description: '게시글 제목' })
+  title: string;
+
+  @IsString()
+  @ApiProperty({ description: '게시글 내용' })
+  description: string;
+
+  @IsNumber()
+  @ApiProperty({ description: '게시글 조회수' })
+  hits: number;
+
+  @IsNumber()
+  @ApiProperty({ description: '카테고리 id' })
+  categoryId: number;
+
+  @IsDate()
+  @ApiProperty({ description: '게시글 생성 날짜' })
+  created_at: Date;
+
+  @IsNumber()
+  @ApiProperty({ description: '댓글 수' })
+  repliesCount: number;
+
+  @IsBoolean()
+  @ApiProperty({
+    description: '내가 선택한 좋아요 타입 ex) true = 좋아요, false = 싫어요',
+  })
+  isLike: boolean;
+
+  @IsNumber()
+  @ApiProperty({ description: '좋아요 수' })
+  likeCount: number;
+
+  @IsNumber()
+  @ApiProperty({ description: '싫어요 수' })
+  unLikeCount: number;
 
   @ApiProperty()
-  readonly number: number;
+  user: ResponseUserDto;
+
+  static fromEntity(
+    entity: Posts,
+    like: Likes,
+    likeCount: number,
+    unlikeCount: number,
+  ): ResponsePostDetailDto {
+    const dto = new ResponsePostDetailDto();
+    dto.id = entity.id;
+    dto.title = entity.title;
+    dto.description = entity.description;
+    dto.created_at = entity.created_at;
+    dto.hits = entity.hits;
+    dto.categoryId = entity.categoryId;
+    dto.repliesCount = entity.replies.length;
+    dto.likeCount = likeCount;
+    dto.unLikeCount = unlikeCount;
+    dto.isLike = null;
+
+    const user = ResponseUserDto.fromEntity(entity.user);
+    dto.user = user;
+    if (like) dto.isLike = like.isLike;
+
+    return dto;
+  }
+
+  static hitsPlus(entity: ResponsePostDetailDto) {
+    entity.hits += 1;
+    return entity;
+  }
 }
