@@ -66,6 +66,7 @@ export class CommunityService {
   async getPostDetail(
     postId: number,
     userId = 0,
+    final?: boolean,
   ): Promise<ResponsePostDetailDto> {
     const postDetail = await this.postRepository.getPostDetail(postId);
     if (!postDetail) {
@@ -82,14 +83,15 @@ export class CommunityService {
       isLike: false,
     });
 
-    this.postRepository.update(postId, { hits: () => 'hits + 1' });
-
     const post = ResponsePostDetailDto.fromEntity(
       postDetail,
       like,
       likeCount,
       unlikeCount,
     );
+    if (final) return post;
+
+    this.postRepository.update(postId, { hits: () => 'hits + 1' });
 
     return ResponsePostDetailDto.hitsPlus(post);
   }
@@ -109,7 +111,7 @@ export class CommunityService {
     postId: number,
     userId: number,
     updatePostDto: UpdatePostDto,
-  ): Promise<boolean> {
+  ): Promise<{ status: boolean }> {
     await this.postValidation(postId, userId);
 
     const result = await this.postRepository.update(postId, updatePostDto);
@@ -118,7 +120,7 @@ export class CommunityService {
       throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
     }
 
-    return true;
+    return { status: true };
   }
 
   // 게시글 삭제
@@ -244,7 +246,8 @@ export class CommunityService {
     userId: number,
     postId: number,
     { isLike }: CreateLikeDto,
-  ): Promise<{ status: boolean }> {
+  ): Promise<ResponsePostDetailDto> {
+    await this.postValidation(postId);
     const like = await this.likeRepository.findOne({
       where: { userId, postId },
     });
@@ -255,14 +258,15 @@ export class CommunityService {
 
     await this.likeRepository.save({ userId, postId, isLike });
 
-    return { status: true };
+    return this.getPostDetail(postId, 0, true);
   }
 
   // 좋아요 / 싫어요 삭제
   async deleteLike(
     userId: number,
     postId: number,
-  ): Promise<{ status: boolean }> {
+  ): Promise<ResponsePostDetailDto> {
+    await this.postValidation(postId);
     const like = await this.likeRepository.findOne({
       where: { userId, postId },
     });
@@ -277,6 +281,6 @@ export class CommunityService {
       throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
     }
 
-    return { status: true };
+    return this.getPostDetail(postId, 0, true);
   }
 }
