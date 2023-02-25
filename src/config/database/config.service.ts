@@ -13,7 +13,6 @@ import { Wallet } from 'src/wallet/entity/wallet.entity';
 @Injectable()
 export class MySqlConfigService implements TypeOrmOptionsFactory {
   constructor(private configService: ConfigService) {}
-
   createTypeOrmOptions(): TypeOrmModuleOptions {
     return {
       type: 'mysql',

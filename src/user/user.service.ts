@@ -31,8 +31,8 @@ export class UserService {
     return user;
   }
 
-  async signIn(): Promise<{ accessToken: string; userId: number }> {
-    const user = await this.userRepository.findOneBy({ id: 1 });
+  async signIn(userId): Promise<{ accessToken: string; userId: number }> {
+    const user = await this.userRepository.findOneBy({ id: userId });
     const payload: JwtPayload = { id: user.id, email: user.email };
 
     return { accessToken: this.jwtService.sign(payload), userId: user.id };

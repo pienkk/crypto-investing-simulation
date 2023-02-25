@@ -59,7 +59,7 @@ export class CommunityController {
     summary: '커뮤니티 상세글 조회 API',
     description: '게시글 상세 조회, 댓글 조회',
   })
-  @ApiOkResponse({ type: ResponsePostsDto })
+  @ApiOkResponse({ type: ResponsePostDetailDto })
   @ApiNotFoundResponse({ description: 'Post not found' })
   getPostDetail(
     @CurrentUser() user: JwtPayload,

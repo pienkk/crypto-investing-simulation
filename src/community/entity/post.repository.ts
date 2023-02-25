@@ -3,18 +3,16 @@ import { Brackets, Repository } from 'typeorm';
 import { QueryDto } from '../dto/community-query.dto';
 import { Posts } from './post.entity';
 
+/**
+ * 게시글 커스텀 Repository
+ */
 @CustomRepository(Posts)
 export class PostRepository extends Repository<Posts> {
-  // 게시글 상세 내용 반환
-  async getPostDetail(postId: number): Promise<Posts> {
-    return await this.createQueryBuilder('post')
-      .innerJoinAndSelect('post.user', 'user')
-      .leftJoinAndSelect('post.replies', 'reply')
-      .where('post.id = :id', { id: postId })
-      .getOne();
-  }
-
-  // 게시글 리스트 반환
+  /**
+   * 필터링에 해당하는 게시글 리스트와 해당 조건에 맞는 게시글의 총 갯수를 반환한다.
+   * @param QueryDto
+   * @returns 게시글 리스트, 조건에 맞는 게시글 갯수
+   */
   async getPostLists({
     page,
     number,
@@ -66,7 +64,11 @@ export class PostRepository extends Repository<Posts> {
       .getManyAndCount();
   }
 
-  // userId가 작성한 게시글 리스트 반환
+  /**
+   * 유저가 작성한 게시글 리스트와 총 갯수를 반환한다.
+   * @param userId 유저 id
+   * @returns 게시글 리스트, 게시글 갯수
+   */
   async getUserPosts(userId: number): Promise<[Posts[], number]> {
     return await this.createQueryBuilder('post')
       .innerJoinAndSelect('post.user', 'user')

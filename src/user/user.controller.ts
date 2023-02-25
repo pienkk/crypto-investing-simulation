@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { PostListDto } from 'src/community/dto/response-post.dto';
 import { ResponseReplyDto } from 'src/community/dto/response-reply.dto';
 import { ResponseMoneyRankDto } from 'src/ranking/dto/response.moneyRank.dto';
@@ -9,8 +9,10 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get() // 로그인 구현전 테스트
-  signIn(): Promise<{ accessToken: string; userId: number }> {
-    return this.userService.signIn();
+  signIn(
+    @Query('userId') userId: number,
+  ): Promise<{ accessToken: string; userId: number }> {
+    return this.userService.signIn(userId);
   }
 
   @Get(':userId')
