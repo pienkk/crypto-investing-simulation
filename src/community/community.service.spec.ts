@@ -33,14 +33,14 @@ describe('CommunityService', () => {
         CommunityService,
         PostRepository,
         ReplyRepository,
-        { provide: getRepositoryToken(Likes), useClass: Repository<Likes> },
+        { provide: getRepositoryToken(Likes), useClass: Repository },
       ],
     }).compile();
 
     communityService = module.get<CommunityService>(CommunityService);
     postRepository = module.get<PostRepository>(PostRepository);
     replyRepository = module.get<ReplyRepository>(ReplyRepository);
-    // likesRepository = module.get<Repository<Likes>>(Repository<Likes>);
+    likesRepository = module.get<Repository<Likes>>(getRepositoryToken(Likes));
   });
   beforeEach(() => {
     existingPost = Posts.of({
@@ -143,6 +143,11 @@ describe('CommunityService', () => {
       categoryId: 1,
       created_at: new Date('2023-02-01'),
     });
+    const existingPostRelation = Posts.of({
+      ...existingPost,
+      user,
+      replies: [],
+    });
     const responsePost: ResponsePostDetailDto = {
       ...existingPost,
       user,
@@ -152,45 +157,65 @@ describe('CommunityService', () => {
       unLikeCount: 0,
     };
 
-    // it('게시글 조회 시 조회수를 1증가 시키고 게시글 정보를 반환한다.', async () => {
-    //   const communityServicePostValidationSpy = jest
-    //     .spyOn(communityService, 'postValidation')
-    //     .mockResolvedValue(existingPostDetail);
-    //   const likeRepositoryFindOneBySpy = jest
-    //     .spyOn(likesRepository, 'findOneBy')
-    //     .mockResolvedValue(null);
-    //   const likeRepositoryCountBySpyOne = jest
-    //     .spyOn(likesRepository, 'count')
-    //     .mockResolvedValue(0);
-    //   const postRepositoryUpdateSpy = jest
-    //     .spyOn(postRepository, 'update')
-    //     .mockImplementation();
+    it('게시글 조회 시 조회수를 1증가 시키고 게시글 정보를 반환한다.', async () => {
+      const postRepositoryFindOneBySpy = jest
+        .spyOn(postRepository, 'findOneBy')
+        .mockResolvedValue(existingPost);
+      const postRepositoryFindOneSpy = jest
+        .spyOn(postRepository, 'findOne')
+        .mockResolvedValue(existingPostRelation);
+      const likeRepositoryFindOneBySpy = jest
+        .spyOn(likesRepository, 'findOneBy')
+        .mockResolvedValue(null);
+      const likeRepositoryCountBySpyOne = jest
+        .spyOn(likesRepository, 'countBy')
+        .mockResolvedValue(0);
+      const postRepositoryUpdateSpy = jest
+        .spyOn(postRepository, 'update')
+        .mockImplementation();
 
-    //   const result = await communityService.getPostDetail(postId);
+      const result = await communityService.getPostDetail(postId);
 
-    //   expect(communityServicePostValidationSpy).toHaveBeenCalledWith(postId);
-    //   expect(postRepositoryUpdateSpy).toBeCalledWith(1);
-    //   expect(result).toEqual({ ...responsePost, hits: 4 });
-    // });
+      expect(postRepositoryFindOneBySpy).toHaveBeenCalledWith({ id: postId });
+      expect(postRepositoryFindOneSpy).toBeCalledTimes(1);
+      expect(likeRepositoryFindOneBySpy).toHaveBeenCalledWith({
+        postId,
+        userId: 0,
+      });
+      expect(likeRepositoryCountBySpyOne).toBeCalledTimes(2);
+      expect(postRepositoryUpdateSpy).toBeCalledTimes(1);
+      expect(result).toEqual({ ...responsePost, hits: 4 });
+    });
 
-    // it('게시글 상태 변경시 조회수를 증가시키지 않고 게시글 정보를 반환한다.', async () => {
-    //   const communityServicePostValidationSpy = jest
-    //     .spyOn(communityService, 'postValidation')
-    //     .mockResolvedValue(existingPostDetail);
-    //   const likeRepositoryFindOneBySpy = jest
-    //     .spyOn(likesRepository, 'findOneBy')
-    //     .mockResolvedValue(null);
-    //   const likeRepositoryCountBySpyOne = jest
-    //     .spyOn(likesRepository, 'count')
-    //     .mockResolvedValue(0);
-    //   const postRepositoryUpdateSpy = jest
-    //     .spyOn(postRepository, 'update')
-    //     .mockImplementation();
+    it('게시글 상태 변경시 조회수를 증가시키지 않고 게시글 정보를 반환한다.', async () => {
+      const postRepositoryFindOneBySpy = jest
+        .spyOn(postRepository, 'findOneBy')
+        .mockResolvedValue(existingPost);
+      const postRepositoryFindOneSpy = jest
+        .spyOn(postRepository, 'findOne')
+        .mockResolvedValue(existingPostRelation);
+      const likeRepositoryFindOneBySpy = jest
+        .spyOn(likesRepository, 'findOneBy')
+        .mockResolvedValue(null);
+      const likeRepositoryCountBySpyOne = jest
+        .spyOn(likesRepository, 'countBy')
+        .mockResolvedValue(0);
+      const postRepositoryUpdateSpy = jest
+        .spyOn(postRepository, 'update')
+        .mockImplementation();
 
-    //   const result = await communityService.getPostDetail(postId, 0, false);
+      const result = await communityService.getPostDetail(postId, 0, true);
 
-    //   expect(result).toEqual(responsePost);
-    // });
+      expect(postRepositoryFindOneBySpy).toHaveBeenCalledWith({ id: postId });
+      // expect(postRepositoryFindOneSpy).toBeCalledTimes(1);
+      expect(likeRepositoryFindOneBySpy).toHaveBeenCalledWith({
+        postId,
+        userId: 0,
+      });
+      expect(likeRepositoryCountBySpyOne).toBeCalledTimes(2);
+      expect(postRepositoryUpdateSpy).toBeCalledTimes(0);
+      expect(result).toEqual(responsePost);
+    });
   });
 
   describe('createPost', () => {
@@ -236,7 +261,6 @@ describe('CommunityService', () => {
       description: '수정한 내용',
       categoryId: 1,
     };
-
     it('게시글 수정 성공 시 true값을 반환한다.', async () => {
       const postRepositoryfindOneBySpy = jest
         .spyOn(postRepository, 'findOneBy')
@@ -729,4 +753,6 @@ describe('CommunityService', () => {
       );
     });
   });
+
+  // describe('createLike', () => {});
 });

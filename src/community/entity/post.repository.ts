@@ -9,9 +9,7 @@ import { Posts } from './post.entity';
 @CustomRepository(Posts)
 export class PostRepository extends Repository<Posts> {
   /**
-   * 필터링에 해당하는 게시글 리스트와 해당 조건에 맞는 게시글의 총 갯수를 반환한다.
-   * @param QueryDto
-   * @returns 게시글 리스트, 조건에 맞는 게시글 갯수
+   * 조건에 맞는 게시글 리스트, 게시글 갯수 반환
    */
   async getPostLists({
     page,
@@ -65,9 +63,7 @@ export class PostRepository extends Repository<Posts> {
   }
 
   /**
-   * 유저가 작성한 게시글 리스트와 총 갯수를 반환한다.
-   * @param userId 유저 id
-   * @returns 게시글 리스트, 게시글 갯수
+   * 유저가 작성한 게시글 리스트 반환
    */
   async getUserPosts(userId: number): Promise<[Posts[], number]> {
     return await this.createQueryBuilder('post')

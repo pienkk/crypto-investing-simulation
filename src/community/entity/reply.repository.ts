@@ -8,9 +8,7 @@ import { Reply } from './reply.entity';
 @CustomRepository(Reply)
 export class ReplyRepository extends Repository<Reply> {
   /**
-   * 게시글 id를 입력받아 해당 게시글에 대한 댓글 리스트를 반환한다.
-   * @param postId 게시글 id
-   * @returns 댓글 리스트
+   * 게시글에 대한 댓글 리스트 반환
    */
   async getReplyLists(postId: number): Promise<Reply[]> {
     return await this.createQueryBuilder('reply')
@@ -22,9 +20,7 @@ export class ReplyRepository extends Repository<Reply> {
   }
 
   /**
-   * 유저 id를 입력받아 해당 유저가 작성한 댓글 리스트를 반환한다.
-   * @param userId 유저 id
-   * @returns 댓글 리스트
+   * 유저가 작성한 댓글 리스트 반환
    */
   async getReplyByUser(userId: number): Promise<Reply[]> {
     return await this.createQueryBuilder('reply')
