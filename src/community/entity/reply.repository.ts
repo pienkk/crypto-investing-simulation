@@ -14,6 +14,7 @@ export class ReplyRepository extends Repository<Reply> {
     return await this.createQueryBuilder('reply')
       .innerJoinAndSelect('reply.user', 'user')
       .where('reply.postId = :postId', { postId })
+      .withDeleted()
       .orderBy('reply.replyId', 'ASC')
       .addOrderBy('reply.created_at', 'ASC')
       .getMany();
@@ -26,7 +27,6 @@ export class ReplyRepository extends Repository<Reply> {
     return await this.createQueryBuilder('reply')
       .innerJoinAndSelect('reply.user', 'user')
       .where('reply.userId = :userId', { userId })
-      .andWhere('reply.deleted_at is null')
       .orderBy('reply.replyId', 'DESC')
       .addOrderBy('reply.created_at', 'ASC')
       .getMany();

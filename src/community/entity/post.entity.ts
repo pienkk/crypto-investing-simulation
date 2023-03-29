@@ -3,6 +3,7 @@ import { User } from 'src/user/entity/user.entity';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -42,7 +43,7 @@ export class Posts {
   @ApiProperty({ description: '게시글 생성 시간' })
   created_at: Date;
 
-  @Column()
+  @DeleteDateColumn()
   @ApiProperty({ description: '게시글 삭제 시간' })
   deleted_at: Date;
 

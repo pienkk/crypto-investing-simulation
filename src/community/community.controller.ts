@@ -13,11 +13,7 @@ import { CommunityService } from './community.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto, UpdateReplyDto } from './dto/create-reply.dto';
 import { QueryDto } from './dto/community-query.dto';
-import {
-  PostListDto,
-  ResponsePostDetailDto,
-  ResponsePostsDto,
-} from './dto/response-post.dto';
+import { PostListDto, ResponsePostDetailDto } from './dto/response-post.dto';
 import { ResponseReplyDto } from './dto/response-reply.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import {
@@ -105,7 +101,7 @@ export class CommunityController {
     return this.communityService.updatePost(postId, user.id, updatePostDto);
   }
 
-  @Delete(':postId')
+  @Delete('post')
   @ApiOperation({
     summary: '커뮤니티 게시글 삭제 API',
     description: '게시글을 삭제한다.',
@@ -114,10 +110,11 @@ export class CommunityController {
   @ApiNotFoundResponse({ description: 'Post not found' })
   @ApiBadRequestResponse({ description: "Don't have post permisson" })
   @ApiBearerAuth()
+  @ApiBody({ type: [Number] })
   @UseGuards(JwtAuthGuard)
   removePost(
     @CurrentUser() user: JwtPayload,
-    @Param('postId') postId: number,
+    @Body('postId') postId: number[],
   ): Promise<{ status: boolean }> {
     return this.communityService.removePost(postId, user.id);
   }
@@ -171,7 +168,7 @@ export class CommunityController {
     return this.communityService.updateReply(replyId, user.id, updateReplyDto);
   }
 
-  @Delete('reply/:replyId')
+  @Delete('reply')
   @ApiOperation({
     summary: '게시글 댓글 삭제 API',
     description: '댓글을 삭제한다.',
@@ -180,10 +177,11 @@ export class CommunityController {
   @ApiNotFoundResponse({ description: 'This reply does not exist' })
   @ApiBadRequestResponse({ description: "Don't have reply permisson" })
   @ApiBearerAuth()
+  @ApiBody({ type: [Number] })
   @UseGuards(JwtAuthGuard)
   removeReply(
     @CurrentUser() user: JwtPayload,
-    @Param('replyId') replyId: number,
+    @Body('replyId') replyId: number[],
   ): Promise<{ status: boolean }> {
     return this.communityService.removeReply(replyId, user.id);
   }

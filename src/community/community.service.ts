@@ -16,7 +16,7 @@ import { ReplyRepository } from './entity/reply.repository';
 import { CreateLikeDto } from './dto/create-like.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Likes } from './entity/like.entity';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 
 /**
  * 커뮤니티 비즈니스 로직
@@ -148,18 +148,22 @@ export class CommunityService {
    * 게시글 삭제
    */
   async removePost(
-    postId: number,
+    postIds: number[],
     userId: number,
   ): Promise<{ status: boolean }> {
-    const post = await this.postValidation(postId, userId);
+    const posts = await this.postRepository.find({
+      where: { id: In(postIds), userId },
+    });
 
-    // 게시글 삭제 현재 시간 입력
-    post.deleted_at = new Date();
-    const removePost = await this.postRepository.save(post);
+    // 입력된 게시글의 권한이 없는 게시글이 있을 경우
+    if (posts.length !== postIds.length) {
+      throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
+    }
 
-    // soft delete가 되지 않았을 경우
-    if (!removePost.deleted_at) {
-      throw new HttpException('This post does not exist', HttpStatus.NOT_FOUND);
+    const deletedPosts = await this.postRepository.softDelete(postIds);
+
+    if (deletedPosts.affected !== postIds.length) {
+      throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
     }
 
     return { status: true };
@@ -172,6 +176,10 @@ export class CommunityService {
     await this.postValidation(postId);
 
     const replies = await this.replyRepository.getReplyLists(postId);
+    console.log(
+      '🚀 ~ file: community.service.ts:179 ~ CommunityService ~ getReplies ~ replies:',
+      replies,
+    );
 
     return ResponseReplyDto.fromEntities(replies);
   }
@@ -266,17 +274,20 @@ export class CommunityService {
    * 댓글 삭제
    */
   async removeReply(
-    replyId: number,
+    replyIds: number[],
     userId: number,
   ): Promise<{ status: boolean }> {
-    const reply = await this.replyValidation(replyId, userId);
+    const replies = await this.replyRepository.find({
+      where: { id: In(replyIds), userId },
+    });
+    if (replies.length !== replyIds.length) {
+      throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
+    }
 
-    // 댓글 soft delte
-    reply.deleted_at = new Date();
-    const removedReply = await this.replyRepository.save(reply);
+    const removedReply = await this.replyRepository.softDelete(replyIds);
 
     // soft delete가 작동하지 않았을 경우
-    if (!removedReply.deleted_at) {
+    if (removedReply.affected !== replyIds.length) {
       throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
     }
 
