@@ -21,8 +21,7 @@ export class PostRepository extends Repository<Posts> {
     const qb = this.createQueryBuilder('post')
       .innerJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.replies', 'reply')
-      .where('post.deleted_at is null')
-      .andWhere('reply.deleted_at is null');
+      .where('post.deleted_at is null');
 
     // 게시글 제목, 내용 검색 시
     if (search && filter === 'content') {
@@ -65,14 +64,55 @@ export class PostRepository extends Repository<Posts> {
   /**
    * 유저가 작성한 게시글 리스트 반환
    */
-  async getUserPosts(userId: number): Promise<[Posts[], number]> {
+  async getUserPosts(
+    userId: number,
+    page: number,
+    number: number,
+  ): Promise<[Posts[], number]> {
     return await this.createQueryBuilder('post')
       .innerJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.replies', 'reply')
-      .where('post.deleted_at is null')
-      .andWhere('reply.deleted_at is null')
-      .andWhere('post.userId =:userId', { userId })
+      .where('post.userId =:userId', { userId })
       .orderBy('post.created_at', 'DESC')
+      .take(number)
+      .skip((page - 1) * number)
+      .getManyAndCount();
+  }
+
+  /**
+   * 유저가 작성한 댓글의 게시글 조회
+   */
+  async getUserReplyByPosts(
+    userId: number,
+    page: number,
+    number: number,
+  ): Promise<[Posts[], number]> {
+    return await this.createQueryBuilder('post')
+      .innerJoinAndSelect('post.user', 'user')
+      .leftJoinAndSelect('post.replies', 'reply')
+      .where('reply.userId =:userId', { userId })
+      .orderBy('post.created_at', 'DESC')
+      .take(number)
+      .skip((page - 1) * number)
+      .getManyAndCount();
+  }
+
+  /**
+   * 유저가 좋아요한 게시글 리스트 반환
+   */
+  async getLikePosts(
+    userId: number,
+    page: number,
+    number: number,
+  ): Promise<[Posts[], number]> {
+    return await this.createQueryBuilder('post')
+      .innerJoinAndSelect('post.user', 'user')
+      .leftJoinAndSelect('post.replies', 'reply')
+      .leftJoinAndSelect('post.likes', 'like')
+      .where('like.userId =:userId', { userId })
+      .orderBy('post.created_at', 'DESC')
+      .take(number)
+      .skip((page - 1) * number)
       .getManyAndCount();
   }
 }

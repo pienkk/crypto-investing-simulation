@@ -45,21 +45,4 @@ export class UserService {
 
     return ResponseMoneyRankDto.fromEntity(userRank);
   }
-
-  async getUserPosts(userId: number): Promise<PostListDto> {
-    await this.userValidation(userId);
-
-    const [posts, number] = await this.postRepository.getUserPosts(userId);
-
-    const postDto = ResponsePostsDto.fromEntities(posts);
-    return { post: postDto, number };
-  }
-
-  async getUserReplies(userId: number): Promise<ResponseReplyDto[]> {
-    await this.userValidation(userId);
-
-    const replies = await this.replyRepository.getReplyByUser(userId);
-
-    return ResponseReplyDto.fromEntities(replies);
-  }
 }

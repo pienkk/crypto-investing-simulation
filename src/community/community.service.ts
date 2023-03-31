@@ -7,7 +7,7 @@ import {
   ResponsePostDetailDto,
   ResponsePostsDto,
 } from './dto/response-post.dto';
-import { ResponseReplyDto } from './dto/response-reply.dto';
+import { ReplyListDto, ResponseReplyDto } from './dto/response-reply.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Posts } from './entity/post.entity';
 import { PostRepository } from './entity/post.repository';
@@ -17,6 +17,7 @@ import { CreateLikeDto } from './dto/create-like.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Likes } from './entity/like.entity';
 import { Repository, In } from 'typeorm';
+import { UserService } from '../user/user.service';
 
 /**
  * 커뮤니티 비즈니스 로직
@@ -24,6 +25,7 @@ import { Repository, In } from 'typeorm';
 @Injectable()
 export class CommunityService {
   constructor(
+    private readonly userService: UserService,
     private readonly postRepository: PostRepository,
     private readonly replyRepository: ReplyRepository,
     @InjectRepository(Likes)
@@ -170,16 +172,28 @@ export class CommunityService {
   }
 
   /**
+   * 유저가 작성한 게시글 리스트
+   */
+  async getUserPosts(userId: number, query: QueryDto): Promise<PostListDto> {
+    await this.userService.userValidation(userId);
+
+    const [posts, number] = await this.postRepository.getUserPosts(
+      userId,
+      query.page,
+      query.number,
+    );
+
+    const postDto = ResponsePostsDto.fromEntities(posts);
+    return { post: postDto, number };
+  }
+
+  /**
    * 댓글 리스트 반환
    */
   async getReplies(postId: number): Promise<ResponseReplyDto[]> {
     await this.postValidation(postId);
 
     const replies = await this.replyRepository.getReplyLists(postId);
-    console.log(
-      '🚀 ~ file: community.service.ts:179 ~ CommunityService ~ getReplies ~ replies:',
-      replies,
-    );
 
     return ResponseReplyDto.fromEntities(replies);
   }
@@ -345,5 +359,57 @@ export class CommunityService {
 
     // 게시글 정보 반환
     return this.getPostDetail(postId, userId, true);
+  }
+
+  /**
+   * 유저가 작성한 댓글 조회
+   */
+  async getUserReplies(userId: number, query: QueryDto): Promise<ReplyListDto> {
+    await this.userService.userValidation(userId);
+
+    const [replies, number] = await this.replyRepository.getReplyByUser(
+      userId,
+      query.page,
+      query.number,
+    );
+
+    const replyDto = ResponseReplyDto.fromEntities(replies);
+
+    return { replies: replyDto, number };
+  }
+
+  /**
+   * 유저가 작성한 댓글의 게시글 조회
+   */
+  async getUserReplyPosts(
+    userId: number,
+    query: QueryDto,
+  ): Promise<PostListDto> {
+    await this.userService.userValidation(userId);
+
+    const [posts, number] = await this.postRepository.getUserReplyByPosts(
+      userId,
+      query.page,
+      query.number,
+    );
+
+    const postDto = ResponsePostsDto.fromEntities(posts);
+    return { post: postDto, number };
+  }
+
+  /**
+   * 유저가 좋아요한 게시글 조회
+   */
+  async getUserLikes(userId: number, query: QueryDto): Promise<PostListDto> {
+    await this.userService.userValidation(userId);
+
+    const [posts, number] = await this.postRepository.getLikePosts(
+      userId,
+      query.page,
+      query.number,
+    );
+
+    const postDto = ResponsePostsDto.fromEntities(posts);
+    return { post: postDto, number };
   }
 }

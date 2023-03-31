@@ -61,7 +61,7 @@ export class PostListDto {
   readonly post: ResponsePostsDto[];
 
   @IsNumber()
-  @ApiProperty()
+  @ApiProperty({ description: '총 게시글 수' })
   readonly number: number;
 }
 

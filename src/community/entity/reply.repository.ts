@@ -23,12 +23,19 @@ export class ReplyRepository extends Repository<Reply> {
   /**
    * 유저가 작성한 댓글 리스트 반환
    */
-  async getReplyByUser(userId: number): Promise<Reply[]> {
+  async getReplyByUser(
+    userId: number,
+    page: number,
+    number: number,
+  ): Promise<[Reply[], number]> {
     return await this.createQueryBuilder('reply')
+      .leftJoinAndSelect('reply.post', 'post')
       .innerJoinAndSelect('reply.user', 'user')
       .where('reply.userId = :userId', { userId })
       .orderBy('reply.replyId', 'DESC')
       .addOrderBy('reply.created_at', 'ASC')
-      .getMany();
+      .take(number)
+      .skip((page - 1) * number)
+      .getManyAndCount();
   }
 }

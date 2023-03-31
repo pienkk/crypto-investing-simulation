@@ -14,7 +14,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto, UpdateReplyDto } from './dto/create-reply.dto';
 import { QueryDto } from './dto/community-query.dto';
 import { PostListDto, ResponsePostDetailDto } from './dto/response-post.dto';
-import { ResponseReplyDto } from './dto/response-reply.dto';
+import { ReplyListDto, ResponseReplyDto } from './dto/response-reply.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import {
   ApiBadRequestResponse,
@@ -119,6 +119,21 @@ export class CommunityController {
     return this.communityService.removePost(postId, user.id);
   }
 
+  @Get('post/user/:userId')
+  @ApiOperation({
+    summary: '유저 게시글 조회 API',
+    description: '유저 게시글 조회',
+  })
+  @ApiOkResponse({ description: 'Response Success', type: PostListDto })
+  @ApiNotFoundResponse({ description: 'User not found' })
+  @ApiQuery({ type: QueryDto })
+  getUserPosts(
+    @Param('userId') userId: number,
+    @Query() pageNation: QueryDto,
+  ): Promise<PostListDto> {
+    return this.communityService.getUserPosts(userId, pageNation);
+  }
+
   @Get('reply/:postId')
   @ApiOperation({
     summary: '게시글 댓글 조회 API',
@@ -186,6 +201,36 @@ export class CommunityController {
     return this.communityService.removeReply(replyId, user.id);
   }
 
+  @Get('reply/user/:userId')
+  @ApiOperation({
+    summary: '유저 댓글 조회 API',
+    description: '유저 댓글 조회',
+  })
+  @ApiOkResponse({ description: 'Response Success', type: ReplyListDto })
+  @ApiNotFoundResponse({ description: 'User not found' })
+  @ApiQuery({ type: QueryDto })
+  getUserReplies(
+    @Param('userId') userId: number,
+    @Query() pageNation: QueryDto,
+  ): Promise<ReplyListDto> {
+    return this.communityService.getUserReplies(userId, pageNation);
+  }
+
+  @Get('reply/post/user/:userId')
+  @ApiOperation({
+    summary: '유저가 작성한 댓글의 게시글 조회 API',
+    description: '유저가 작성한 댓글의 게시글 조회',
+  })
+  @ApiOkResponse({ description: 'Response Success', type: PostListDto })
+  @ApiNotFoundResponse({ description: 'User not found' })
+  @ApiQuery({ type: QueryDto })
+  getUserReplyPosts(
+    @Param('userId') userId: number,
+    @Query() pageNation: QueryDto,
+  ): Promise<PostListDto> {
+    return this.communityService.getUserReplyPosts(userId, pageNation);
+  }
+
   @Post('like/:postId')
   @ApiOperation({
     summary: '게시글 좋아요/싫어요 추가 API',
@@ -217,5 +262,20 @@ export class CommunityController {
     @Param('postId') postId: number,
   ): Promise<ResponsePostDetailDto> {
     return this.communityService.deleteLike(user.id, postId);
+  }
+
+  @Get('like/user/:userId')
+  @ApiOperation({
+    summary: '유저 좋아요/싫어요 조회 API',
+    description: '유저 좋아요/싫어요 조회',
+  })
+  @ApiOkResponse({ description: 'Response Success', type: PostListDto })
+  @ApiNotFoundResponse({ description: 'User not found' })
+  @ApiQuery({ type: QueryDto })
+  getUserLikes(
+    @Param('userId') userId: number,
+    @Query() pageNation: QueryDto,
+  ): Promise<PostListDto> {
+    return this.communityService.getUserLikes(userId, pageNation);
   }
 }

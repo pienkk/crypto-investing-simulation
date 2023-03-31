@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsDate, IsNumber, IsString } from 'class-validator';
 import { ResponseUserDto } from 'src/user/dto/response-user.dto';
 import { Reply } from '../entity/reply.entity';
+import { ResponsePostsDto } from './response-post.dto';
 
 export class ResponseReplyDto {
   @IsNumber()
@@ -23,6 +24,9 @@ export class ResponseReplyDto {
   @ApiProperty({ description: '삭제 시간' })
   deleted_at: Date;
 
+  @ApiProperty({ description: '게시글 정보' })
+  post: ResponsePostsDto;
+
   @ApiProperty({ description: '유저 정보' })
   user: ResponseUserDto;
 
@@ -36,10 +40,21 @@ export class ResponseReplyDto {
 
     const user = ResponseUserDto.fromEntity(entity.user);
     dto.user = user;
+
+    const post = ResponsePostsDto.fromEntity(entity.post);
+    dto.post = post;
     return dto;
   }
 
   static fromEntities(entities: Reply[]): ResponseReplyDto[] {
     return entities.map((entity) => ResponseReplyDto.fromEntity(entity));
   }
+}
+
+export class ReplyListDto {
+  @ApiProperty({ type: [ResponseReplyDto] })
+  readonly replies: ResponseReplyDto[];
+
+  @ApiProperty({ description: '총 댓글 수' })
+  readonly number: number;
 }
