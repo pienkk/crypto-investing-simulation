@@ -4,11 +4,6 @@ import { UserRepository } from './entity/user.repository';
 import { JwtPayload } from 'src/auth/jwt-payload.interface';
 import { PostRepository } from 'src/community/entity/post.repository';
 import { ReplyRepository } from 'src/community/entity/reply.repository';
-import {
-  ResponsePostsDto,
-  PostListDto,
-} from 'src/community/dto/response-post.dto';
-import { ResponseReplyDto } from 'src/community/dto/response-reply.dto';
 import { User } from './entity/user.entity';
 import { ResponseMoneyRankDto } from 'src/ranking/dto/response.moneyRank.dto';
 
@@ -17,8 +12,6 @@ export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
-    private readonly postRepository: PostRepository,
-    private readonly replyRepository: ReplyRepository,
   ) {}
 
   async userValidation(userId: number): Promise<User> {

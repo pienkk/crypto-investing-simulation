@@ -17,7 +17,8 @@ import { CreateLikeDto } from './dto/create-like.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Likes } from './entity/like.entity';
 import { Repository, In } from 'typeorm';
-import { UserService } from '../user/user.service';
+import { UserRepository } from '../user/entity/user.repository';
+import { User } from '../user/entity/user.entity';
 
 /**
  * 커뮤니티 비즈니스 로직
@@ -25,11 +26,11 @@ import { UserService } from '../user/user.service';
 @Injectable()
 export class CommunityService {
   constructor(
-    private readonly userService: UserService,
     private readonly postRepository: PostRepository,
     private readonly replyRepository: ReplyRepository,
     @InjectRepository(Likes)
     private readonly likeRepository: Repository<Likes>,
+    private readonly userRepository: UserRepository,
   ) {}
 
   /**
@@ -175,7 +176,7 @@ export class CommunityService {
    * 유저가 작성한 게시글 리스트
    */
   async getUserPosts(userId: number, query: QueryDto): Promise<PostListDto> {
-    await this.userService.userValidation(userId);
+    await this.userValidation(userId);
 
     const [posts, number] = await this.postRepository.getUserPosts(
       userId,
@@ -365,7 +366,7 @@ export class CommunityService {
    * 유저가 작성한 댓글 조회
    */
   async getUserReplies(userId: number, query: QueryDto): Promise<ReplyListDto> {
-    await this.userService.userValidation(userId);
+    await this.userValidation(userId);
 
     const [replies, number] = await this.replyRepository.getReplyByUser(
       userId,
@@ -385,7 +386,7 @@ export class CommunityService {
     userId: number,
     query: QueryDto,
   ): Promise<PostListDto> {
-    await this.userService.userValidation(userId);
+    await this.userValidation(userId);
 
     const [posts, number] = await this.postRepository.getUserReplyByPosts(
       userId,
@@ -401,7 +402,7 @@ export class CommunityService {
    * 유저가 좋아요한 게시글 조회
    */
   async getUserLikes(userId: number, query: QueryDto): Promise<PostListDto> {
-    await this.userService.userValidation(userId);
+    await this.userValidation(userId);
 
     const [posts, number] = await this.postRepository.getLikePosts(
       userId,
@@ -411,5 +412,15 @@ export class CommunityService {
 
     const postDto = ResponsePostsDto.fromEntities(posts);
     return { post: postDto, number };
+  }
+
+  async userValidation(userId: number): Promise<User> {
+    const user = await this.userRepository.findOneBy({ id: userId });
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    return user;
   }
 }

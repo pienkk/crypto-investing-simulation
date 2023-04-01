@@ -6,11 +6,16 @@ import { CommunityService } from './community.service';
 import { Likes } from './entity/like.entity';
 import { PostRepository } from './entity/post.repository';
 import { ReplyRepository } from './entity/reply.repository';
+import { UserRepository } from '../user/entity/user.repository';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Likes]),
-    TypeOrmExModule.forCustomRepository([PostRepository, ReplyRepository]),
+    TypeOrmExModule.forCustomRepository([
+      PostRepository,
+      ReplyRepository,
+      UserRepository,
+    ]),
   ],
   controllers: [CommunityController],
   providers: [CommunityService],
