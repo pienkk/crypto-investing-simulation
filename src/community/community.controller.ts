@@ -12,7 +12,7 @@ import {
 import { CommunityService } from './community.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto, UpdateReplyDto } from './dto/create-reply.dto';
-import { QueryDto } from './dto/community-query.dto';
+import { PageNationDto, QueryDto } from './dto/community-query.dto';
 import { PostListDto, ResponsePostDetailDto } from './dto/response-post.dto';
 import { ReplyListDto, ResponseReplyDto } from './dto/response-reply.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -126,10 +126,10 @@ export class CommunityController {
   })
   @ApiOkResponse({ description: 'Response Success', type: PostListDto })
   @ApiNotFoundResponse({ description: 'User not found' })
-  @ApiQuery({ type: QueryDto })
+  @ApiQuery({ type: PageNationDto })
   getUserPosts(
     @Param('userId') userId: number,
-    @Query() pageNation: QueryDto,
+    @Query() pageNation: PageNationDto,
   ): Promise<PostListDto> {
     return this.communityService.getUserPosts(userId, pageNation);
   }
@@ -208,10 +208,10 @@ export class CommunityController {
   })
   @ApiOkResponse({ description: 'Response Success', type: ReplyListDto })
   @ApiNotFoundResponse({ description: 'User not found' })
-  @ApiQuery({ type: QueryDto })
+  @ApiQuery({ type: PageNationDto })
   getUserReplies(
     @Param('userId') userId: number,
-    @Query() pageNation: QueryDto,
+    @Query() pageNation: PageNationDto,
   ): Promise<ReplyListDto> {
     return this.communityService.getUserReplies(userId, pageNation);
   }
@@ -274,7 +274,7 @@ export class CommunityController {
   @ApiQuery({ type: QueryDto })
   getUserLikes(
     @Param('userId') userId: number,
-    @Query() pageNation: QueryDto,
+    @Query() pageNation: PageNationDto,
   ): Promise<PostListDto> {
     return this.communityService.getUserLikes(userId, pageNation);
   }

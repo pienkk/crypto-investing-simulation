@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto, UpdateReplyDto } from './dto/create-reply.dto';
-import { QueryDto } from './dto/community-query.dto';
+import { PageNationDto, QueryDto } from './dto/community-query.dto';
 import {
   PostListDto,
   ResponsePostDetailDto,
@@ -175,7 +175,10 @@ export class CommunityService {
   /**
    * 유저가 작성한 게시글 리스트
    */
-  async getUserPosts(userId: number, query: QueryDto): Promise<PostListDto> {
+  async getUserPosts(
+    userId: number,
+    query: PageNationDto,
+  ): Promise<PostListDto> {
     await this.userValidation(userId);
 
     const [posts, number] = await this.postRepository.getUserPosts(
@@ -323,12 +326,18 @@ export class CommunityService {
       where: { userId, postId },
     });
 
-    // 이미 좋아요 / 싫어요 한 게시글일 경우
-    if (like) {
+    // 좋아요 / 싫어요를 같은 상태로 요청할 경우
+    if (like.isLike === isLike) {
       throw new HttpException('Already Like', HttpStatus.BAD_REQUEST);
     }
 
-    await this.likeRepository.save({ userId, postId, isLike });
+    // 좋아요 이력이 있을경우 업데이트
+    if (like) {
+      await this.likeRepository.update(like.id, { isLike });
+      // 이력이 없을 경우 생성
+    } else {
+      await this.likeRepository.save({ userId, postId, isLike });
+    }
 
     // 게시글 정보 반환
     return this.getPostDetail(postId, userId, true);
@@ -365,7 +374,10 @@ export class CommunityService {
   /**
    * 유저가 작성한 댓글 조회
    */
-  async getUserReplies(userId: number, query: QueryDto): Promise<ReplyListDto> {
+  async getUserReplies(
+    userId: number,
+    query: PageNationDto,
+  ): Promise<ReplyListDto> {
     await this.userValidation(userId);
 
     const [replies, number] = await this.replyRepository.getReplyByUser(
@@ -384,7 +396,7 @@ export class CommunityService {
    */
   async getUserReplyPosts(
     userId: number,
-    query: QueryDto,
+    query: PageNationDto,
   ): Promise<PostListDto> {
     await this.userValidation(userId);
 
@@ -401,7 +413,10 @@ export class CommunityService {
   /**
    * 유저가 좋아요한 게시글 조회
    */
-  async getUserLikes(userId: number, query: QueryDto): Promise<PostListDto> {
+  async getUserLikes(
+    userId: number,
+    query: PageNationDto,
+  ): Promise<PostListDto> {
     await this.userValidation(userId);
 
     const [posts, number] = await this.postRepository.getLikePosts(

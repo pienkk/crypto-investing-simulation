@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class QueryDto {
+export class PageNationDto {
   @IsNumber()
   @IsOptional()
   @ApiProperty({ description: '페이지', default: 1, required: false })
@@ -15,7 +15,8 @@ export class QueryDto {
     required: false,
   })
   readonly number?: number = 10;
-
+}
+export class QueryDto extends PageNationDto {
   @IsNumber()
   @IsNotEmpty()
   @ApiProperty({ description: '게시글 카테고리', required: true })
