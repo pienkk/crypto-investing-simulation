@@ -16,7 +16,7 @@ import { ReplyRepository } from './entity/reply.repository';
 import { CreateLikeDto } from './dto/create-like.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Likes } from './entity/like.entity';
-import { Repository, In } from 'typeorm';
+import { Repository, In, MoreThan, LessThan } from 'typeorm';
 import { UserRepository } from '../user/entity/user.repository';
 import { User } from '../user/entity/user.entity';
 
@@ -100,11 +100,22 @@ export class CommunityService {
       isLike: false,
     });
 
+    const nextPost = await this.postRepository.findOne({
+      where: { id: MoreThan(postId) },
+    });
+
+    const prevPost = await this.postRepository.findOne({
+      where: { id: LessThan(postId) },
+      order: { id: 'DESC' },
+    });
+
     const post = ResponsePostDetailDto.fromEntity(
       postDetail,
       like,
       likeCount,
       unlikeCount,
+      prevPost ? prevPost.id : null,
+      nextPost ? nextPost.id : null,
     );
     if (update) return post;
 
@@ -327,13 +338,13 @@ export class CommunityService {
     });
 
     // 좋아요 / 싫어요를 같은 상태로 요청할 경우
-    if (like.isLike === isLike) {
+    if (like?.isLike === isLike) {
       throw new HttpException('Already Like', HttpStatus.BAD_REQUEST);
     }
 
     // 좋아요 이력이 있을경우 업데이트
     if (like) {
-      await this.likeRepository.update(like.id, { isLike });
+      await this.likeRepository.save({ id: like.id, isLike });
       // 이력이 없을 경우 생성
     } else {
       await this.likeRepository.save({ userId, postId, isLike });

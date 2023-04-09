@@ -41,8 +41,10 @@ export class ResponseReplyDto {
     const user = ResponseUserDto.fromEntity(entity.user);
     dto.user = user;
 
-    const post = ResponsePostsDto.fromEntity(entity.post);
-    dto.post = post;
+    if (entity.post) {
+      const post = ResponsePostsDto.fromEntity(entity.post);
+      dto.post = post;
+    }
     return dto;
   }
 
@@ -57,4 +59,28 @@ export class ReplyListDto {
 
   @ApiProperty({ description: '총 댓글 수' })
   readonly number: number;
+}
+
+export class ResponseUserReplyDto {
+  @IsNumber()
+  @ApiProperty({ description: '댓글id' })
+  id: number;
+
+  @IsString()
+  @ApiProperty({ description: '코멘트' })
+  comment: string;
+
+  @IsNumber()
+  @ApiProperty({ description: '부모 댓글id' })
+  replyId: number;
+
+  @IsDate()
+  @ApiProperty({ description: '작성 날짜' })
+  created_at: Date;
+
+  @ApiProperty({ description: '게시글 정보' })
+  post: ResponsePostsDto;
+
+  @ApiProperty({ description: '유저 정보' })
+  user: ResponseUserDto;
 }

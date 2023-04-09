@@ -43,11 +43,14 @@ export class ResponsePostsDto {
     dto.created_at = entity.created_at;
     dto.hits = entity.hits;
     dto.categoryId = entity.categoryId;
-    dto.repliesCount = entity.replies.length;
 
-    const user = ResponseUserDto.fromEntity(entity.user);
-    dto.user = user;
-
+    if (entity.replies) {
+      dto.repliesCount = entity.replies.length;
+    }
+    if (entity.user) {
+      const user = ResponseUserDto.fromEntity(entity.user);
+      dto.user = user;
+    }
     return dto;
   }
 
@@ -108,6 +111,14 @@ export class ResponsePostDetailDto {
   @ApiProperty({ description: '싫어요 수' })
   unLikeCount: number;
 
+  @IsNumber()
+  @ApiProperty({ description: '이전 게시글 id' })
+  prevPostId: number;
+
+  @IsNumber()
+  @ApiProperty({ description: '다음 게시글 id' })
+  nextPostId: number;
+
   @ApiProperty()
   user: ResponseUserDto;
 
@@ -116,6 +127,8 @@ export class ResponsePostDetailDto {
     like: Likes,
     likeCount: number,
     unlikeCount: number,
+    prevPostId: number,
+    nextPostId: number,
   ): ResponsePostDetailDto {
     const dto = new ResponsePostDetailDto();
     dto.id = entity.id;
@@ -127,6 +140,9 @@ export class ResponsePostDetailDto {
     dto.repliesCount = entity.replies.length;
     dto.likeCount = likeCount;
     dto.unLikeCount = unlikeCount;
+    dto.prevPostId = prevPostId;
+    dto.nextPostId = nextPostId;
+
     dto.isLike = null;
 
     const user = ResponseUserDto.fromEntity(entity.user);
