@@ -25,6 +25,7 @@ export class User {
     type: 'varchar',
     length: 100,
     comment: '유저 자기소개',
+    nullable: true,
   })
   description: string;
 
@@ -38,6 +39,7 @@ export class User {
   @Column('decimal', {
     precision: 15,
     scale: 7,
+    default: 10000000,
     transformer: new ColumnTransform(),
   })
   money: number;

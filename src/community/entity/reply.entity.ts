@@ -48,6 +48,7 @@ export class Reply {
     type: 'int',
     comment: '부모 댓글 id',
     name: 'reply_id',
+    nullable: true,
   })
   @ApiProperty({ description: '부모 댓글 id' })
   replyId: number;
