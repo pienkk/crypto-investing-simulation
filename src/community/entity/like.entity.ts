@@ -11,15 +11,26 @@ import { Posts } from './post.entity';
 
 @Entity()
 export class Likes {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({
+    type: 'int',
+    comment: '좋아요 id',
+  })
   @ApiProperty({ description: '좋아요 id' })
   id: number;
 
-  @Column()
+  @Column({
+    type: 'int',
+    comment: '게시글 id',
+    name: 'post_id',
+  })
   @ApiProperty({ description: '게시글 id' })
   postId: number;
 
-  @Column()
+  @Column({
+    type: 'int',
+    comment: '유저 id',
+    name: 'user_id',
+  })
   @ApiProperty({ description: '유저id' })
   userId: number;
 

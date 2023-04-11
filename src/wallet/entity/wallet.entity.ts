@@ -11,13 +11,24 @@ import {
 
 @Entity('wallets')
 export class Wallet {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({
+    type: 'int',
+    comment: '지갑 id',
+  })
   id: number;
 
-  @Column()
+  @Column({
+    type: 'int',
+    comment: '코인 id',
+    name: 'coin_id',
+  })
   coinId: number;
 
-  @Column()
+  @Column({
+    type: 'int',
+    comment: '유저 id',
+    name: 'user_id',
+  })
   userId: number;
 
   @Column('decimal', {

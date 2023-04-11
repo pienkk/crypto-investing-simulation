@@ -3,7 +3,10 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('coinHistories')
 export class CoinHistory {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({
+    type: 'int',
+    comment: '코인 히스토리 id',
+  })
   id: number;
 
   @Column('decimal', {
@@ -13,9 +16,15 @@ export class CoinHistory {
   })
   price: number;
 
-  @Column()
+  @Column({
+    type: 'int',
+    comment: '코인 심볼',
+  })
   symbol: string;
 
-  @Column()
+  @Column({
+    type: 'int',
+    comment: '이벤트 시간',
+  })
   eventTime: number;
 }

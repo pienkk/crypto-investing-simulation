@@ -22,6 +22,8 @@ export class MySqlConfigService implements TypeOrmOptionsFactory {
       host: this.configService.get<string>('DB_HOST'),
       database: this.configService.get<string>('DB_DATABASE'),
       logging: true,
+      synchronize: true,
+      // dropSchema: true,
       entities: [Posts, Reply, User, Coin, CoinHistory, Trade, Wallet, Likes],
     };
   }

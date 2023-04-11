@@ -15,23 +15,39 @@ import { PurchaseStatus, TradeStatus } from '../enum/trade.status.enum';
 
 @Entity('tradeHistories')
 export class Trade {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({
+    type: 'int',
+    comment: '거래 내역 id',
+  })
   @ApiProperty({ description: '거래 내역 id' })
   id: number;
 
-  @Column()
+  @Column({
+    type: 'int',
+    comment: '유저 id',
+    name: 'user_id',
+  })
   @ApiProperty({ description: '유저 id' })
   userId: number;
 
-  @Column()
+  @Column({
+    type: 'int',
+    comment: '코인 id',
+    name: 'coin_id',
+  })
   @ApiProperty({ description: '코인 id' })
   coinId: number;
 
-  @Column({ enum: PurchaseStatus })
+  @Column({
+    type: 'enum',
+    enum: PurchaseStatus,
+    name: 'is_purchase',
+    comment: '구매/판매여부',
+  })
   @ApiProperty({ description: '구매 / 판매 여부' })
   isPurchase: PurchaseStatus;
 
-  @Column({ enum: TradeStatus })
+  @Column({ type: 'enum', enum: TradeStatus, comment: '거래 상태' })
   @ApiProperty({ description: '거래 상태 정보' })
   status: TradeStatus;
 
@@ -47,6 +63,7 @@ export class Trade {
     precision: 15,
     scale: 7,
     transformer: new ColumnTransform(),
+    nullable: true,
   })
   @ApiProperty({ description: '구매 금액' })
   buyPrice: number;
@@ -55,6 +72,7 @@ export class Trade {
     precision: 15,
     scale: 7,
     transformer: new ColumnTransform(),
+    nullable: true,
   })
   @ApiProperty({ description: '판매 금액' })
   sellPrice: number;
@@ -63,6 +81,7 @@ export class Trade {
     precision: 15,
     scale: 7,
     transformer: new ColumnTransform(),
+    nullable: true,
   })
   @ApiProperty({ description: '수수료' })
   fee: number;
@@ -71,6 +90,7 @@ export class Trade {
     precision: 15,
     scale: 7,
     transformer: new ColumnTransform(),
+    nullable: true,
   })
   @ApiProperty({ description: '순수익' })
   gainMoney: number;
@@ -79,6 +99,7 @@ export class Trade {
     precision: 15,
     scale: 7,
     transformer: new ColumnTransform(),
+    nullable: true,
   })
   @ApiProperty({ description: '순수익 률' })
   gainPercent: number;
@@ -88,7 +109,7 @@ export class Trade {
   created_at: Date;
 
   @OneToOne(() => Coin, (coin) => coin.trade)
-  @JoinColumn()
+  @JoinColumn({ name: 'coinId' })
   coin: Coin;
 
   @ManyToOne(() => User, (user) => user.trade)

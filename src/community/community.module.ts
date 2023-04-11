@@ -7,6 +7,7 @@ import { Likes } from './entity/like.entity';
 import { PostRepository } from './entity/post.repository';
 import { ReplyRepository } from './entity/reply.repository';
 import { UserRepository } from '../user/entity/user.repository';
+import { CommunityGateway } from './community.gateway';
 
 @Module({
   imports: [
@@ -18,6 +19,6 @@ import { UserRepository } from '../user/entity/user.repository';
     ]),
   ],
   controllers: [CommunityController],
-  providers: [CommunityService],
+  providers: [CommunityService, CommunityGateway],
 })
 export class CommunityModule {}

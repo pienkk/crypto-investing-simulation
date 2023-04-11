@@ -13,23 +13,42 @@ import { Posts } from './post.entity';
 
 @Entity('replies')
 export class Reply {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({
+    type: 'int',
+    comment: '댓글 id',
+  })
   @ApiProperty({ description: '댓글 id' })
   id: number;
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    length: 1000,
+    comment: '댓글 코멘트',
+  })
   @ApiProperty({ description: '댓글 코멘트' })
   comment: string;
 
-  @Column()
+  @Column({
+    type: 'int',
+    comment: '유저 id',
+    name: 'user_id',
+  })
   @ApiProperty({ description: '유저 id' })
   userId: number;
 
-  @Column()
+  @Column({
+    type: 'int',
+    comment: '게시글 id',
+    name: 'post_id',
+  })
   @ApiProperty({ description: '게시글 id' })
   postId: number;
 
-  @Column()
+  @Column({
+    type: 'int',
+    comment: '부모 댓글 id',
+    name: 'reply_id',
+  })
   @ApiProperty({ description: '부모 댓글 id' })
   replyId: number;
 

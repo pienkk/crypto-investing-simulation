@@ -30,6 +30,7 @@ export class ReplyRepository extends Repository<Reply> {
   ): Promise<[Reply[], number]> {
     return await this.createQueryBuilder('reply')
       .leftJoinAndSelect('reply.post', 'post')
+      .leftJoinAndSelect('post.replies', 'replies')
       .innerJoinAndSelect('reply.user', 'user')
       .where('reply.userId = :userId', { userId })
       .orderBy('reply.replyId', 'DESC')
