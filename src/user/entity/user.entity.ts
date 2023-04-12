@@ -45,7 +45,7 @@ export class User {
   money: number;
 
   @OneToMany(() => Posts, (post) => post.user)
-  post: Posts[];
+  posts: Posts[];
 
   @OneToMany(() => Reply, (reply) => reply.user)
   replies: Reply[];

@@ -109,10 +109,10 @@ export class Trade {
   created_at: Date;
 
   @OneToOne(() => Coin, (coin) => coin.trade)
-  @JoinColumn({ name: 'coinId' })
+  @JoinColumn({ name: 'coin_id' })
   coin: Coin;
 
   @ManyToOne(() => User, (user) => user.trade)
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 }

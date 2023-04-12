@@ -278,4 +278,9 @@ export class CommunityController {
   ): Promise<PostListDto> {
     return this.communityService.getUserLikes(userId, pageNation);
   }
+
+  @Post('binance')
+  getBinance() {
+    return this.communityService.getBinance();
+  }
 }

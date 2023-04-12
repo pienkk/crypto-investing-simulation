@@ -77,8 +77,8 @@ export class Posts {
   @OneToMany(() => Reply, (reply) => reply.post, { cascade: true })
   replies: Reply[];
 
-  @ManyToOne(() => User, (user) => user.post)
-  @JoinColumn({ name: 'userId' })
+  @ManyToOne(() => User, (user) => user.posts)
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @OneToMany(() => Likes, (likes) => likes.post)

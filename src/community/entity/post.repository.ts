@@ -21,8 +21,7 @@ export class PostRepository extends Repository<Posts> {
     const qb = this.createQueryBuilder('post')
       .innerJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.replies', 'reply')
-      .where('post.deleted_at is null')
-      .andWhere('post.isPublished = true');
+      .where('post.isPublished = true');
 
     // 게시글 제목, 내용 검색 시
     if (search && filter === 'content') {

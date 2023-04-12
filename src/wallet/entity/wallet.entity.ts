@@ -46,10 +46,10 @@ export class Wallet {
   quantity: number;
 
   @ManyToOne(() => User, (user) => user.wallet)
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @ManyToOne(() => Coin, (coin) => coin.wallet)
-  @JoinColumn({ name: 'coinId' })
+  @JoinColumn({ name: 'coin_id' })
   coin: Coin;
 }

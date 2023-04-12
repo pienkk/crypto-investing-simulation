@@ -1,5 +1,4 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ResponseReplyDto } from 'src/community/dto/response-reply.dto';
 import { ResponseMoneyRankDto } from 'src/ranking/dto/response.moneyRank.dto';
 import { UserService } from './user.service';
 

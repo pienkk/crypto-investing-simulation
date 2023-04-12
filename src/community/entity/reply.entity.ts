@@ -62,11 +62,11 @@ export class Reply {
   deleted_at: Date;
 
   @ManyToOne(() => Posts, (post) => post.replies, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'postId' })
+  @JoinColumn({ name: 'post_id' })
   post: Posts;
 
   @ManyToOne(() => User, (user) => user.replies)
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   static of(params: Partial<Reply>): Reply {

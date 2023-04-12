@@ -19,6 +19,7 @@ import { Likes } from './entity/like.entity';
 import { Repository, In, MoreThan, LessThan } from 'typeorm';
 import { UserRepository } from '../user/entity/user.repository';
 import { User } from '../user/entity/user.entity';
+import axios from 'axios';
 
 /**
  * 커뮤니티 비즈니스 로직
@@ -41,10 +42,12 @@ export class CommunityService {
     postId: number,
     userId?: number,
   ): Promise<Posts> {
-    const post = await this.postRepository.findOneBy({ id: postId });
+    const post = await this.postRepository.findOneBy({
+      id: postId,
+    });
 
-    // 게시글이 존재하지 않거나, soft delete상태인 경우
-    if (!post || post.deleted_at) {
+    // 게시글이 존재하지 않거나, 공개 상태가 아닌경우
+    if (!post || post.isPublished === false) {
       throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
     }
 
@@ -166,7 +169,7 @@ export class CommunityService {
     userId: number,
   ): Promise<{ status: boolean }> {
     const posts = await this.postRepository.find({
-      where: { id: In(postIds), userId },
+      where: { id: In(postIds), userId, isPublished: true },
     });
 
     // 입력된 게시글의 권한이 없는 게시글이 있을 경우
@@ -174,11 +177,11 @@ export class CommunityService {
       throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
     }
 
-    const deletedPosts = await this.postRepository.softDelete(postIds);
-
-    if (deletedPosts.affected !== postIds.length) {
-      throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
-    }
+    await Promise.all(
+      posts.map(async (post) => {
+        await this.postRepository.save({ ...post, isPublished: false });
+      }),
+    );
 
     return { status: true };
   }
@@ -448,5 +451,16 @@ export class CommunityService {
     }
 
     return user;
+  }
+
+  public async getBinance() {
+    const binance = axios.get(
+      'https://www.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h',
+    );
+    console.log(
+      '🚀 ~ file: community.service.ts:460 ~ CommunityService ~ getBinance ~ binance:',
+      binance,
+    );
+    return binance;
   }
 }

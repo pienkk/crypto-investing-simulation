@@ -42,11 +42,11 @@ export class Likes {
   isLike: boolean;
 
   @ManyToOne(() => User, (user) => user.likes)
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @ManyToOne(() => Posts, (posts) => posts.likes)
-  @JoinColumn({ name: 'postId' })
+  @JoinColumn({ name: 'post_id' })
   post: Posts;
 
   static of(params: Partial<Likes>): Likes {
