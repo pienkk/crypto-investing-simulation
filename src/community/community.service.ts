@@ -452,15 +452,4 @@ export class CommunityService {
 
     return user;
   }
-
-  public async getBinance() {
-    const binance = axios.get(
-      'https://www.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h',
-    );
-    console.log(
-      '🚀 ~ file: community.service.ts:460 ~ CommunityService ~ getBinance ~ binance:',
-      binance,
-    );
-    return binance;
-  }
 }

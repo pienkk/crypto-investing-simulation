@@ -6,11 +6,13 @@ import { PostRepository } from 'src/community/entity/post.repository';
 import { ReplyRepository } from 'src/community/entity/reply.repository';
 import { User } from './entity/user.entity';
 import { ResponseMoneyRankDto } from 'src/ranking/dto/response.moneyRank.dto';
+import { PageNationDto } from '../community/dto/community-query.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
+    private readonly postRepository: PostRepository,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -37,5 +39,19 @@ export class UserService {
     const userRank = await this.userRepository.getRankByUser(userId);
 
     return ResponseMoneyRankDto.fromEntity(userRank);
+  }
+
+  // 숨김 처리된 게시글 요청
+  public async getMyDeletePosts(userId: number) {
+    await this.userValidation(userId);
+
+    const posts = await this.postRepository.find({
+      where: {
+        userId,
+        isPublished: false,
+      },
+    });
+
+    return posts;
   }
 }

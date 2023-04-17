@@ -24,6 +24,10 @@ export class ResponsePostsDto {
   @ApiProperty({ description: '카테고리 id' })
   categoryId: number;
 
+  @IsBoolean()
+  @ApiProperty({ description: '게시글 공개 여부' })
+  isPublished: boolean;
+
   @IsDate()
   @ApiProperty({ description: '게시글 생성 날짜' })
   created_at: Date;
@@ -40,6 +44,7 @@ export class ResponsePostsDto {
     dto.id = entity.id;
     dto.title = entity.title;
     dto.description = entity.description;
+    dto.isPublished = entity.isPublished;
     dto.created_at = entity.created_at;
     dto.hits = entity.hits;
     dto.categoryId = entity.categoryId;
@@ -107,6 +112,10 @@ export class ResponsePostDetailDto {
   @ApiProperty({ description: '좋아요 수' })
   likeCount: number;
 
+  @IsBoolean()
+  @ApiProperty({ description: '게시글 공개 여부' })
+  isPublished: boolean;
+
   @IsNumber()
   @ApiProperty({ description: '싫어요 수' })
   unLikeCount: number;
@@ -138,6 +147,7 @@ export class ResponsePostDetailDto {
     dto.hits = entity.hits;
     dto.categoryId = entity.categoryId;
     dto.repliesCount = entity.replies.length;
+    dto.isPublished = entity.isPublished;
     dto.likeCount = likeCount;
     dto.unLikeCount = unlikeCount;
     dto.prevPostId = prevPostId;
