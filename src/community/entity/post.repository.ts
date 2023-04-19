@@ -53,7 +53,7 @@ export class PostRepository extends Repository<Posts> {
       qb.andWhere('post.categoryId = :categoryId ', { categoryId });
     }
 
-    // pagenation
+    // 페이지네이션
     return await qb
       .take(number)
       .skip((page - 1) * number)
@@ -73,6 +73,7 @@ export class PostRepository extends Repository<Posts> {
       .innerJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.replies', 'reply')
       .where('post.userId =:userId', { userId })
+      .andWhere('post.isPublished = true')
       .orderBy('post.created_at', 'DESC')
       .take(number)
       .skip((page - 1) * number)

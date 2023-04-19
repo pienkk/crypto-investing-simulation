@@ -44,6 +44,13 @@ export class User {
   })
   money: number;
 
+  @Column({
+    type: 'varchar',
+    comment: '프로필 이미지',
+    name: 'profile_image',
+  })
+  profileImage: string;
+
   @OneToMany(() => Posts, (post) => post.user)
   posts: Posts[];
 

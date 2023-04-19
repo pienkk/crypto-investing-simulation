@@ -1,18 +1,21 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ResponseMoneyRankDto } from 'src/ranking/dto/response.moneyRank.dto';
 import { UserService } from './user.service';
-import {
-  ApiBearerAuth,
-  ApiOkResponse,
-  ApiOperation,
-  ApiQuery,
-} from '@nestjs/swagger';
-import { PostListDto } from 'src/community/dto/response-post.dto';
-import { QueryDto } from 'src/community/dto/community-query.dto';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { CurrentUser } from 'src/auth/security/auth.user.param';
 import { JwtPayload } from 'src/auth/jwt-payload.interface';
 import { Posts } from 'src/community/entity/post.entity';
 import { JwtAuthGuard } from 'src/auth/security/auth.guard';
+import { SignInDto } from './dto/create-user.dto';
+import { ResponseSignInDto } from './dto/response-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -41,5 +44,17 @@ export class UserController {
   @Get(':userId')
   getUserInfo(@Param('userId') userId: number): Promise<ResponseMoneyRankDto> {
     return this.userService.getUserInfo(userId);
+  }
+
+  @Post('social')
+  @ApiOperation({
+    summary: '소셜 로그인 API',
+    description: '소셜 로그인 API',
+  })
+  @ApiOkResponse({ type: ResponseSignInDto })
+  socialLogin(
+    @Body() socialLoginDto: SignInDto,
+  ): Promise<{ accessToken: string; nickname: string }> {
+    return this.userService.socialLogin(socialLoginDto);
   }
 }

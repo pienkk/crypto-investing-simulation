@@ -7,6 +7,7 @@ import { ReplyRepository } from 'src/community/entity/reply.repository';
 import { User } from './entity/user.entity';
 import { ResponseMoneyRankDto } from 'src/ranking/dto/response.moneyRank.dto';
 import { PageNationDto } from '../community/dto/community-query.dto';
+import { SignInDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UserService {
@@ -33,6 +34,9 @@ export class UserService {
     return { accessToken: this.jwtService.sign(payload), userId: user.id };
   }
 
+  /**
+   * 유저 정보 조회
+   */
   async getUserInfo(userId: number): Promise<ResponseMoneyRankDto> {
     await this.userValidation(userId);
 
@@ -41,8 +45,10 @@ export class UserService {
     return ResponseMoneyRankDto.fromEntity(userRank);
   }
 
-  // 숨김 처리된 게시글 요청
-  public async getMyDeletePosts(userId: number) {
+  /**
+   * 본인의 숨김 게시글 조회
+   */
+  async getMyDeletePosts(userId: number) {
     await this.userValidation(userId);
 
     const posts = await this.postRepository.find({
@@ -53,5 +59,34 @@ export class UserService {
     });
 
     return posts;
+  }
+
+  /**
+   * 소셜 로그인
+   */
+  async socialLogin(
+    socialLoginDto: SignInDto,
+  ): Promise<{ accessToken: string; nickname: string }> {
+    // 유저가 없으면 생성
+    // 닉네임이 같이 들어오면 신규가입
+    if (socialLoginDto.nickname !== undefined) {
+      await this.userRepository.save(socialLoginDto);
+    }
+
+    const user = await this.userRepository.findOneBy({
+      email: socialLoginDto.email,
+    });
+
+    // 가입되지 않은 유저일 경우 에러 반환
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    const payload: JwtPayload = { id: user.id, email: user.email };
+
+    return {
+      accessToken: this.jwtService.sign(payload),
+      nickname: user.nickname,
+    };
   }
 }
