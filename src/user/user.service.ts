@@ -8,6 +8,7 @@ import { User } from './entity/user.entity';
 import { ResponseMoneyRankDto } from 'src/ranking/dto/response.moneyRank.dto';
 import { PageNationDto } from '../community/dto/community-query.dto';
 import { SignInDto } from './dto/create-user.dto';
+import { ResponsePostsDto } from 'src/community/dto/response-post.dto';
 
 @Injectable()
 export class UserService {
@@ -46,6 +47,19 @@ export class UserService {
   }
 
   /**
+   * 닉네임 중복체크
+   */
+  async checkNickname(nickname: string): Promise<{ status: boolean }> {
+    const user = await this.userRepository.findOneBy({ nickname });
+
+    if (user) {
+      return { status: false };
+    }
+
+    return { status: true };
+  }
+
+  /**
    * 본인의 숨김 게시글 조회
    */
   async getMyDeletePosts(userId: number) {
@@ -56,9 +70,12 @@ export class UserService {
         userId,
         isPublished: false,
       },
+      relations: ['user', 'replies'],
     });
 
-    return posts;
+    const responsePosts = ResponsePostsDto.fromEntities(posts);
+
+    return responsePosts;
   }
 
   /**

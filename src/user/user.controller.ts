@@ -16,6 +16,7 @@ import { Posts } from 'src/community/entity/post.entity';
 import { JwtAuthGuard } from 'src/auth/security/auth.guard';
 import { SignInDto } from './dto/create-user.dto';
 import { ResponseSignInDto } from './dto/response-user.dto';
+import { ResponsePostsDto } from 'src/community/dto/response-post.dto';
 
 @Controller('user')
 export class UserController {
@@ -30,15 +31,28 @@ export class UserController {
 
   @Get('posts')
   @ApiOperation({
-    summary: '내가 작성한 게시글 조회 API',
-    description: '내가 작성한 게시글 조회 API',
+    summary: '삭제된 게시글 조회 API',
+    description: '내가 작성한 게시글 중 삭제된 게시글을 조회한다.',
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: [Posts] })
-  getMyDeletePosts(@CurrentUser() user: JwtPayload): Promise<Posts[]> {
-    console.log(user);
+  getMyDeletePosts(
+    @CurrentUser() user: JwtPayload,
+  ): Promise<ResponsePostsDto[]> {
     return this.userService.getMyDeletePosts(user.id);
+  }
+
+  @Post('check')
+  @ApiOperation({
+    summary: '닉네임 중복체크 API',
+    description: '해당 닉네임이 중복되어 있는지 확인한다 (중복가입불가)',
+  })
+  @ApiOkResponse({ description: '{ status: true }' })
+  checkNickname(
+    @Body('nickname') nickname: string,
+  ): Promise<{ status: boolean }> {
+    return this.userService.checkNickname(nickname);
   }
 
   @Get(':userId')
