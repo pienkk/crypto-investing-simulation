@@ -1,4 +1,3 @@
-import { Exclude } from 'class-transformer';
 import { Likes } from 'src/community/entity/like.entity';
 import { Posts } from 'src/community/entity/post.entity';
 import { Reply } from 'src/community/entity/reply.entity';
@@ -9,28 +8,51 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({
+    type: 'int',
+    comment: '유저 id',
+  })
   id: number;
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    length: 30,
+    comment: '유저 닉네임',
+  })
   nickname: string;
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    length: 100,
+    comment: '유저 자기소개',
+    nullable: true,
+  })
   description: string;
 
-  @Column()
-  @Exclude()
+  @Column({
+    type: 'varchar',
+    length: 100,
+    comment: '유저 이메일',
+  })
   email: string;
 
   @Column('decimal', {
     precision: 15,
     scale: 7,
+    default: 10000000,
     transformer: new ColumnTransform(),
   })
   money: number;
 
+  @Column({
+    type: 'varchar',
+    comment: '프로필 이미지',
+    name: 'profile_image',
+  })
+  profileImage: string;
+
   @OneToMany(() => Posts, (post) => post.user)
-  post: Posts[];
+  posts: Posts[];
 
   @OneToMany(() => Reply, (reply) => reply.user)
   replies: Reply[];

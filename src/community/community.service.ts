@@ -1,13 +1,13 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto, UpdateReplyDto } from './dto/create-reply.dto';
-import { QueryDto } from './dto/community-query.dto';
+import { PageNationDto, QueryDto } from './dto/community-query.dto';
 import {
   PostListDto,
   ResponsePostDetailDto,
   ResponsePostsDto,
 } from './dto/response-post.dto';
-import { ResponseReplyDto } from './dto/response-reply.dto';
+import { ReplyListDto, ResponseReplyDto } from './dto/response-reply.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { Posts } from './entity/post.entity';
 import { PostRepository } from './entity/post.repository';
@@ -16,7 +16,10 @@ import { ReplyRepository } from './entity/reply.repository';
 import { CreateLikeDto } from './dto/create-like.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Likes } from './entity/like.entity';
-import { Repository } from 'typeorm';
+import { Repository, In, MoreThan, LessThan } from 'typeorm';
+import { UserRepository } from '../user/entity/user.repository';
+import { User } from '../user/entity/user.entity';
+import axios from 'axios';
 
 /**
  * 커뮤니티 비즈니스 로직
@@ -28,14 +31,23 @@ export class CommunityService {
     private readonly replyRepository: ReplyRepository,
     @InjectRepository(Likes)
     private readonly likeRepository: Repository<Likes>,
+    private readonly userRepository: UserRepository,
   ) {}
 
-  // 게시글 유효성 검증 userId는 옵션값으로 유저의 유효성을 검증한다
-  async postValidation(postId: number, userId?: number): Promise<Posts> {
-    const post = await this.postRepository.findOneBy({ id: postId });
+  /**
+   * postId와 userId를 이용한 게시글 검증로직 (userId는 옵션)
+   * userId가 들어올경우 게시글 작성자 여부 검증 추가
+   */
+  private async postValidation(
+    postId: number,
+    userId?: number,
+  ): Promise<Posts> {
+    const post = await this.postRepository.findOneBy({
+      id: postId,
+    });
 
-    // 게시글이 존재하지 않거나, soft delete상태인 경우
-    if (!post || post.deleted_at) {
+    // 게시글이 존재하지 않거나, 공개 상태가 아닌경우
+    if (!post || post.isPublished === false) {
       throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
     }
 
@@ -50,7 +62,9 @@ export class CommunityService {
     return post;
   }
 
-  // 게시글 리스트
+  /**
+   * 게시글 리스트 반환
+   */
   async getPosts(GetPostListsDto: QueryDto): Promise<PostListDto> {
     const [postList, number] = await this.postRepository.getPostLists(
       GetPostListsDto,
@@ -62,16 +76,23 @@ export class CommunityService {
     return responsePosts;
   }
 
-  // 게시글 상세 정보
+  /**
+   * 게시글 상세 정보 반환 (userId와 update는 옵션)
+   * userId 입력시 해당 유저의 해당 게시글에 좋아요 유무 표시
+   * update 입력시 조회수 증가 x
+   */
   async getPostDetail(
     postId: number,
     userId = 0,
+    update?: boolean,
   ): Promise<ResponsePostDetailDto> {
-    const postDetail = await this.postRepository.getPostDetail(postId);
-    if (!postDetail) {
-      throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
-    }
+    await this.postValidation(postId);
+    const postDetail = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['user', 'replies'],
+    });
 
+    // 좋아요 여부, 좋아요, 싫어요 카운트
     const like = await this.likeRepository.findOneBy({ postId, userId });
     const likeCount = await this.likeRepository.countBy({
       postId,
@@ -82,19 +103,34 @@ export class CommunityService {
       isLike: false,
     });
 
-    this.postRepository.update(postId, { hits: () => 'hits + 1' });
+    const nextPost = await this.postRepository.findOne({
+      where: { id: MoreThan(postId) },
+    });
+
+    const prevPost = await this.postRepository.findOne({
+      where: { id: LessThan(postId) },
+      order: { id: 'DESC' },
+    });
 
     const post = ResponsePostDetailDto.fromEntity(
       postDetail,
       like,
       likeCount,
       unlikeCount,
+      prevPost ? prevPost.id : null,
+      nextPost ? nextPost.id : null,
     );
+    if (update) return post;
+
+    // 조회수 증가
+    this.postRepository.update(postId, { hits: () => 'hits + 1' });
 
     return ResponsePostDetailDto.hitsPlus(post);
   }
 
-  // 게시글 생성
+  /**
+   * 게시글 생성
+   */
   async createPost(
     createPostDto: CreatePostDto,
     userId: number,
@@ -104,42 +140,74 @@ export class CommunityService {
     return await this.postRepository.save(post);
   }
 
-  // 게시글 수정
+  /**
+   * 게시글 수정
+   */
   async updatePost(
     postId: number,
     userId: number,
     updatePostDto: UpdatePostDto,
-  ): Promise<boolean> {
+  ): Promise<{ status: boolean }> {
     await this.postValidation(postId, userId);
 
+    // 게시글 수정
     const result = await this.postRepository.update(postId, updatePostDto);
+
     // 수정된 갯수가 1개가 아닐 경우
     if (result.affected !== 1) {
       throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
     }
 
-    return true;
+    return { status: true };
   }
 
-  // 게시글 삭제
+  /**
+   * 게시글 삭제
+   */
   async removePost(
-    postId: number,
+    postIds: number[],
     userId: number,
   ): Promise<{ status: boolean }> {
-    const post = await this.postValidation(postId, userId);
+    const posts = await this.postRepository.find({
+      where: { id: In(postIds), userId, isPublished: true },
+    });
 
-    post.deleted_at = new Date();
-    const removePost = await this.postRepository.save(post);
-
-    // soft delete가 되지 않았을 경우
-    if (!removePost.deleted_at) {
-      throw new HttpException('This post does not exist', HttpStatus.NOT_FOUND);
+    // 입력된 게시글의 권한이 없는 게시글이 있을 경우
+    if (posts.length !== postIds.length) {
+      throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
     }
+
+    await Promise.all(
+      posts.map(async (post) => {
+        await this.postRepository.save({ ...post, isPublished: false });
+      }),
+    );
 
     return { status: true };
   }
 
-  // 게시글의 댓글 리스트 조회
+  /**
+   * 유저가 작성한 게시글 리스트
+   */
+  async getUserPosts(
+    userId: number,
+    query: PageNationDto,
+  ): Promise<PostListDto> {
+    await this.userValidation(userId);
+
+    const [posts, number] = await this.postRepository.getUserPosts(
+      userId,
+      query.page,
+      query.number,
+    );
+
+    const postDto = ResponsePostsDto.fromEntities(posts);
+    return { post: postDto, number };
+  }
+
+  /**
+   * 댓글 리스트 반환
+   */
   async getReplies(postId: number): Promise<ResponseReplyDto[]> {
     await this.postValidation(postId);
 
@@ -148,7 +216,9 @@ export class CommunityService {
     return ResponseReplyDto.fromEntities(replies);
   }
 
-  // 댓글 생성
+  /**
+   * 댓글 생성 후 게시글에 해당하는 댓글 리스트 반환
+   */
   async createReply(
     createReplyDto: CreateReplyDto,
     userId: number,
@@ -167,6 +237,7 @@ export class CommunityService {
         throw new HttpException('Reply is not found', HttpStatus.NOT_FOUND);
     }
 
+    // 댓글 생성
     const reply = this.replyRepository.create({ ...createReplyDto, userId });
     const savedReply = await this.replyRepository.save(reply);
 
@@ -178,12 +249,19 @@ export class CommunityService {
       });
     }
 
+    // 댓글 리스트 조회 후 반환
     const replies = await this.replyRepository.getReplyLists(postId);
     return ResponseReplyDto.fromEntities(replies);
   }
 
-  // 댓글 유효성 검사 userId는 유저 검증로직으로 옵션
-  async replyValidation(replyId: number, userId: number): Promise<Reply> {
+  /**
+   * replyId와 userId를 이용한 댓글 검증 로직 (userId는 옵션)
+   * userId 입력시 해당 유저가 작성한 댓글인지 검증
+   */
+  private async replyValidation(
+    replyId: number,
+    userId: number,
+  ): Promise<Reply> {
     const reply = await this.replyRepository.findOneBy({ id: replyId });
 
     // 댓글이 존재하지 않거나, soft delete 상태일 경우
@@ -204,7 +282,9 @@ export class CommunityService {
     return reply;
   }
 
-  // 댓글 수정
+  /**
+   * 댓글 수정
+   */
   async updateReply(
     replyId: number,
     userId: number,
@@ -213,6 +293,7 @@ export class CommunityService {
     await this.replyValidation(replyId, userId);
 
     const result = await this.replyRepository.update(replyId, updateReplyDto);
+
     // 수정된 갯수가 1개가 아닐 경우
     if (result.affected !== 1) {
       throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
@@ -221,62 +302,154 @@ export class CommunityService {
     return { status: true };
   }
 
-  // 댓글 삭제
+  /**
+   * 댓글 삭제
+   */
   async removeReply(
-    replyId: number,
+    replyIds: number[],
     userId: number,
   ): Promise<{ status: boolean }> {
-    const reply = await this.replyValidation(replyId, userId);
+    const replies = await this.replyRepository.find({
+      where: { id: In(replyIds), userId },
+    });
+    if (replies.length !== replyIds.length) {
+      throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
+    }
 
-    reply.deleted_at = new Date();
+    const removedReply = await this.replyRepository.softDelete(replyIds);
 
-    const removedReply = await this.replyRepository.save(reply);
     // soft delete가 작동하지 않았을 경우
-    if (!removedReply.deleted_at) {
+    if (removedReply.affected !== replyIds.length) {
       throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
     }
 
     return { status: true };
   }
 
-  // 좋아요 / 싫어요 추가
+  /**
+   * 좋아요 / 싫어요 생성, 게시글 상세 정보 반환
+   */
   async createLike(
     userId: number,
     postId: number,
     { isLike }: CreateLikeDto,
-  ): Promise<{ status: boolean }> {
+  ): Promise<ResponsePostDetailDto> {
+    await this.postValidation(postId);
+
     const like = await this.likeRepository.findOne({
       where: { userId, postId },
     });
 
-    if (like) {
+    // 좋아요 / 싫어요를 같은 상태로 요청할 경우
+    if (like?.isLike === isLike) {
       throw new HttpException('Already Like', HttpStatus.BAD_REQUEST);
     }
 
-    await this.likeRepository.save({ userId, postId, isLike });
+    // 좋아요 이력이 있을경우 업데이트
+    if (like) {
+      await this.likeRepository.save({ id: like.id, isLike });
+      // 이력이 없을 경우 생성
+    } else {
+      await this.likeRepository.save({ userId, postId, isLike });
+    }
 
-    return { status: true };
+    // 게시글 정보 반환
+    return this.getPostDetail(postId, userId, true);
   }
 
-  // 좋아요 / 싫어요 삭제
+  /**
+   * 좋아요 / 싫어요 삭제, 게시글 상세 정보 반환
+   */
   async deleteLike(
     userId: number,
     postId: number,
-  ): Promise<{ status: boolean }> {
+  ): Promise<ResponsePostDetailDto> {
+    await this.postValidation(postId);
     const like = await this.likeRepository.findOne({
       where: { userId, postId },
     });
 
+    // 좋아요 / 싫어요 이력이 없을 경우
     if (!like) {
       throw new HttpException("Don't find Like", HttpStatus.NOT_FOUND);
     }
 
     const result = await this.likeRepository.delete(like);
 
+    // 이력이 삭제되지 않았을 경우
     if (result.affected !== 1) {
       throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
     }
 
-    return { status: true };
+    // 게시글 정보 반환
+    return this.getPostDetail(postId, userId, true);
+  }
+
+  /**
+   * 유저가 작성한 댓글 조회
+   */
+  async getUserReplies(
+    userId: number,
+    query: PageNationDto,
+  ): Promise<ReplyListDto> {
+    await this.userValidation(userId);
+
+    const [replies, number] = await this.replyRepository.getReplyByUser(
+      userId,
+      query.page,
+      query.number,
+    );
+
+    const replyDto = ResponseReplyDto.fromEntities(replies);
+
+    return { replies: replyDto, number };
+  }
+
+  /**
+   * 유저가 작성한 댓글의 게시글 조회
+   */
+  async getUserReplyPosts(
+    userId: number,
+    query: PageNationDto,
+  ): Promise<PostListDto> {
+    await this.userValidation(userId);
+
+    const [posts, number] = await this.postRepository.getUserReplyByPosts(
+      userId,
+      query.page,
+      query.number,
+    );
+
+    const postDto = ResponsePostsDto.fromEntities(posts);
+    return { post: postDto, number };
+  }
+
+  /**
+   * 유저가 좋아요한 게시글 조회
+   */
+  async getUserLikes(
+    userId: number,
+    query: PageNationDto,
+  ): Promise<PostListDto> {
+    await this.userValidation(userId);
+
+    const [posts, number] = await this.postRepository.getLikePosts(
+      userId,
+      query.page,
+      query.number,
+    );
+
+    const postDto = ResponsePostsDto.fromEntities(posts);
+    return { post: postDto, number };
+  }
+
+  async userValidation(userId: number): Promise<User> {
+    const user = await this.userRepository.findOneBy({ id: userId });
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    return user;
   }
 }

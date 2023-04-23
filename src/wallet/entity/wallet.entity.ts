@@ -11,13 +11,24 @@ import {
 
 @Entity('wallets')
 export class Wallet {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({
+    type: 'int',
+    comment: '지갑 id',
+  })
   id: number;
 
-  @Column()
+  @Column({
+    type: 'int',
+    comment: '코인 id',
+    name: 'coin_id',
+  })
   coinId: number;
 
-  @Column()
+  @Column({
+    type: 'int',
+    comment: '유저 id',
+    name: 'user_id',
+  })
   userId: number;
 
   @Column('decimal', {
@@ -35,10 +46,10 @@ export class Wallet {
   quantity: number;
 
   @ManyToOne(() => User, (user) => user.wallet)
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @ManyToOne(() => Coin, (coin) => coin.wallet)
-  @JoinColumn({ name: 'coinId' })
+  @JoinColumn({ name: 'coin_id' })
   coin: Coin;
 }

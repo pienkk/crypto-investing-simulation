@@ -13,7 +13,6 @@ import { Wallet } from 'src/wallet/entity/wallet.entity';
 @Injectable()
 export class MySqlConfigService implements TypeOrmOptionsFactory {
   constructor(private configService: ConfigService) {}
-
   createTypeOrmOptions(): TypeOrmModuleOptions {
     return {
       type: 'mysql',
@@ -23,6 +22,8 @@ export class MySqlConfigService implements TypeOrmOptionsFactory {
       host: this.configService.get<string>('DB_HOST'),
       database: this.configService.get<string>('DB_DATABASE'),
       logging: true,
+      synchronize: true,
+      // dropSchema: true,
       entities: [Posts, Reply, User, Coin, CoinHistory, Trade, Wallet, Likes],
     };
   }

@@ -2,6 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsString } from 'class-validator';
 import { User } from '../entity/user.entity';
 
+/**
+ * 유저 정보 응답 DTO
+ */
 export class ResponseUserDto {
   @IsNumber()
   @ApiProperty({ description: '유저 id' })
@@ -22,4 +25,17 @@ export class ResponseUserDto {
     dto.description = entity.description;
     return dto;
   }
+}
+
+/**
+ * 로그인 응답 DTO
+ */
+export class ResponseSignInDto {
+  @IsString()
+  @ApiProperty({ description: 'JWT 토큰' })
+  token: string;
+
+  @IsString()
+  @ApiProperty()
+  nickname: string;
 }

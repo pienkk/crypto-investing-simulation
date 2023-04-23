@@ -8,18 +8,18 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { QueryFailedError } from 'typeorm';
+import { QueryFailedError, TypeORMError } from 'typeorm';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  catch(exception: unknown, host: ArgumentsHost) {
+  catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = (exception as any).message.message;
     let code = 'HttpException';
-    console.log(exception);
+    console.log(exception.constructor);
 
     switch (exception.constructor) {
       case HttpException:
@@ -33,12 +33,19 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         code = (exception as any).code;
         break;
 
+      case TypeORMError:
+        status = HttpStatus.UNPROCESSABLE_ENTITY;
+        message = (exception as TypeORMError).message;
+        code = (exception as any).code;
+        break;
+
       case BadRequestException:
         status = (exception as any).status;
         message = (exception as any).response.message;
         break;
 
       default:
+        message = exception.message;
         status = HttpStatus.INTERNAL_SERVER_ERROR;
     }
 

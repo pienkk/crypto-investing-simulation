@@ -12,13 +12,9 @@ import {
 import { CommunityService } from './community.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto, UpdateReplyDto } from './dto/create-reply.dto';
-import { QueryDto } from './dto/community-query.dto';
-import {
-  PostListDto,
-  ResponsePostDetailDto,
-  ResponsePostsDto,
-} from './dto/response-post.dto';
-import { ResponseReplyDto } from './dto/response-reply.dto';
+import { PageNationDto, QueryDto } from './dto/community-query.dto';
+import { PostListDto, ResponsePostDetailDto } from './dto/response-post.dto';
+import { ReplyListDto, ResponseReplyDto } from './dto/response-reply.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import {
   ApiBadRequestResponse,
@@ -59,7 +55,7 @@ export class CommunityController {
     summary: '커뮤니티 상세글 조회 API',
     description: '게시글 상세 조회, 댓글 조회',
   })
-  @ApiOkResponse({ type: ResponsePostsDto })
+  @ApiOkResponse({ type: ResponsePostDetailDto })
   @ApiNotFoundResponse({ description: 'Post not found' })
   getPostDetail(
     @CurrentUser() user: JwtPayload,
@@ -101,11 +97,11 @@ export class CommunityController {
     @CurrentUser() user: JwtPayload,
     @Param('postId') postId: number,
     @Body() updatePostDto: UpdatePostDto,
-  ): Promise<boolean> {
+  ): Promise<{ status: boolean }> {
     return this.communityService.updatePost(postId, user.id, updatePostDto);
   }
 
-  @Delete(':postId')
+  @Delete('post')
   @ApiOperation({
     summary: '커뮤니티 게시글 삭제 API',
     description: '게시글을 삭제한다.',
@@ -114,12 +110,28 @@ export class CommunityController {
   @ApiNotFoundResponse({ description: 'Post not found' })
   @ApiBadRequestResponse({ description: "Don't have post permisson" })
   @ApiBearerAuth()
+  @ApiBody({ type: [Number] })
   @UseGuards(JwtAuthGuard)
   removePost(
     @CurrentUser() user: JwtPayload,
-    @Param('postId') postId: number,
+    @Body('postId') postId: number[],
   ): Promise<{ status: boolean }> {
     return this.communityService.removePost(postId, user.id);
+  }
+
+  @Get('post/user/:userId')
+  @ApiOperation({
+    summary: '유저 게시글 조회 API',
+    description: '유저 게시글 조회',
+  })
+  @ApiOkResponse({ description: 'Response Success', type: PostListDto })
+  @ApiNotFoundResponse({ description: 'User not found' })
+  @ApiQuery({ type: PageNationDto })
+  getUserPosts(
+    @Param('userId') userId: number,
+    @Query() pageNation: PageNationDto,
+  ): Promise<PostListDto> {
+    return this.communityService.getUserPosts(userId, pageNation);
   }
 
   @Get('reply/:postId')
@@ -171,7 +183,7 @@ export class CommunityController {
     return this.communityService.updateReply(replyId, user.id, updateReplyDto);
   }
 
-  @Delete('reply/:replyId')
+  @Delete('reply')
   @ApiOperation({
     summary: '게시글 댓글 삭제 API',
     description: '댓글을 삭제한다.',
@@ -180,12 +192,43 @@ export class CommunityController {
   @ApiNotFoundResponse({ description: 'This reply does not exist' })
   @ApiBadRequestResponse({ description: "Don't have reply permisson" })
   @ApiBearerAuth()
+  @ApiBody({ type: [Number] })
   @UseGuards(JwtAuthGuard)
   removeReply(
     @CurrentUser() user: JwtPayload,
-    @Param('replyId') replyId: number,
+    @Body('replyId') replyId: number[],
   ): Promise<{ status: boolean }> {
     return this.communityService.removeReply(replyId, user.id);
+  }
+
+  @Get('reply/user/:userId')
+  @ApiOperation({
+    summary: '유저 댓글 조회 API',
+    description: '유저 댓글 조회',
+  })
+  @ApiOkResponse({ description: 'Response Success', type: ReplyListDto })
+  @ApiNotFoundResponse({ description: 'User not found' })
+  @ApiQuery({ type: PageNationDto })
+  getUserReplies(
+    @Param('userId') userId: number,
+    @Query() pageNation: PageNationDto,
+  ): Promise<ReplyListDto> {
+    return this.communityService.getUserReplies(userId, pageNation);
+  }
+
+  @Get('reply/post/user/:userId')
+  @ApiOperation({
+    summary: '유저가 작성한 댓글의 게시글 조회 API',
+    description: '유저가 작성한 댓글의 게시글 조회',
+  })
+  @ApiOkResponse({ description: 'Response Success', type: PostListDto })
+  @ApiNotFoundResponse({ description: 'User not found' })
+  @ApiQuery({ type: QueryDto })
+  getUserReplyPosts(
+    @Param('userId') userId: number,
+    @Query() pageNation: QueryDto,
+  ): Promise<PostListDto> {
+    return this.communityService.getUserReplyPosts(userId, pageNation);
   }
 
   @Post('like/:postId')
@@ -193,7 +236,7 @@ export class CommunityController {
     summary: '게시글 좋아요/싫어요 추가 API',
     description: '게시글에 좋아요/ 싫어요를 한다',
   })
-  @ApiOkResponse({ description: '{ status: true}' })
+  @ApiOkResponse({ type: ResponsePostDetailDto })
   @ApiBadRequestResponse({ description: 'Already Like' })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
@@ -201,7 +244,7 @@ export class CommunityController {
     @CurrentUser() user: JwtPayload,
     @Param('postId') postId: number,
     @Body() createLikeDto: CreateLikeDto,
-  ): Promise<{ status: boolean }> {
+  ): Promise<ResponsePostDetailDto> {
     return this.communityService.createLike(user.id, postId, createLikeDto);
   }
 
@@ -210,14 +253,29 @@ export class CommunityController {
     summary: '게시글 좋아요/싫어요 삭제 API',
     description: '내가 게시글에 좋아요/싫어요 기록을 삭제한다.',
   })
-  @ApiOkResponse({ description: '{ status: true }' })
+  @ApiOkResponse({ type: ResponsePostDetailDto })
   @ApiNotFoundResponse({ description: "Don't find Like" })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   deleteLike(
     @CurrentUser() user: JwtPayload,
     @Param('postId') postId: number,
-  ): Promise<{ status: boolean }> {
+  ): Promise<ResponsePostDetailDto> {
     return this.communityService.deleteLike(user.id, postId);
+  }
+
+  @Get('like/user/:userId')
+  @ApiOperation({
+    summary: '유저 좋아요/싫어요 조회 API',
+    description: '유저 좋아요/싫어요 조회',
+  })
+  @ApiOkResponse({ description: 'Response Success', type: PostListDto })
+  @ApiNotFoundResponse({ description: 'User not found' })
+  @ApiQuery({ type: QueryDto })
+  getUserLikes(
+    @Param('userId') userId: number,
+    @Query() pageNation: PageNationDto,
+  ): Promise<PostListDto> {
+    return this.communityService.getUserLikes(userId, pageNation);
   }
 }

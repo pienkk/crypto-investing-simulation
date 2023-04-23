@@ -6,6 +6,7 @@ import { Coin } from 'src/market/entity/coin.entity';
 import { CoinValueDto } from 'src/market/dto/coin-value.dto';
 import { AxiosError } from 'axios';
 import { CoinHistoryRepository } from 'src/market/entity/coinHistory.repository';
+import axios from 'axios';
 
 const ONEHOUR = 3600;
 const FOURHOUR = 14400;

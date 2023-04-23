@@ -4,21 +4,18 @@ import { UserRepository } from './entity/user.repository';
 import { JwtPayload } from 'src/auth/jwt-payload.interface';
 import { PostRepository } from 'src/community/entity/post.repository';
 import { ReplyRepository } from 'src/community/entity/reply.repository';
-import {
-  ResponsePostsDto,
-  PostListDto,
-} from 'src/community/dto/response-post.dto';
-import { ResponseReplyDto } from 'src/community/dto/response-reply.dto';
 import { User } from './entity/user.entity';
 import { ResponseMoneyRankDto } from 'src/ranking/dto/response.moneyRank.dto';
+import { PageNationDto } from '../community/dto/community-query.dto';
+import { SignInDto } from './dto/create-user.dto';
+import { ResponsePostsDto } from 'src/community/dto/response-post.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly jwtService: JwtService,
     private readonly postRepository: PostRepository,
-    private readonly replyRepository: ReplyRepository,
+    private readonly jwtService: JwtService,
   ) {}
 
   async userValidation(userId: number): Promise<User> {
@@ -31,13 +28,16 @@ export class UserService {
     return user;
   }
 
-  async signIn(): Promise<{ accessToken: string; userId: number }> {
-    const user = await this.userRepository.findOneBy({ id: 1 });
+  async signIn(userId): Promise<{ accessToken: string; userId: number }> {
+    const user = await this.userRepository.findOneBy({ id: userId });
     const payload: JwtPayload = { id: user.id, email: user.email };
 
     return { accessToken: this.jwtService.sign(payload), userId: user.id };
   }
 
+  /**
+   * 유저 정보 조회
+   */
   async getUserInfo(userId: number): Promise<ResponseMoneyRankDto> {
     await this.userValidation(userId);
 
@@ -46,20 +46,64 @@ export class UserService {
     return ResponseMoneyRankDto.fromEntity(userRank);
   }
 
-  async getUserPosts(userId: number): Promise<PostListDto> {
-    await this.userValidation(userId);
+  /**
+   * 닉네임 중복체크
+   */
+  async checkNickname(nickname: string): Promise<{ status: boolean }> {
+    const user = await this.userRepository.findOneBy({ nickname });
 
-    const [posts, number] = await this.postRepository.getUserPosts(userId);
+    if (user) {
+      return { status: false };
+    }
 
-    const postDto = ResponsePostsDto.fromEntities(posts);
-    return { post: postDto, number };
+    return { status: true };
   }
 
-  async getUserReplies(userId: number): Promise<ResponseReplyDto[]> {
+  /**
+   * 본인의 숨김 게시글 조회
+   */
+  async getMyDeletePosts(userId: number) {
     await this.userValidation(userId);
 
-    const replies = await this.replyRepository.getReplyByUser(userId);
+    const posts = await this.postRepository.find({
+      where: {
+        userId,
+        isPublished: false,
+      },
+      relations: ['user', 'replies'],
+    });
 
-    return ResponseReplyDto.fromEntities(replies);
+    const responsePosts = ResponsePostsDto.fromEntities(posts);
+
+    return responsePosts;
+  }
+
+  /**
+   * 소셜 로그인
+   */
+  async socialLogin(
+    socialLoginDto: SignInDto,
+  ): Promise<{ accessToken: string; nickname: string }> {
+    // 유저가 없으면 생성
+    // 닉네임이 같이 들어오면 신규가입
+    if (socialLoginDto.nickname !== undefined) {
+      await this.userRepository.save(socialLoginDto);
+    }
+
+    const user = await this.userRepository.findOneBy({
+      email: socialLoginDto.email,
+    });
+
+    // 가입되지 않은 유저일 경우 에러 반환
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    const payload: JwtPayload = { id: user.id, email: user.email };
+
+    return {
+      accessToken: this.jwtService.sign(payload),
+      nickname: user.nickname,
+    };
   }
 }

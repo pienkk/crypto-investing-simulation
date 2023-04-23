@@ -12,23 +12,42 @@ import {
 
 @Entity('coins')
 export class Coin {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({
+    type: 'int',
+    comment: '코인 id',
+  })
   @ApiProperty({ description: '코인 id' })
   id: number;
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    length: 30,
+    comment: '코인 이름',
+  })
   @ApiProperty({ description: '코인 이름' })
   name: string;
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    length: 10,
+    comment: '코인 티커',
+  })
   @ApiProperty({ description: '코인 티커' })
   ticker: string;
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    length: 10,
+    comment: '코인 심볼',
+  })
   @ApiProperty({ description: '코인 심볼' })
   symbol: string;
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    length: 255,
+    comment: '코인 이미지',
+  })
   @ApiProperty({ description: '코인 이미지' })
   image: string;
 
