@@ -9,6 +9,7 @@ import { ResponseMoneyRankDto } from 'src/ranking/dto/response.moneyRank.dto';
 import { PageNationDto } from '../community/dto/community-query.dto';
 import { SignInDto } from './dto/create-user.dto';
 import { ResponsePostsDto } from 'src/community/dto/response-post.dto';
+import { ResponseSignInDto } from './dto/response-user.dto';
 
 @Injectable()
 export class UserService {
@@ -81,9 +82,7 @@ export class UserService {
   /**
    * 소셜 로그인
    */
-  async socialLogin(
-    socialLoginDto: SignInDto,
-  ): Promise<{ accessToken: string; nickname: string }> {
+  async socialLogin(socialLoginDto: SignInDto): Promise<ResponseSignInDto> {
     // 유저가 없으면 생성
     // 닉네임이 같이 들어오면 신규가입
     if (socialLoginDto.nickname !== undefined) {
@@ -104,6 +103,8 @@ export class UserService {
     return {
       accessToken: this.jwtService.sign(payload),
       nickname: user.nickname,
+      id: user.id,
+      isSuccess: true,
     };
   }
 }

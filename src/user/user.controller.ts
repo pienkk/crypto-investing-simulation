@@ -66,9 +66,7 @@ export class UserController {
     description: '소셜 로그인 API',
   })
   @ApiOkResponse({ type: ResponseSignInDto })
-  socialLogin(
-    @Body() socialLoginDto: SignInDto,
-  ): Promise<{ accessToken: string; nickname: string }> {
+  socialLogin(@Body() socialLoginDto: SignInDto): Promise<ResponseSignInDto> {
     return this.userService.socialLogin(socialLoginDto);
   }
 }
