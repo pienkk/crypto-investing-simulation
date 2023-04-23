@@ -1,46 +1,47 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ResponseMoneyRankDto } from 'src/ranking/dto/response.moneyRank.dto';
 import { UserService } from './user.service';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { CurrentUser } from 'src/auth/security/auth.user.param';
 import { JwtPayload } from 'src/auth/jwt-payload.interface';
-import { Posts } from 'src/community/entity/post.entity';
 import { JwtAuthGuard } from 'src/auth/security/auth.guard';
-import { SignInDto } from './dto/create-user.dto';
+import { RequestSignInDto } from './dto/request-user.dto';
 import { ResponseSignInDto } from './dto/response-user.dto';
 import { ResponsePostsDto } from 'src/community/dto/response-post.dto';
+import { Try, createResponseForm } from 'src/types';
+import {
+  responseArraySchema,
+  responseBooleanSchema,
+  responseObjectSchema,
+} from 'src/types/swagger';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get() // 로그인 구현전 테스트
-  signIn(
-    @Query('userId') userId: number,
-  ): Promise<{ accessToken: string; userId: number }> {
-    return this.userService.signIn(userId);
-  }
-
   @Get('posts')
   @ApiOperation({
     summary: '삭제된 게시글 조회 API',
-    description: '내가 작성한 게시글 중 삭제된 게시글을 조회한다.',
+    description: '내가 작성한 게시글 중 삭제한 게시글을 조회한다.',
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @ApiOkResponse({ type: [Posts] })
-  getMyDeletePosts(
+  @ApiResponse({
+    status: 200,
+    schema: responseArraySchema(ResponsePostsDto),
+  })
+  async getMyDeletePosts(
     @CurrentUser() user: JwtPayload,
-  ): Promise<ResponsePostsDto[]> {
-    return this.userService.getMyDeletePosts(user.id);
+  ): Promise<Try<ResponsePostsDto[]>> {
+    const posts = await this.userService.getMyDeletePosts(user.id);
+
+    return createResponseForm(posts);
   }
 
   @Post('check')
@@ -48,16 +49,34 @@ export class UserController {
     summary: '닉네임 중복체크 API',
     description: '해당 닉네임이 중복되어 있는지 확인한다 (중복가입불가)',
   })
-  @ApiOkResponse({ description: '{ status: true }' })
-  checkNickname(
+  @ApiResponse({
+    status: 200,
+    schema: responseBooleanSchema(),
+  })
+  async checkNickname(
     @Body('nickname') nickname: string,
-  ): Promise<{ status: boolean }> {
-    return this.userService.checkNickname(nickname);
+  ): Promise<Try<boolean>> {
+    const isNickname = await this.userService.checkNickname(nickname);
+
+    return createResponseForm(isNickname);
   }
 
   @Get(':userId')
-  getUserInfo(@Param('userId') userId: number): Promise<ResponseMoneyRankDto> {
-    return this.userService.getUserInfo(userId);
+  @ApiOperation({
+    summary: '유저 정보 조회 API',
+    description: '유저ID에 해당하는 유저 정보를 조회한다.',
+  })
+  @ApiResponse({
+    status: 200,
+    schema: responseObjectSchema(ResponseMoneyRankDto),
+  })
+  @ApiParam({ name: 'userId', description: '유저 ID' })
+  async getUserInfo(
+    @Param('userId') userId: number,
+  ): Promise<Try<ResponseMoneyRankDto>> {
+    const user = await this.userService.getUserInfo(userId);
+
+    return createResponseForm(user);
   }
 
   @Post('social')
@@ -65,8 +84,13 @@ export class UserController {
     summary: '소셜 로그인 API',
     description: '소셜 로그인 API',
   })
-  @ApiOkResponse({ type: ResponseSignInDto })
-  socialLogin(@Body() socialLoginDto: SignInDto): Promise<ResponseSignInDto> {
-    return this.userService.socialLogin(socialLoginDto);
+  @ApiBody({ type: RequestSignInDto })
+  @ApiResponse({ status: 200, schema: responseObjectSchema(ResponseSignInDto) })
+  async socialLogin(
+    @Body() socialLoginDto: RequestSignInDto,
+  ): Promise<Try<ResponseSignInDto>> {
+    const user = await this.userService.socialLogin(socialLoginDto);
+
+    return createResponseForm(user);
   }
 }

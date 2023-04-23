@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 import { User } from '../entity/user.entity';
 
 /**
@@ -36,14 +36,10 @@ export class ResponseSignInDto {
   accessToken: string;
 
   @IsString()
-  @ApiProperty()
+  @ApiProperty({ description: '유저 닉네임', example: '기석' })
   nickname: string;
 
   @IsNumber()
-  @ApiProperty()
+  @ApiProperty({ description: '유저 id', example: 1 })
   id: number;
-
-  @IsBoolean()
-  @ApiProperty()
-  isSuccess: boolean;
 }

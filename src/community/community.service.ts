@@ -19,7 +19,6 @@ import { Likes } from './entity/like.entity';
 import { Repository, In, MoreThan, LessThan } from 'typeorm';
 import { UserRepository } from '../user/entity/user.repository';
 import { User } from '../user/entity/user.entity';
-import axios from 'axios';
 
 /**
  * 커뮤니티 비즈니스 로직
@@ -48,7 +47,15 @@ export class CommunityService {
 
     // 게시글이 존재하지 않거나, 공개 상태가 아닌경우
     if (!post || post.isPublished === false) {
-      throw new HttpException('Post not found', HttpStatus.NOT_FOUND);
+      // throw HttpException.createBody({
+      //   isSuccess: false,
+      //   code: 404,
+      //   message: 'Post not found',
+      // });
+      throw new HttpException(
+        '게시글을 찾을 수 없습니다.',
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     // 게시글을 작성한 유저가 아닐 경우
