@@ -1,4 +1,4 @@
-import { getSchemaPath } from '@nestjs/swagger';
+import { getSchemaPath, refs } from '@nestjs/swagger';
 import { SchemaObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 
 export const responseObjectSchema = (responseDto: any): SchemaObject => {
@@ -11,7 +11,8 @@ export const responseObjectSchema = (responseDto: any): SchemaObject => {
       },
       data: {
         type: 'object',
-        anyOf: [{ $ref: getSchemaPath(responseDto) }],
+        anyOf: refs(responseDto),
+        // anyOf: [{ type: getSchemaPath(responseDto) }],
       },
     },
   };

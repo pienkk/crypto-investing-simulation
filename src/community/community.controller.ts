@@ -28,6 +28,7 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
+  ApiExtraModels,
   ApiNotFoundResponse,
   ApiOperation,
   ApiResponse,
@@ -57,6 +58,7 @@ export class CommunityController {
     description:
       '게시글 목록을 검색한다. query parameter를 이용한 페이지네이션 지원',
   })
+  @ApiExtraModels(PostListDto)
   @ApiResponse({ status: 200, schema: responseObjectSchema(PostListDto) })
   // @ApiQuery({ type: QueryDto })
   async getPosts(@Query() pageNation: QueryDto): Promise<Try<PostListDto>> {
@@ -71,6 +73,7 @@ export class CommunityController {
     summary: '커뮤니티 상세글 조회 API',
     description: '입력받은 게시글을 조회하고 조회수를 증가시킨다.',
   })
+  @ApiExtraModels(ResponsePostDetailDto)
   @ApiResponse({
     status: 200,
     schema: responseObjectSchema(ResponsePostDetailDto),
@@ -93,6 +96,7 @@ export class CommunityController {
     summary: '커뮤니티 게시글 생성 API',
     description: '게시글을 생성하고 게시글 id를 반환한다.',
   })
+  @ApiExtraModels(ResponseCreatePostDto)
   @ApiResponse({
     status: 201,
     schema: responseObjectSchema(ResponseCreatePostDto),
@@ -175,6 +179,7 @@ export class CommunityController {
     summary: '유저 게시글 조회 API',
     description: '특정 유저가 작성한 게시글 리스트를 반환한다.',
   })
+  @ApiExtraModels(PostListDto)
   @ApiResponse({ status: 200, schema: responseObjectSchema(PostListDto) })
   @ApiNotFoundResponse({
     description: '유저가 존재하지 않을 때',
@@ -194,6 +199,7 @@ export class CommunityController {
     summary: '게시글 댓글 조회 API',
     description: '특정 게시글에 대한 댓글 리스트를 조회한다.',
   })
+  @ApiExtraModels(ResponseReplyDto)
   @ApiResponse({ status: 200, schema: responseArraySchema(ResponseReplyDto) })
   @ApiNotFoundResponse({
     description: '게시글이 존재하지 않을 때',
@@ -212,6 +218,7 @@ export class CommunityController {
     summary: '게시글 댓글 작성 API',
     description: '댓글을 생성하고 해당 게시글의 댓글 리스트를 반환한다.',
   })
+  @ApiExtraModels(ResponseReplyDto)
   @ApiResponse({ status: 201, schema: responseArraySchema(ResponseReplyDto) })
   @ApiNotFoundResponse({
     description: '게시글이 존재하지 않을 때',
@@ -294,6 +301,7 @@ export class CommunityController {
     summary: '유저 댓글 조회 API',
     description: '특정 유저가 작성한 댓글 리스트를 반환한다.',
   })
+  @ApiExtraModels(ReplyListDto)
   @ApiResponse({ status: 200, schema: responseObjectSchema(ReplyListDto) })
   @ApiNotFoundResponse({
     description: '유저가 존재하지 않을 때',
@@ -316,6 +324,7 @@ export class CommunityController {
     summary: '유저가 작성한 댓글의 게시글 조회 API',
     description: '유저가 작성한 댓글의 게시글 리스트를 반환한다.',
   })
+  @ApiExtraModels(PostListDto)
   @ApiResponse({ status: 200, schema: responseObjectSchema(PostListDto) })
   @ApiNotFoundResponse({
     description: '유저가 존재하지 않을 때',
@@ -339,6 +348,7 @@ export class CommunityController {
     description:
       '게시글에 좋아요/싫어요를 한 후 해당 게시글 상세 정보를 반환한다.',
   })
+  @ApiExtraModels(ResponsePostDetailDto)
   @ApiResponse({
     status: 201,
     schema: responseObjectSchema(ResponsePostDetailDto),
@@ -373,6 +383,7 @@ export class CommunityController {
     description:
       '게시글에 했던 좋아요/싫어요 기록을 삭제한 후 게시글 상세 정보를 반환한다.',
   })
+  @ApiExtraModels(ResponsePostDetailDto)
   @ApiResponse({
     status: 200,
     schema: responseObjectSchema(ResponsePostDetailDto),
@@ -397,6 +408,7 @@ export class CommunityController {
     summary: '유저 좋아요한 게시글 조회 API',
     description: '특정 유저가 좋아요 한 게시글 리스트를 조회한다.',
   })
+  @ApiExtraModels(PostListDto)
   @ApiResponse({ status: 200, schema: responseObjectSchema(PostListDto) })
   @ApiNotFoundResponse({
     description: '유저가 존재하지 않을 경우',

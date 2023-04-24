@@ -4,6 +4,7 @@ import { UserService } from './user.service';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiExtraModels,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -32,6 +33,7 @@ export class UserController {
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiExtraModels(ResponsePostsDto)
   @ApiResponse({
     status: 200,
     schema: responseArraySchema(ResponsePostsDto),
@@ -66,6 +68,7 @@ export class UserController {
     summary: '유저 정보 조회 API',
     description: '유저ID에 해당하는 유저 정보를 조회한다.',
   })
+  @ApiExtraModels(ResponseMoneyRankDto)
   @ApiResponse({
     status: 200,
     schema: responseObjectSchema(ResponseMoneyRankDto),
@@ -84,6 +87,7 @@ export class UserController {
     summary: '소셜 로그인 API',
     description: '소셜 로그인 API',
   })
+  @ApiExtraModels(ResponseSignInDto)
   @ApiBody({ type: RequestSignInDto })
   @ApiResponse({ status: 200, schema: responseObjectSchema(ResponseSignInDto) })
   async socialLogin(

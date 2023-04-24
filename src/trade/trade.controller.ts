@@ -10,9 +10,8 @@ import {
 import {
   ApiBearerAuth,
   ApiBody,
-  ApiCreatedResponse,
+  ApiExtraModels,
   ApiForbiddenResponse,
-  ApiOkResponse,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -28,6 +27,7 @@ import { TradeService } from './trade.service';
 import { Try, createResponseForm } from 'src/types';
 import {
   responseArraySchema,
+  responseBooleanSchema,
   responseErrorSchema,
   responseObjectSchema,
 } from 'src/types/swagger';
@@ -42,6 +42,7 @@ export class TradeController {
     summary: '거래 목록 조회 API',
     description: '코인 거래 목록을 조회한다.',
   })
+  @ApiExtraModels(ResponseTradeDto)
   @ApiResponse({ status: 200, schema: responseArraySchema(ResponseTradeDto) })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
@@ -58,6 +59,7 @@ export class TradeController {
     summary: '코인 정보, 유저 정보 조회 API',
     description: '코인 정보, 유저 소지금액, 코인 소지 개수를 조회한다.',
   })
+  @ApiExtraModels(ResponseAmountDto)
   @ApiResponse({ status: 200, schema: responseObjectSchema(ResponseAmountDto) })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
@@ -75,6 +77,7 @@ export class TradeController {
     summary: '코인 거래 API',
     description: '코인 구매, 판매 주문을 실행한다.',
   })
+  @ApiExtraModels(Trade)
   @ApiResponse({ status: 201, schema: responseObjectSchema(Trade) })
   @ApiBody({ type: CreateTradeDto })
   @ApiBearerAuth()
@@ -93,7 +96,7 @@ export class TradeController {
     summary: '코인 거래 취소 API',
     description: '코인 거래중인 내역을 취소한다.',
   })
-  @ApiResponse({ status: 204, schema: responseObjectSchema(Boolean) })
+  @ApiResponse({ status: 204, schema: responseBooleanSchema() })
   @ApiForbiddenResponse({
     description: '거래중이 아닌 주문을 취소하려고 할 때',
     schema: responseErrorSchema('거래중인 주문만 취소할 수 있습니다.'),

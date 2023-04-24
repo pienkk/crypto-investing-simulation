@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import {
-  ApiOkResponse,
+  ApiExtraModels,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -21,6 +21,7 @@ export class RankingController {
     summary: '소지금 랭킹 조회 API',
     description: '소지금 랭킹 순위의 유저 리스트를 반환한다.',
   })
+  @ApiExtraModels(ResponseMoneyRankDto)
   @ApiResponse({
     status: 200,
     schema: responseArraySchema(ResponseMoneyRankDto),
@@ -36,6 +37,7 @@ export class RankingController {
     summary: '수익금 랭킹 조회 API',
     description: '수익금 랭킹 순위의 유저 리스트를 반환한다.',
   })
+  @ApiExtraModels(ResponseIncomeRankDto)
   @ApiResponse({
     status: 200,
     schema: responseArraySchema(ResponseIncomeRankDto),
@@ -53,6 +55,7 @@ export class RankingController {
     summary: '수익률 랭킹 조회 API',
     description: '수익률 랭킹 순위의 유저 리스트를 반환한다.',
   })
+  @ApiExtraModels(ResponseIncomeRankDto)
   @ApiResponse({
     status: 200,
     schema: responseArraySchema(ResponseIncomeRankDto),

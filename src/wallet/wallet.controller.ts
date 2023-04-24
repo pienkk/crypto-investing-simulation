@@ -1,7 +1,7 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiOkResponse,
+  ApiExtraModels,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -24,6 +24,7 @@ export class WalletController {
     summary: '유저 지갑 정보 조회 API',
     description: '유저 소지금, 코인 갯수, 순 이익 조회',
   })
+  @ApiExtraModels(ResponseWallet)
   @ApiResponse({ status: 200, schema: responseObjectSchema(ResponseWallet) })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
