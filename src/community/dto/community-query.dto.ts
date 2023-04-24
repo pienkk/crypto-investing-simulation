@@ -19,7 +19,7 @@ export class PageNationDto {
 export class QueryDto extends PageNationDto {
   @IsNumber()
   @IsNotEmpty()
-  @ApiProperty({ description: '게시글 카테고리', required: true })
+  @ApiProperty({ description: '게시글 카테고리', required: true, example: 1 })
   readonly categoryId: number;
 
   @IsString()

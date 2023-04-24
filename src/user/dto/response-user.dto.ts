@@ -7,15 +7,18 @@ import { User } from '../entity/user.entity';
  */
 export class ResponseUserDto {
   @IsNumber()
-  @ApiProperty({ description: '유저 id' })
+  @ApiProperty({ description: '유저 id', example: 1 })
   id: number;
 
   @IsString()
-  @ApiProperty({ description: '유저 닉네임' })
+  @ApiProperty({ description: '유저 닉네임', example: '기석' })
   nickname: string;
 
   @IsString()
-  @ApiProperty({ description: '유저 소개' })
+  @ApiProperty({
+    description: '유저 소개',
+    example: '백엔드 개발자 장기석입니다.',
+  })
   description: string;
 
   static fromEntity(entity: User): ResponseUserDto {

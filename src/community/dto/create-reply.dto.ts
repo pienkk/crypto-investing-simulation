@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateReplyDto {
   @IsString()
@@ -22,4 +28,15 @@ export class UpdateReplyDto {
   @IsString()
   @ApiProperty({ description: '코멘트', required: true })
   readonly comment: string;
+}
+
+export class RequestDeleteReplyDto {
+  @IsNotEmpty()
+  @IsArray()
+  @ApiProperty({
+    description: '삭제할 댓글 id리스트',
+    required: true,
+    example: [1, 2],
+  })
+  readonly replyId: number[];
 }

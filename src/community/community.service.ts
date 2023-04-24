@@ -1,6 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreatePostDto } from './dto/create-post.dto';
-import { CreateReplyDto, UpdateReplyDto } from './dto/create-reply.dto';
+import { CreatePostDto, RequestDeletePostDto } from './dto/create-post.dto';
+import {
+  CreateReplyDto,
+  RequestDeleteReplyDto,
+  UpdateReplyDto,
+} from './dto/create-reply.dto';
 import { PageNationDto, QueryDto } from './dto/community-query.dto';
 import {
   PostListDto,
@@ -47,11 +51,6 @@ export class CommunityService {
 
     // 게시글이 존재하지 않거나, 공개 상태가 아닌경우
     if (!post || post.isPublished === false) {
-      // throw HttpException.createBody({
-      //   isSuccess: false,
-      //   code: 404,
-      //   message: 'Post not found',
-      // });
       throw new HttpException(
         '게시글을 찾을 수 없습니다.',
         HttpStatus.NOT_FOUND,
@@ -61,7 +60,7 @@ export class CommunityService {
     // 게시글을 작성한 유저가 아닐 경우
     if (userId && post.userId !== userId) {
       throw new HttpException(
-        "Don't have post permisson",
+        '게시글에 대한 권한이 없습니다.',
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -77,6 +76,7 @@ export class CommunityService {
       GetPostListsDto,
     );
 
+    // 반환값 형식에 맞게 변환
     const post = ResponsePostsDto.fromEntities(postList);
     const responsePosts: PostListDto = { post, number };
 
@@ -141,10 +141,12 @@ export class CommunityService {
   async createPost(
     createPostDto: CreatePostDto,
     userId: number,
-  ): Promise<Posts> {
+  ): Promise<{ postId: number }> {
     const post = this.postRepository.create({ ...createPostDto, userId });
 
-    return await this.postRepository.save(post);
+    const savedPost = await this.postRepository.save(post);
+
+    return { postId: savedPost.id };
   }
 
   /**
@@ -154,34 +156,32 @@ export class CommunityService {
     postId: number,
     userId: number,
     updatePostDto: UpdatePostDto,
-  ): Promise<{ status: boolean }> {
+  ): Promise<boolean> {
     await this.postValidation(postId, userId);
 
     // 게시글 수정
     const result = await this.postRepository.update(postId, updatePostDto);
 
-    // 수정된 갯수가 1개가 아닐 경우
-    if (result.affected !== 1) {
-      throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
-    }
-
-    return { status: true };
+    return result.affected === 1 ? true : false;
   }
 
   /**
    * 게시글 삭제
    */
   async removePost(
-    postIds: number[],
+    { postId }: RequestDeletePostDto,
     userId: number,
-  ): Promise<{ status: boolean }> {
+  ): Promise<boolean> {
     const posts = await this.postRepository.find({
-      where: { id: In(postIds), userId, isPublished: true },
+      where: { id: In(postId), userId, isPublished: true },
     });
 
     // 입력된 게시글의 권한이 없는 게시글이 있을 경우
-    if (posts.length !== postIds.length) {
-      throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
+    if (posts.length !== postId.length) {
+      throw new HttpException(
+        '삭제 요청된 게시글 중 권한이 없는 게시글이 존재합니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     await Promise.all(
@@ -190,7 +190,7 @@ export class CommunityService {
       }),
     );
 
-    return { status: true };
+    return true;
   }
 
   /**
@@ -209,7 +209,7 @@ export class CommunityService {
     );
 
     const postDto = ResponsePostsDto.fromEntities(posts);
-    return { post: postDto, number };
+    return { post: postDto, number } as PostListDto;
   }
 
   /**
@@ -273,15 +273,12 @@ export class CommunityService {
 
     // 댓글이 존재하지 않거나, soft delete 상태일 경우
     if (!reply || reply.deleted_at)
-      throw new HttpException(
-        'This reply does not exist',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException('댓글을 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
 
     // 해당 댓글을 작성한 유저가 아닐 경우,
     if (reply.userId !== userId) {
       throw new HttpException(
-        "Don't have reply permisson",
+        '댓글에 대한 권한이 없습니다.',
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -296,41 +293,36 @@ export class CommunityService {
     replyId: number,
     userId: number,
     updateReplyDto: UpdateReplyDto,
-  ): Promise<{ status: true }> {
+  ): Promise<boolean> {
     await this.replyValidation(replyId, userId);
 
     const result = await this.replyRepository.update(replyId, updateReplyDto);
 
-    // 수정된 갯수가 1개가 아닐 경우
-    if (result.affected !== 1) {
-      throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
-    }
-
-    return { status: true };
+    return result.affected === 1 ? true : false;
   }
 
   /**
    * 댓글 삭제
    */
   async removeReply(
-    replyIds: number[],
+    { replyId }: RequestDeleteReplyDto,
     userId: number,
-  ): Promise<{ status: boolean }> {
+  ): Promise<boolean> {
     const replies = await this.replyRepository.find({
-      where: { id: In(replyIds), userId },
+      where: { id: In(replyId), userId },
     });
-    if (replies.length !== replyIds.length) {
-      throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
+
+    // 입력된 댓글의 권한이 없는 댓글이 있을 경우
+    if (replies.length !== replyId.length) {
+      throw new HttpException(
+        '삭제 요청된 댓글 중 권한이 없는 댓글이 존재합니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
-    const removedReply = await this.replyRepository.softDelete(replyIds);
+    const removedReply = await this.replyRepository.softDelete(replyId);
 
-    // soft delete가 작동하지 않았을 경우
-    if (removedReply.affected !== replyIds.length) {
-      throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
-    }
-
-    return { status: true };
+    return removedReply.affected === replyId.length ? true : false;
   }
 
   /**
@@ -349,7 +341,10 @@ export class CommunityService {
 
     // 좋아요 / 싫어요를 같은 상태로 요청할 경우
     if (like?.isLike === isLike) {
-      throw new HttpException('Already Like', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        '이전과 같은 상태의 좋아요/싫어요 요청입니다.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     // 좋아요 이력이 있을경우 업데이트
@@ -378,15 +373,13 @@ export class CommunityService {
 
     // 좋아요 / 싫어요 이력이 없을 경우
     if (!like) {
-      throw new HttpException("Don't find Like", HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        '좋아요/싫어요 한 이력이 없습니다.',
+        HttpStatus.NOT_FOUND,
+      );
     }
 
-    const result = await this.likeRepository.delete(like);
-
-    // 이력이 삭제되지 않았을 경우
-    if (result.affected !== 1) {
-      throw new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN);
-    }
+    await this.likeRepository.delete(like);
 
     // 게시글 정보 반환
     return this.getPostDetail(postId, userId, true);
@@ -407,9 +400,9 @@ export class CommunityService {
       query.number,
     );
 
+    // 댓글 리스트 반환
     const replyDto = ResponseReplyDto.fromEntities(replies);
-
-    return { replies: replyDto, number };
+    return { replies: replyDto, number } as ReplyListDto;
   }
 
   /**
@@ -454,7 +447,7 @@ export class CommunityService {
     const user = await this.userRepository.findOneBy({ id: userId });
 
     if (!user) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      throw new HttpException('유저를 찾을 수 않습니다.', HttpStatus.NOT_FOUND);
     }
 
     return user;

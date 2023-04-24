@@ -50,3 +50,31 @@ export const responseArraySchema = (responseDto: any): SchemaObject => {
     },
   };
 };
+
+export const responseErrorSchema = (message: string): SchemaObject => {
+  return {
+    type: 'object',
+    properties: {
+      isSuccess: {
+        type: 'boolean',
+        example: false,
+      },
+      message: {
+        type: 'string',
+        example: message,
+      },
+      code: {
+        type: 'string',
+        example: 'HttpException',
+      },
+      path: {
+        type: 'string',
+        example: '/community',
+      },
+      timestamp: {
+        type: 'date',
+        example: '2021-03-01T00:00:00.000Z',
+      },
+    },
+  };
+};

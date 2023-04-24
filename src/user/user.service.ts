@@ -24,7 +24,10 @@ export class UserService {
     const user = await this.userRepository.findOneBy({ id: userId });
 
     if (!user) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        '유저가 존재하지 않습니다.',
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     return user;
@@ -87,7 +90,10 @@ export class UserService {
 
     // 가입되지 않은 유저일 경우 에러 반환
     if (!user) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        '유저가 존재하지 않습니다.',
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     const payload: JwtPayload = { id: user.id, email: user.email };
