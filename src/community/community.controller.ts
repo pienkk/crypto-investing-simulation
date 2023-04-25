@@ -10,20 +10,29 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommunityService } from './community.service';
-import { CreatePostDto, RequestDeletePostDto } from './dto/create-post.dto';
 import {
-  CreateReplyDto,
+  RequestCreatePostDto,
+  RequestDeletePostDto,
+  RequestUpdatePostDto,
+} from './dto/Request-post.dto';
+import {
+  RequestCreateReplyDto,
   RequestDeleteReplyDto,
-  UpdateReplyDto,
-} from './dto/create-reply.dto';
-import { PageNationDto, QueryDto } from './dto/community-query.dto';
+  RequestUpdateReplyDto,
+} from './dto/Request-reply.dto';
 import {
-  PostListDto,
+  PageNationDto,
+  RequestGetPostsQueryDto,
+} from './dto/Request-query.dto';
+import {
+  ResponsePostPageNationDto,
   ResponseCreatePostDto,
   ResponsePostDetailDto,
-} from './dto/response-post.dto';
-import { ReplyListDto, ResponseReplyDto } from './dto/response-reply.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
+} from './dto/Response-post.dto';
+import {
+  ResponseReplyPageNationDto,
+  ResponseReplyDto,
+} from './dto/Response-reply.dto';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -38,7 +47,7 @@ import { JwtAuthGuard } from 'src/auth/security/auth.guard';
 import { CurrentUser } from 'src/auth/security/auth.user.param';
 import { JwtPayload } from 'src/auth/jwt-payload.interface';
 import { OptionalJwtAuthGuard } from 'src/auth/security/optionalAuth.guard';
-import { CreateLikeDto } from './dto/create-like.dto';
+import { RequestCreateLikeDto } from './dto/Request-like.dto';
 import { createResponseForm, Try } from 'src/types';
 import {
   responseArraySchema,
@@ -58,10 +67,14 @@ export class CommunityController {
     description:
       '게시글 목록을 검색한다. query parameter를 이용한 페이지네이션 지원',
   })
-  @ApiExtraModels(PostListDto)
-  @ApiResponse({ status: 200, schema: responseObjectSchema(PostListDto) })
-  // @ApiQuery({ type: QueryDto })
-  async getPosts(@Query() pageNation: QueryDto): Promise<Try<PostListDto>> {
+  @ApiExtraModels(ResponsePostPageNationDto)
+  @ApiResponse({
+    status: 200,
+    schema: responseObjectSchema(ResponsePostPageNationDto),
+  })
+  async getPosts(
+    @Query() pageNation: RequestGetPostsQueryDto,
+  ): Promise<Try<ResponsePostPageNationDto>> {
     const posts = await this.communityService.getPosts(pageNation);
 
     return createResponseForm(posts);
@@ -101,12 +114,12 @@ export class CommunityController {
     status: 201,
     schema: responseObjectSchema(ResponseCreatePostDto),
   })
-  @ApiBody({ type: CreatePostDto })
+  @ApiBody({ type: RequestCreatePostDto })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async createPost(
     @CurrentUser() user: JwtPayload,
-    @Body() createPostDto: CreatePostDto,
+    @Body() createPostDto: RequestCreatePostDto,
   ): Promise<Try<ResponseCreatePostDto>> {
     const post = await this.communityService.createPost(createPostDto, user.id);
 
@@ -130,21 +143,21 @@ export class CommunityController {
     description: '게시글을 수정할 권한이 없을 때',
     schema: responseErrorSchema('게시글을 수정할 권한이 없습니다.'),
   })
-  @ApiBody({ type: UpdatePostDto })
+  @ApiBody({ type: RequestUpdatePostDto })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async updatePost(
     @CurrentUser() user: JwtPayload,
     @Param('postId') postId: number,
-    @Body() updatePostDto: UpdatePostDto,
+    @Body() updatePostDto: RequestUpdatePostDto,
   ): Promise<Try<boolean>> {
-    const post = await this.communityService.updatePost(
+    const boolean = await this.communityService.updatePost(
       postId,
       user.id,
       updatePostDto,
     );
 
-    return createResponseForm(post);
+    return createResponseForm(boolean);
   }
 
   @Delete('post')
@@ -166,12 +179,12 @@ export class CommunityController {
     @CurrentUser() user: JwtPayload,
     @Body() requestDeletePostDto: RequestDeletePostDto,
   ): Promise<Try<boolean>> {
-    const post = await this.communityService.removePost(
+    const boolean = await this.communityService.removePost(
       requestDeletePostDto,
       user.id,
     );
 
-    return createResponseForm(post);
+    return createResponseForm(boolean);
   }
 
   @Get('post/user/:userId')
@@ -179,8 +192,11 @@ export class CommunityController {
     summary: '유저 게시글 조회 API',
     description: '특정 유저가 작성한 게시글 리스트를 반환한다.',
   })
-  @ApiExtraModels(PostListDto)
-  @ApiResponse({ status: 200, schema: responseObjectSchema(PostListDto) })
+  @ApiExtraModels(ResponsePostPageNationDto)
+  @ApiResponse({
+    status: 200,
+    schema: responseObjectSchema(ResponsePostPageNationDto),
+  })
   @ApiNotFoundResponse({
     description: '유저가 존재하지 않을 때',
     schema: responseErrorSchema('유저를 찾을 수 없습니다.'),
@@ -188,7 +204,7 @@ export class CommunityController {
   async getUserPosts(
     @Param('userId') userId: number,
     @Query() pageNation: PageNationDto,
-  ): Promise<Try<PostListDto>> {
+  ): Promise<Try<ResponsePostPageNationDto>> {
     const posts = await this.communityService.getUserPosts(userId, pageNation);
 
     return createResponseForm(posts);
@@ -228,7 +244,7 @@ export class CommunityController {
   @UseGuards(JwtAuthGuard)
   async createReply(
     @CurrentUser() user: JwtPayload,
-    @Body() createReplyDto: CreateReplyDto,
+    @Body() createReplyDto: RequestCreateReplyDto,
   ): Promise<Try<ResponseReplyDto[]>> {
     const replies = await this.communityService.createReply(
       createReplyDto,
@@ -243,7 +259,7 @@ export class CommunityController {
     summary: '게시글 댓글 수정 API',
     description: '댓글을 수정하고 결과 값을 반환한다.',
   })
-  @ApiBody({ type: UpdateReplyDto })
+  @ApiBody({ type: RequestUpdateReplyDto })
   @ApiResponse({ status: 200, schema: responseBooleanSchema() })
   @ApiNotFoundResponse({
     description: '댓글이 존재하지 않을 때',
@@ -258,15 +274,15 @@ export class CommunityController {
   async updateReply(
     @CurrentUser() user: JwtPayload,
     @Param('replyId') replyId: number,
-    @Body() updateReplyDto: UpdateReplyDto,
+    @Body() updateReplyDto: RequestUpdateReplyDto,
   ): Promise<Try<boolean>> {
-    const reply = await this.communityService.updateReply(
+    const boolean = await this.communityService.updateReply(
       replyId,
       user.id,
       updateReplyDto,
     );
 
-    return createResponseForm(reply);
+    return createResponseForm(boolean);
   }
 
   @Delete('reply')
@@ -301,8 +317,11 @@ export class CommunityController {
     summary: '유저 댓글 조회 API',
     description: '특정 유저가 작성한 댓글 리스트를 반환한다.',
   })
-  @ApiExtraModels(ReplyListDto)
-  @ApiResponse({ status: 200, schema: responseObjectSchema(ReplyListDto) })
+  @ApiExtraModels(ResponseReplyPageNationDto)
+  @ApiResponse({
+    status: 200,
+    schema: responseObjectSchema(ResponseReplyPageNationDto),
+  })
   @ApiNotFoundResponse({
     description: '유저가 존재하지 않을 때',
     schema: responseErrorSchema('유저를 찾을 수 없습니다.'),
@@ -310,7 +329,7 @@ export class CommunityController {
   async getUserReplies(
     @Param('userId') userId: number,
     @Query() pageNation: PageNationDto,
-  ): Promise<Try<ReplyListDto>> {
+  ): Promise<Try<ResponseReplyPageNationDto>> {
     const replies = await this.communityService.getUserReplies(
       userId,
       pageNation,
@@ -324,16 +343,19 @@ export class CommunityController {
     summary: '유저가 작성한 댓글의 게시글 조회 API',
     description: '유저가 작성한 댓글의 게시글 리스트를 반환한다.',
   })
-  @ApiExtraModels(PostListDto)
-  @ApiResponse({ status: 200, schema: responseObjectSchema(PostListDto) })
+  @ApiExtraModels(ResponsePostPageNationDto)
+  @ApiResponse({
+    status: 200,
+    schema: responseObjectSchema(ResponsePostPageNationDto),
+  })
   @ApiNotFoundResponse({
     description: '유저가 존재하지 않을 때',
     schema: responseErrorSchema('유저를 찾을 수 없습니다.'),
   })
   async getUserReplyPosts(
     @Param('userId') userId: number,
-    @Query() pageNation: QueryDto,
-  ): Promise<Try<PostListDto>> {
+    @Query() pageNation: RequestGetPostsQueryDto,
+  ): Promise<Try<ResponsePostPageNationDto>> {
     const posts = await this.communityService.getUserReplyPosts(
       userId,
       pageNation,
@@ -366,7 +388,7 @@ export class CommunityController {
   async createLike(
     @CurrentUser() user: JwtPayload,
     @Param('postId') postId: number,
-    @Body() createLikeDto: CreateLikeDto,
+    @Body() createLikeDto: RequestCreateLikeDto,
   ): Promise<Try<ResponsePostDetailDto>> {
     const post = await this.communityService.createLike(
       user.id,
@@ -408,8 +430,11 @@ export class CommunityController {
     summary: '유저 좋아요한 게시글 조회 API',
     description: '특정 유저가 좋아요 한 게시글 리스트를 조회한다.',
   })
-  @ApiExtraModels(PostListDto)
-  @ApiResponse({ status: 200, schema: responseObjectSchema(PostListDto) })
+  @ApiExtraModels(ResponsePostPageNationDto)
+  @ApiResponse({
+    status: 200,
+    schema: responseObjectSchema(ResponsePostPageNationDto),
+  })
   @ApiNotFoundResponse({
     description: '유저가 존재하지 않을 경우',
     schema: responseErrorSchema('유저를 찾을 수 없습니다.'),
@@ -417,7 +442,7 @@ export class CommunityController {
   async getUserLikes(
     @Param('userId') userId: number,
     @Query() pageNation: PageNationDto,
-  ): Promise<Try<PostListDto>> {
+  ): Promise<Try<ResponsePostPageNationDto>> {
     const posts = await this.communityService.getUserLikes(userId, pageNation);
 
     return createResponseForm(posts);

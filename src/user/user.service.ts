@@ -6,7 +6,7 @@ import { PostRepository } from 'src/community/entity/post.repository';
 import { User } from './entity/user.entity';
 import { ResponseMoneyRankDto } from 'src/ranking/dto/response.moneyRank.dto';
 import { RequestSignInDto } from './dto/request-user.dto';
-import { ResponsePostsDto } from 'src/community/dto/response-post.dto';
+import { ResponsePostDto } from 'src/community/dto/Response-post.dto';
 import { ResponseSignInDto } from './dto/response-user.dto';
 
 @Injectable()
@@ -67,7 +67,7 @@ export class UserService {
       relations: ['user', 'replies'],
     });
 
-    const responsePosts = ResponsePostsDto.fromEntities(posts);
+    const responsePosts = ResponsePostDto.fromEntities(posts);
 
     return responsePosts;
   }

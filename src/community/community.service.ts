@@ -1,23 +1,32 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreatePostDto, RequestDeletePostDto } from './dto/create-post.dto';
 import {
-  CreateReplyDto,
+  RequestCreatePostDto,
+  RequestDeletePostDto,
+  RequestUpdatePostDto,
+} from './dto/Request-post.dto';
+import {
+  RequestCreateReplyDto,
   RequestDeleteReplyDto,
-  UpdateReplyDto,
-} from './dto/create-reply.dto';
-import { PageNationDto, QueryDto } from './dto/community-query.dto';
+  RequestUpdateReplyDto,
+} from './dto/Request-reply.dto';
 import {
-  PostListDto,
+  PageNationDto,
+  RequestGetPostsQueryDto,
+} from './dto/Request-query.dto';
+import {
+  ResponsePostPageNationDto,
   ResponsePostDetailDto,
-  ResponsePostsDto,
-} from './dto/response-post.dto';
-import { ReplyListDto, ResponseReplyDto } from './dto/response-reply.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
+  ResponsePostDto,
+} from './dto/Response-post.dto';
+import {
+  ResponseReplyPageNationDto,
+  ResponseReplyDto,
+} from './dto/Response-reply.dto';
 import { Posts } from './entity/post.entity';
 import { PostRepository } from './entity/post.repository';
 import { Reply } from './entity/reply.entity';
 import { ReplyRepository } from './entity/reply.repository';
-import { CreateLikeDto } from './dto/create-like.dto';
+import { RequestCreateLikeDto } from './dto/Request-like.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Likes } from './entity/like.entity';
 import { Repository, In, MoreThan, LessThan } from 'typeorm';
@@ -71,14 +80,16 @@ export class CommunityService {
   /**
    * 게시글 리스트 반환
    */
-  async getPosts(GetPostListsDto: QueryDto): Promise<PostListDto> {
+  async getPosts(
+    GetPostListsDto: RequestGetPostsQueryDto,
+  ): Promise<ResponsePostPageNationDto> {
     const [postList, number] = await this.postRepository.getPostLists(
       GetPostListsDto,
     );
 
     // 반환값 형식에 맞게 변환
-    const post = ResponsePostsDto.fromEntities(postList);
-    const responsePosts: PostListDto = { post, number };
+    const post = ResponsePostDto.fromEntities(postList);
+    const responsePosts: ResponsePostPageNationDto = { post, number };
 
     return responsePosts;
   }
@@ -139,7 +150,7 @@ export class CommunityService {
    * 게시글 생성
    */
   async createPost(
-    createPostDto: CreatePostDto,
+    createPostDto: RequestCreatePostDto,
     userId: number,
   ): Promise<{ postId: number }> {
     const post = this.postRepository.create({ ...createPostDto, userId });
@@ -155,7 +166,7 @@ export class CommunityService {
   async updatePost(
     postId: number,
     userId: number,
-    updatePostDto: UpdatePostDto,
+    updatePostDto: RequestUpdatePostDto,
   ): Promise<boolean> {
     await this.postValidation(postId, userId);
 
@@ -199,7 +210,7 @@ export class CommunityService {
   async getUserPosts(
     userId: number,
     query: PageNationDto,
-  ): Promise<PostListDto> {
+  ): Promise<ResponsePostPageNationDto> {
     await this.userValidation(userId);
 
     const [posts, number] = await this.postRepository.getUserPosts(
@@ -208,8 +219,8 @@ export class CommunityService {
       query.number,
     );
 
-    const postDto = ResponsePostsDto.fromEntities(posts);
-    return { post: postDto, number } as PostListDto;
+    const postDto = ResponsePostDto.fromEntities(posts);
+    return { post: postDto, number } as ResponsePostPageNationDto;
   }
 
   /**
@@ -227,7 +238,7 @@ export class CommunityService {
    * 댓글 생성 후 게시글에 해당하는 댓글 리스트 반환
    */
   async createReply(
-    createReplyDto: CreateReplyDto,
+    createReplyDto: RequestCreateReplyDto,
     userId: number,
   ): Promise<ResponseReplyDto[]> {
     const { postId } = createReplyDto;
@@ -292,7 +303,7 @@ export class CommunityService {
   async updateReply(
     replyId: number,
     userId: number,
-    updateReplyDto: UpdateReplyDto,
+    updateReplyDto: RequestUpdateReplyDto,
   ): Promise<boolean> {
     await this.replyValidation(replyId, userId);
 
@@ -331,7 +342,7 @@ export class CommunityService {
   async createLike(
     userId: number,
     postId: number,
-    { isLike }: CreateLikeDto,
+    { isLike }: RequestCreateLikeDto,
   ): Promise<ResponsePostDetailDto> {
     await this.postValidation(postId);
 
@@ -391,7 +402,7 @@ export class CommunityService {
   async getUserReplies(
     userId: number,
     query: PageNationDto,
-  ): Promise<ReplyListDto> {
+  ): Promise<ResponseReplyPageNationDto> {
     await this.userValidation(userId);
 
     const [replies, number] = await this.replyRepository.getReplyByUser(
@@ -402,7 +413,7 @@ export class CommunityService {
 
     // 댓글 리스트 반환
     const replyDto = ResponseReplyDto.fromEntities(replies);
-    return { replies: replyDto, number } as ReplyListDto;
+    return { replies: replyDto, number } as ResponseReplyPageNationDto;
   }
 
   /**
@@ -411,7 +422,7 @@ export class CommunityService {
   async getUserReplyPosts(
     userId: number,
     query: PageNationDto,
-  ): Promise<PostListDto> {
+  ): Promise<ResponsePostPageNationDto> {
     await this.userValidation(userId);
 
     const [posts, number] = await this.postRepository.getUserReplyByPosts(
@@ -420,7 +431,7 @@ export class CommunityService {
       query.number,
     );
 
-    const postDto = ResponsePostsDto.fromEntities(posts);
+    const postDto = ResponsePostDto.fromEntities(posts);
     return { post: postDto, number };
   }
 
@@ -430,7 +441,7 @@ export class CommunityService {
   async getUserLikes(
     userId: number,
     query: PageNationDto,
-  ): Promise<PostListDto> {
+  ): Promise<ResponsePostPageNationDto> {
     await this.userValidation(userId);
 
     const [posts, number] = await this.postRepository.getLikePosts(
@@ -439,7 +450,7 @@ export class CommunityService {
       query.number,
     );
 
-    const postDto = ResponsePostsDto.fromEntities(posts);
+    const postDto = ResponsePostDto.fromEntities(posts);
     return { post: postDto, number };
   }
 

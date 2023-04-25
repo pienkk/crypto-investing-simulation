@@ -1,6 +1,6 @@
 import { CustomRepository } from 'src/config/typeorm/typeorm-ex.decorator';
 import { Brackets, Repository } from 'typeorm';
-import { QueryDto } from '../dto/community-query.dto';
+import { RequestGetPostsQueryDto } from '../dto/Request-query.dto';
 import { Posts } from './post.entity';
 
 /**
@@ -17,7 +17,7 @@ export class PostRepository extends Repository<Posts> {
     categoryId,
     search,
     filter,
-  }: QueryDto): Promise<[Posts[], number]> {
+  }: RequestGetPostsQueryDto): Promise<[Posts[], number]> {
     const qb = this.createQueryBuilder('post')
       .innerJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.replies', 'reply')

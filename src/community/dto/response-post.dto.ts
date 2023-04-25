@@ -3,7 +3,7 @@ import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
 import { ResponseUserDto } from 'src/user/dto/response-user.dto';
 import { Likes } from '../entity/like.entity';
 import { Posts } from '../entity/post.entity';
-export class ResponsePostsDto {
+export class ResponsePostDto {
   @IsNumber()
   @ApiProperty({ description: '게시글 Id', example: 5 })
   id: number;
@@ -36,11 +36,11 @@ export class ResponsePostsDto {
   @ApiProperty({ description: '댓글 수', example: 10 })
   repliesCount: number;
 
-  @ApiProperty()
+  @ApiProperty({ type: ResponseUserDto })
   user: ResponseUserDto;
 
-  static fromEntity(entity: Posts): ResponsePostsDto {
-    const dto = new ResponsePostsDto();
+  static fromEntity(entity: Posts): ResponsePostDto {
+    const dto = new ResponsePostDto();
     dto.id = entity.id;
     dto.title = entity.title;
     dto.description = entity.description;
@@ -59,14 +59,14 @@ export class ResponsePostsDto {
     return dto;
   }
 
-  static fromEntities(entities: Posts[]): ResponsePostsDto[] {
-    return entities.map((entity) => ResponsePostsDto.fromEntity(entity));
+  static fromEntities(entities: Posts[]): ResponsePostDto[] {
+    return entities.map((entity) => ResponsePostDto.fromEntity(entity));
   }
 }
 
-export class PostListDto {
-  @ApiProperty({ type: [ResponsePostsDto] })
-  readonly post: ResponsePostsDto[];
+export class ResponsePostPageNationDto {
+  @ApiProperty({ type: [ResponsePostDto] })
+  readonly post: ResponsePostDto[];
 
   @IsNumber()
   @ApiProperty({ description: '총 게시글 수', example: 10 })

@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsDate, IsNumber, IsString } from 'class-validator';
 import { ResponseUserDto } from 'src/user/dto/response-user.dto';
 import { Reply } from '../entity/reply.entity';
-import { ResponsePostsDto } from './response-post.dto';
+import { ResponsePostDto } from './Response-post.dto';
 
 export class ResponseReplyDto {
   @IsNumber()
@@ -25,7 +25,7 @@ export class ResponseReplyDto {
   deleted_at: Date;
 
   @ApiProperty({ description: '게시글 정보' })
-  post: ResponsePostsDto;
+  post: ResponsePostDto;
 
   @ApiProperty({ description: '유저 정보' })
   user: ResponseUserDto;
@@ -42,7 +42,7 @@ export class ResponseReplyDto {
     dto.user = user;
 
     if (entity.post) {
-      const post = ResponsePostsDto.fromEntity(entity.post);
+      const post = ResponsePostDto.fromEntity(entity.post);
       dto.post = post;
     }
     return dto;
@@ -53,7 +53,7 @@ export class ResponseReplyDto {
   }
 }
 
-export class ReplyListDto {
+export class ResponseReplyPageNationDto {
   @ApiProperty({ type: [ResponseReplyDto] })
   readonly replies: ResponseReplyDto[];
 
@@ -61,26 +61,26 @@ export class ReplyListDto {
   readonly number: number;
 }
 
-export class ResponseUserReplyDto {
-  @IsNumber()
-  @ApiProperty({ description: '댓글id' })
-  id: number;
+// export class ResponseUserReplyDto {
+//   @IsNumber()
+//   @ApiProperty({ description: '댓글id' })
+//   id: number;
 
-  @IsString()
-  @ApiProperty({ description: '코멘트' })
-  comment: string;
+//   @IsString()
+//   @ApiProperty({ description: '코멘트' })
+//   comment: string;
 
-  @IsNumber()
-  @ApiProperty({ description: '부모 댓글id' })
-  replyId: number;
+//   @IsNumber()
+//   @ApiProperty({ description: '부모 댓글id' })
+//   replyId: number;
 
-  @IsDate()
-  @ApiProperty({ description: '작성 날짜' })
-  created_at: Date;
+//   @IsDate()
+//   @ApiProperty({ description: '작성 날짜' })
+//   created_at: Date;
 
-  @ApiProperty({ description: '게시글 정보' })
-  post: ResponsePostsDto;
+//   @ApiProperty({ description: '게시글 정보' })
+//   post: ResponsePostDto;
 
-  @ApiProperty({ description: '유저 정보' })
-  user: ResponseUserDto;
-}
+//   @ApiProperty({ description: '유저 정보' })
+//   user: ResponseUserDto;
+// }

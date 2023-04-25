@@ -14,7 +14,7 @@ import { JwtPayload } from 'src/auth/jwt-payload.interface';
 import { JwtAuthGuard } from 'src/auth/security/auth.guard';
 import { RequestSignInDto } from './dto/request-user.dto';
 import { ResponseSignInDto } from './dto/response-user.dto';
-import { ResponsePostsDto } from 'src/community/dto/response-post.dto';
+import { ResponsePostDto } from 'src/community/dto/Response-post.dto';
 import { Try, createResponseForm } from 'src/types';
 import {
   responseArraySchema,
@@ -33,14 +33,14 @@ export class UserController {
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @ApiExtraModels(ResponsePostsDto)
+  @ApiExtraModels(ResponsePostDto)
   @ApiResponse({
     status: 200,
-    schema: responseArraySchema(ResponsePostsDto),
+    schema: responseArraySchema(ResponsePostDto),
   })
   async getMyDeletePosts(
     @CurrentUser() user: JwtPayload,
-  ): Promise<Try<ResponsePostsDto[]>> {
+  ): Promise<Try<ResponsePostDto[]>> {
     const posts = await this.userService.getMyDeletePosts(user.id);
 
     return createResponseForm(posts);

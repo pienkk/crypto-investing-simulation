@@ -16,7 +16,7 @@ export class PageNationDto {
   })
   readonly number?: number = 10;
 }
-export class QueryDto extends PageNationDto {
+export class RequestGetPostsQueryDto extends PageNationDto {
   @IsNumber()
   @IsNotEmpty()
   @ApiProperty({ description: '게시글 카테고리', required: true, example: 1 })

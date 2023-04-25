@@ -7,26 +7,35 @@ import {
   IsString,
 } from 'class-validator';
 
-export class CreateReplyDto {
+export class RequestCreateReplyDto {
   @IsString()
   @IsNotEmpty()
-  @ApiProperty({ description: '코멘트', required: true })
+  @ApiProperty({
+    description: '코멘트',
+    required: true,
+    example: '댓글입니다.',
+  })
   readonly comment: string;
 
   @IsNumber()
   @IsNotEmpty()
-  @ApiProperty({ description: '포스트ID', required: true })
+  @ApiProperty({ description: '포스트Id', required: true, example: 20 })
   readonly postId: number;
 
   @IsNumber()
   @IsOptional()
-  @ApiProperty({ description: '원 댓글ID', required: false })
+  @ApiProperty({ description: '원 댓글ID', required: false, example: 5 })
   readonly replyId?: number;
 }
 
-export class UpdateReplyDto {
+export class RequestUpdateReplyDto {
   @IsString()
-  @ApiProperty({ description: '코멘트', required: true })
+  @IsNotEmpty()
+  @ApiProperty({
+    description: '코멘트',
+    required: true,
+    example: '수정 댓글입니다.',
+  })
   readonly comment: string;
 }
 
