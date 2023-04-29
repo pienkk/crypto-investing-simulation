@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { Posts } from './post.entity';
 
-@Entity()
+@Entity('likes')
 export class Likes {
   @PrimaryGeneratedColumn({
     type: 'int',

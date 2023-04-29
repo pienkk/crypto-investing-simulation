@@ -3,23 +3,23 @@ import { IsNumber, IsString } from 'class-validator';
 
 export class ResponseMoneyRankDto {
   @IsNumber()
-  @ApiProperty({ description: '유저 id' })
+  @ApiProperty({ description: '유저 id', example: 1 })
   private id: number;
 
   @IsString()
-  @ApiProperty({ description: '유저 닉네임' })
+  @ApiProperty({ description: '유저 닉네임', example: '기석' })
   private nickname: string;
 
   @IsNumber()
-  @ApiProperty({ description: '소지금 + 코인 가액의 합' })
+  @ApiProperty({ description: '소지금 + 코인 가액의 합', example: 100000 })
   private totalMoney: number;
 
   @IsNumber()
-  @ApiProperty({ description: '순 수익률' })
+  @ApiProperty({ description: '순 수익률', example: 10 })
   private yieldPercent: number;
 
   @IsNumber()
-  @ApiProperty({ description: '랭킹' })
+  @ApiProperty({ description: '랭킹', example: 1 })
   private ranking: number;
 
   static fromEntity(entity: MoneyRank): ResponseMoneyRankDto {

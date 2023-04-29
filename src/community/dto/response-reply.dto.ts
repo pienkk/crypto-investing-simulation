@@ -2,8 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsDate, IsNumber, IsString } from 'class-validator';
 import { ResponseUserDto } from 'src/user/dto/response-user.dto';
 import { Reply } from '../entity/reply.entity';
-import { ResponsePostsDto } from './response-post.dto';
+import { ResponsePostDto } from './Response-post.dto';
 
+// 댓글 응답 DTO
 export class ResponseReplyDto {
   @IsNumber()
   @ApiProperty({ description: '댓글id' })
@@ -25,7 +26,7 @@ export class ResponseReplyDto {
   deleted_at: Date;
 
   @ApiProperty({ description: '게시글 정보' })
-  post: ResponsePostsDto;
+  post: ResponsePostDto;
 
   @ApiProperty({ description: '유저 정보' })
   user: ResponseUserDto;
@@ -42,7 +43,7 @@ export class ResponseReplyDto {
     dto.user = user;
 
     if (entity.post) {
-      const post = ResponsePostsDto.fromEntity(entity.post);
+      const post = ResponsePostDto.fromEntity(entity.post);
       dto.post = post;
     }
     return dto;
@@ -53,34 +54,11 @@ export class ResponseReplyDto {
   }
 }
 
-export class ReplyListDto {
+// 댓글 페이지네이션 응답 DTO
+export class ResponseReplyPageNationDto {
   @ApiProperty({ type: [ResponseReplyDto] })
   readonly replies: ResponseReplyDto[];
 
   @ApiProperty({ description: '총 댓글 수' })
   readonly number: number;
-}
-
-export class ResponseUserReplyDto {
-  @IsNumber()
-  @ApiProperty({ description: '댓글id' })
-  id: number;
-
-  @IsString()
-  @ApiProperty({ description: '코멘트' })
-  comment: string;
-
-  @IsNumber()
-  @ApiProperty({ description: '부모 댓글id' })
-  replyId: number;
-
-  @IsDate()
-  @ApiProperty({ description: '작성 날짜' })
-  created_at: Date;
-
-  @ApiProperty({ description: '게시글 정보' })
-  post: ResponsePostsDto;
-
-  @ApiProperty({ description: '유저 정보' })
-  user: ResponseUserDto;
 }

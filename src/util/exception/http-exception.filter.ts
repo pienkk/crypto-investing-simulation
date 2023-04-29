@@ -19,7 +19,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = (exception as any).message.message;
     let code = 'HttpException';
-    console.log(exception.constructor);
 
     switch (exception.constructor) {
       case HttpException:
@@ -50,8 +49,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     const error = {
-      message,
-      statusCode: status,
+      isSuccess: false,
+      message: message,
+      // statusCode: status,
       code,
       path: request.url,
       timestamp: new Date(),

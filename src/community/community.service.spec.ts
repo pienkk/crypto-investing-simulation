@@ -4,15 +4,21 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from 'src/user/entity/user.entity';
 import { Repository } from 'typeorm';
 import { CommunityService } from './community.service';
-import { QueryDto } from './dto/community-query.dto';
-import { CreatePostDto } from './dto/create-post.dto';
-import { CreateReplyDto, UpdateReplyDto } from './dto/create-reply.dto';
+import { RequestGetPostsQueryDto } from './dto/Request-query.dto';
+import {
+  RequestCreatePostDto,
+  RequestUpdatePostDto,
+} from './dto/Request-post.dto';
+import {
+  RequestCreateReplyDto,
+  RequestUpdateReplyDto,
+} from './dto/Request-reply.dto';
 import {
   ResponsePostDetailDto,
-  ResponsePostsDto,
-} from './dto/response-post.dto';
-import { ResponseReplyDto } from './dto/response-reply.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
+  ResponsePostDto,
+  ResponsePostPageNationDto,
+} from './dto/Response-post.dto';
+import { ResponseReplyDto } from './dto/Response-reply.dto';
 import { Likes } from './entity/like.entity';
 import { Posts } from './entity/post.entity';
 import { PostRepository } from './entity/post.repository';
@@ -65,7 +71,7 @@ describe('CommunityService', () => {
   });
 
   describe('getPosts', () => {
-    const fetchQueryDto: QueryDto = { page: 1, categoryId: 1 };
+    const fetchQueryDto: RequestGetPostsQueryDto = { page: 1, categoryId: 1 };
     const user: User = User.of({
       id: 1,
       nickname: '피엔',
@@ -93,7 +99,7 @@ describe('CommunityService', () => {
         user,
       }),
     ];
-    const responsePosts: ResponsePostsDto[] = [
+    const responsePosts: ResponsePostDto[] = [
       {
         id: 1,
         title: '첫번째 게시글',
@@ -102,6 +108,7 @@ describe('CommunityService', () => {
         categoryId: 1,
         created_at: new Date('2023-02-01'),
         repliesCount: 0,
+        isPublished: true,
         user,
       },
       {
@@ -112,6 +119,7 @@ describe('CommunityService', () => {
         categoryId: 1,
         created_at: new Date('2023-02-01'),
         repliesCount: 0,
+        isPublished: true,
         user,
       },
     ];
@@ -220,12 +228,12 @@ describe('CommunityService', () => {
 
   describe('createPost', () => {
     const userId = 1;
-    const createPostDto: CreatePostDto = {
+    const RequestCreatePostDto: RequestCreatePostDto = {
       title: '첫 글',
       description: '첫번째 내용',
       categoryId: 1,
     };
-    const createPost = Posts.of({ ...createPostDto, userId });
+    const createPost = Posts.of({ ...RequestCreatePostDto, userId });
     const savedPost = Posts.of({
       ...createPost,
       id: 1,
@@ -242,10 +250,13 @@ describe('CommunityService', () => {
         .spyOn(postRepository, 'save')
         .mockResolvedValue(savedPost);
 
-      const result = await communityService.createPost(createPostDto, userId);
+      const result = await communityService.createPost(
+        RequestCreatePostDto,
+        userId,
+      );
 
       expect(postRepositoryCreateSpy).toHaveBeenCalledWith({
-        ...createPostDto,
+        ...RequestCreatePostDto,
         userId,
       });
       expect(postRepositorySaveSpy).toHaveBeenCalledWith(createPost);
@@ -256,7 +267,7 @@ describe('CommunityService', () => {
   describe('updatePost', () => {
     const postId = 1;
     const userId = 1;
-    const updatePostDto: UpdatePostDto = {
+    const updatePostDto: RequestUpdatePostDto = {
       title: '수정한 제목',
       description: '수정한 내용',
       categoryId: 1,
@@ -468,11 +479,11 @@ describe('CommunityService', () => {
       nickname: '피엔',
       description: '',
     });
-    const createReplyDto: CreateReplyDto = {
+    const createReplyDto: RequestCreateReplyDto = {
       comment: '두번째 댓글',
       postId: 1,
     };
-    const createReReplyDto: CreateReplyDto = {
+    const createReReplyDto: RequestCreateReplyDto = {
       ...createReplyDto,
       replyId: 1,
     };
@@ -628,7 +639,7 @@ describe('CommunityService', () => {
   describe('updateReply', () => {
     const replyId = 1;
     const userId = 1;
-    const updateReplyDto: UpdateReplyDto = {
+    const updateReplyDto: RequestUpdateReplyDto = {
       comment: '수정된 댓글',
     };
 
@@ -643,13 +654,13 @@ describe('CommunityService', () => {
       const result = await communityService.updateReply(
         replyId,
         userId,
-        updateReplyDto,
+        RequestUpdateReplyDto,
       );
 
       expect(replyRepositoryfindOneBySpy).toHaveBeenCalledWith({ id: replyId });
       expect(replyRepositoryUpdateSpy).toHaveBeenCalledWith(
         replyId,
-        updateReplyDto,
+        RequestUpdateReplyDto,
       );
       expect(result).toEqual({ status: true });
     });
@@ -663,7 +674,7 @@ describe('CommunityService', () => {
         return await communityService.updateReply(
           replyId,
           userId,
-          updateReplyDto,
+          RequestUpdateReplyDto,
         );
       };
       expect(result).rejects.toThrow(
@@ -680,7 +691,7 @@ describe('CommunityService', () => {
         return await communityService.updateReply(
           replyId,
           userId,
-          updateReplyDto,
+          RequestUpdateReplyDto,
         );
       };
       expect(result).rejects.toThrow(
@@ -700,7 +711,7 @@ describe('CommunityService', () => {
         return await communityService.updateReply(
           replyId,
           userId,
-          updateReplyDto,
+          RequestUpdateReplyDto,
         );
       };
 

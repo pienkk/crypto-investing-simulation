@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 import { User } from '../entity/user.entity';
 
 /**
@@ -7,22 +7,34 @@ import { User } from '../entity/user.entity';
  */
 export class ResponseUserDto {
   @IsNumber()
-  @ApiProperty({ description: '유저 id' })
+  @ApiProperty({ description: '유저 id', example: 1 })
   id: number;
 
   @IsString()
-  @ApiProperty({ description: '유저 닉네임' })
+  @ApiProperty({ description: '유저 닉네임', example: '기석' })
   nickname: string;
 
   @IsString()
-  @ApiProperty({ description: '유저 소개' })
+  @ApiProperty({
+    description: '유저 소개',
+    example: '백엔드 개발자 장기석입니다.',
+  })
   description: string;
+
+  @IsString()
+  @ApiProperty({
+    description: '유저 프로필 이미지',
+    example:
+      'https://velog.velcdn.com/images/kisuk623/profile/8dc78e6c-5544-4b8a-8ebe-1ecd9dcb14fd/image.png',
+  })
+  profileImage: string;
 
   static fromEntity(entity: User): ResponseUserDto {
     const dto = new ResponseUserDto();
     dto.id = entity.id;
     dto.nickname = entity.nickname;
     dto.description = entity.description;
+    dto.profileImage = entity.profileImage;
     return dto;
   }
 }
@@ -36,14 +48,10 @@ export class ResponseSignInDto {
   accessToken: string;
 
   @IsString()
-  @ApiProperty()
+  @ApiProperty({ description: '유저 닉네임', example: '기석' })
   nickname: string;
 
   @IsNumber()
-  @ApiProperty()
+  @ApiProperty({ description: '유저 id', example: 1 })
   id: number;
-
-  @IsBoolean()
-  @ApiProperty()
-  isSuccess: boolean;
 }

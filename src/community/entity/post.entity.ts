@@ -13,7 +13,7 @@ import {
 import { Likes } from './like.entity';
 import { Reply } from './reply.entity';
 
-@Entity()
+@Entity('posts')
 export class Posts {
   @PrimaryGeneratedColumn({
     type: 'int',

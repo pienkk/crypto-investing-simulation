@@ -48,7 +48,7 @@ export class TradeService {
 
     if (!tradeHistory) {
       throw new HttpException(
-        'You can only cancel the trade by processing',
+        '거래중인 주문만 취소할 수 있습니다.',
         HttpStatus.FORBIDDEN,
       );
     }

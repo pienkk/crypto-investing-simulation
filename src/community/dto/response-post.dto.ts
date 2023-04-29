@@ -3,29 +3,31 @@ import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
 import { ResponseUserDto } from 'src/user/dto/response-user.dto';
 import { Likes } from '../entity/like.entity';
 import { Posts } from '../entity/post.entity';
-export class ResponsePostsDto {
+
+// 게시글 응답 DTO
+export class ResponsePostDto {
   @IsNumber()
-  @ApiProperty({ description: '게시글 Id' })
+  @ApiProperty({ description: '게시글 Id', example: 5 })
   id: number;
 
   @IsString()
-  @ApiProperty({ description: '게시글 제목' })
+  @ApiProperty({ description: '게시글 제목', example: '게시글 제목' })
   title: string;
 
   @IsString()
-  @ApiProperty({ description: '게시글 내용' })
+  @ApiProperty({ description: '게시글 내용', example: '게시글 내용' })
   description: string;
 
   @IsNumber()
-  @ApiProperty({ description: '게시글 조회수' })
+  @ApiProperty({ description: '게시글 조회수', example: 200 })
   hits: number;
 
   @IsNumber()
-  @ApiProperty({ description: '카테고리 id' })
+  @ApiProperty({ description: '카테고리 id', example: 1 })
   categoryId: number;
 
   @IsBoolean()
-  @ApiProperty({ description: '게시글 공개 여부' })
+  @ApiProperty({ description: '게시글 공개 여부', example: true })
   isPublished: boolean;
 
   @IsDate()
@@ -33,14 +35,14 @@ export class ResponsePostsDto {
   created_at: Date;
 
   @IsNumber()
-  @ApiProperty({ description: '댓글 수' })
+  @ApiProperty({ description: '댓글 수', example: 10 })
   repliesCount: number;
 
-  @ApiProperty()
+  @ApiProperty({ type: ResponseUserDto })
   user: ResponseUserDto;
 
-  static fromEntity(entity: Posts): ResponsePostsDto {
-    const dto = new ResponsePostsDto();
+  static fromEntity(entity: Posts): ResponsePostDto {
+    const dto = new ResponsePostDto();
     dto.id = entity.id;
     dto.title = entity.title;
     dto.description = entity.description;
@@ -59,39 +61,41 @@ export class ResponsePostsDto {
     return dto;
   }
 
-  static fromEntities(entities: Posts[]): ResponsePostsDto[] {
-    return entities.map((entity) => ResponsePostsDto.fromEntity(entity));
+  static fromEntities(entities: Posts[]): ResponsePostDto[] {
+    return entities.map((entity) => ResponsePostDto.fromEntity(entity));
   }
 }
 
-export class PostListDto {
-  @ApiProperty({ type: [ResponsePostsDto] })
-  readonly post: ResponsePostsDto[];
+// 게시글 페이지네이션 응답 DTO
+export class ResponsePostPageNationDto {
+  @ApiProperty({ type: [ResponsePostDto] })
+  readonly post: ResponsePostDto[];
 
   @IsNumber()
-  @ApiProperty({ description: '총 게시글 수' })
+  @ApiProperty({ description: '총 게시글 수', example: 10 })
   readonly number: number;
 }
 
+// 게시글 상세 응답 DTO
 export class ResponsePostDetailDto {
   @IsNumber()
-  @ApiProperty({ description: '게시글 Id' })
+  @ApiProperty({ description: '게시글 Id', example: 6 })
   id: number;
 
   @IsString()
-  @ApiProperty({ description: '게시글 제목' })
+  @ApiProperty({ description: '게시글 제목', example: '게시글 제목' })
   title: string;
 
   @IsString()
-  @ApiProperty({ description: '게시글 내용' })
+  @ApiProperty({ description: '게시글 내용', example: '게시글 내용' })
   description: string;
 
   @IsNumber()
-  @ApiProperty({ description: '게시글 조회수' })
+  @ApiProperty({ description: '게시글 조회수', example: 50 })
   hits: number;
 
   @IsNumber()
-  @ApiProperty({ description: '카테고리 id' })
+  @ApiProperty({ description: '카테고리 id', example: 1 })
   categoryId: number;
 
   @IsDate()
@@ -99,36 +103,37 @@ export class ResponsePostDetailDto {
   created_at: Date;
 
   @IsNumber()
-  @ApiProperty({ description: '댓글 수' })
+  @ApiProperty({ description: '댓글 수', example: 20 })
   repliesCount: number;
 
   @IsBoolean()
   @ApiProperty({
     description: '내가 선택한 좋아요 타입 ex) true = 좋아요, false = 싫어요',
+    example: true,
   })
   isLike: boolean;
 
   @IsNumber()
-  @ApiProperty({ description: '좋아요 수' })
+  @ApiProperty({ description: '좋아요 수', example: 20 })
   likeCount: number;
 
   @IsBoolean()
-  @ApiProperty({ description: '게시글 공개 여부' })
+  @ApiProperty({ description: '게시글 공개 여부', example: true })
   isPublished: boolean;
 
   @IsNumber()
-  @ApiProperty({ description: '싫어요 수' })
+  @ApiProperty({ description: '싫어요 수', example: 10 })
   unLikeCount: number;
 
   @IsNumber()
-  @ApiProperty({ description: '이전 게시글 id' })
+  @ApiProperty({ description: '이전 게시글 id', example: 5 })
   prevPostId: number;
 
   @IsNumber()
-  @ApiProperty({ description: '다음 게시글 id' })
+  @ApiProperty({ description: '다음 게시글 id', example: 7 })
   nextPostId: number;
 
-  @ApiProperty()
+  @ApiProperty({ description: '게시글 작성자' })
   user: ResponseUserDto;
 
   static fromEntity(
@@ -166,4 +171,11 @@ export class ResponsePostDetailDto {
     entity.hits += 1;
     return entity;
   }
+}
+
+// 게시글 생성 응답 DTO
+export class ResponseCreatePostDto {
+  @IsNumber()
+  @ApiProperty({ description: '게시글 id', example: 6 })
+  postId: number;
 }
