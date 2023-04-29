@@ -18,43 +18,45 @@ export class PostRepository extends Repository<Posts> {
     search,
     filter,
   }: RequestGetPostsQueryDto): Promise<[Posts[], number]> {
-    const qb = this.createQueryBuilder('post')
+    const posts = this.createQueryBuilder('post')
       .innerJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.replies', 'reply')
       .where('post.isPublished = true');
 
-    // 게시글 제목, 내용 검색 시
-    if (search && filter === 'content') {
-      qb.andWhere(
-        new Brackets((qb) => {
-          qb.where('post.title LIKE :search', {
-            search: `%${search}%`,
-          }).orWhere('post.description LIKE :search', {
-            search: `%${search}%`,
-          });
-        }),
-      );
-    }
+    if (search) {
+      if (filter === 'content') {
+        // 게시글 제목, 내용 검색 시
+        posts.andWhere(
+          new Brackets((qb) => {
+            qb.where('post.title LIKE :search', {
+              search: `%${search}%`,
+            }).orWhere('post.description LIKE :search', {
+              search: `%${search}%`,
+            });
+          }),
+        );
+      }
 
-    // 댓글 내용 검색 시
-    if (search && filter === 'reply') {
-      qb.andWhere('reply.comment LIKE :search', { search: `%${search}%` });
-    }
+      // 댓글 내용 검색 시
+      if (filter === 'reply') {
+        posts.andWhere('reply.comment LIKE :search', { search: `%${search}%` });
+      }
 
-    // 유저 닉네임 검색 시
-    if (search && filter === 'nickname') {
-      qb.andWhere('user.nickname LIKE :nickname', {
-        nickname: `%${search}%`,
-      });
+      // 유저 닉네임 검색 시
+      if (filter === 'nickname') {
+        posts.andWhere('user.nickname LIKE :nickname', {
+          nickname: `%${search}%`,
+        });
+      }
     }
 
     // 카테고리 검색 시
     if (categoryId !== 0) {
-      qb.andWhere('post.categoryId = :categoryId ', { categoryId });
+      posts.andWhere('post.categoryId = :categoryId ', { categoryId });
     }
 
     // 페이지네이션
-    return await qb
+    return await posts
       .take(number)
       .skip((page - 1) * number)
       .orderBy('post.created_at', 'DESC')

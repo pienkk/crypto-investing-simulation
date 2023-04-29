@@ -4,6 +4,7 @@ import { ResponseUserDto } from 'src/user/dto/response-user.dto';
 import { Reply } from '../entity/reply.entity';
 import { ResponsePostDto } from './Response-post.dto';
 
+// 댓글 응답 DTO
 export class ResponseReplyDto {
   @IsNumber()
   @ApiProperty({ description: '댓글id' })
@@ -53,6 +54,7 @@ export class ResponseReplyDto {
   }
 }
 
+// 댓글 페이지네이션 응답 DTO
 export class ResponseReplyPageNationDto {
   @ApiProperty({ type: [ResponseReplyDto] })
   readonly replies: ResponseReplyDto[];
@@ -60,27 +62,3 @@ export class ResponseReplyPageNationDto {
   @ApiProperty({ description: '총 댓글 수' })
   readonly number: number;
 }
-
-// export class ResponseUserReplyDto {
-//   @IsNumber()
-//   @ApiProperty({ description: '댓글id' })
-//   id: number;
-
-//   @IsString()
-//   @ApiProperty({ description: '코멘트' })
-//   comment: string;
-
-//   @IsNumber()
-//   @ApiProperty({ description: '부모 댓글id' })
-//   replyId: number;
-
-//   @IsDate()
-//   @ApiProperty({ description: '작성 날짜' })
-//   created_at: Date;
-
-//   @ApiProperty({ description: '게시글 정보' })
-//   post: ResponsePostDto;
-
-//   @ApiProperty({ description: '유저 정보' })
-//   user: ResponseUserDto;
-// }

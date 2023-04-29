@@ -7,6 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 
+// 댓글 생성 요청 DTO
 export class RequestCreateReplyDto {
   @IsString()
   @IsNotEmpty()
@@ -28,6 +29,7 @@ export class RequestCreateReplyDto {
   readonly replyId?: number;
 }
 
+// 댓글 수정 요청 DTO
 export class RequestUpdateReplyDto {
   @IsString()
   @IsNotEmpty()
@@ -39,6 +41,7 @@ export class RequestUpdateReplyDto {
   readonly comment: string;
 }
 
+// 댓글 삭제 요청 DTO
 export class RequestDeleteReplyDto {
   @IsNotEmpty()
   @IsArray()

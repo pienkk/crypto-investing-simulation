@@ -7,6 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 
+// 게시글 생성 요청 DTO
 export class RequestCreatePostDto {
   @IsString()
   @IsNotEmpty()
@@ -24,6 +25,7 @@ export class RequestCreatePostDto {
   readonly categoryId: number;
 }
 
+// 게시글 수정 요청 DTO
 export class RequestUpdatePostDto {
   @IsString()
   @IsOptional()
@@ -49,6 +51,7 @@ export class RequestUpdatePostDto {
   readonly categoryId: number;
 }
 
+// 게시글 삭제 요청 DTO
 export class RequestDeletePostDto {
   @IsNotEmpty()
   @IsArray()

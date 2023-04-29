@@ -3,6 +3,8 @@ import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
 import { ResponseUserDto } from 'src/user/dto/response-user.dto';
 import { Likes } from '../entity/like.entity';
 import { Posts } from '../entity/post.entity';
+
+// 게시글 응답 DTO
 export class ResponsePostDto {
   @IsNumber()
   @ApiProperty({ description: '게시글 Id', example: 5 })
@@ -64,6 +66,7 @@ export class ResponsePostDto {
   }
 }
 
+// 게시글 페이지네이션 응답 DTO
 export class ResponsePostPageNationDto {
   @ApiProperty({ type: [ResponsePostDto] })
   readonly post: ResponsePostDto[];
@@ -73,6 +76,7 @@ export class ResponsePostPageNationDto {
   readonly number: number;
 }
 
+// 게시글 상세 응답 DTO
 export class ResponsePostDetailDto {
   @IsNumber()
   @ApiProperty({ description: '게시글 Id', example: 6 })
@@ -169,6 +173,7 @@ export class ResponsePostDetailDto {
   }
 }
 
+// 게시글 생성 응답 DTO
 export class ResponseCreatePostDto {
   @IsNumber()
   @ApiProperty({ description: '게시글 id', example: 6 })

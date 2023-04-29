@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
+// 검색 페이지네이션 DTO
 export class PageNationDto {
   @IsNumber()
   @IsOptional()
@@ -16,6 +17,8 @@ export class PageNationDto {
   })
   readonly number?: number = 10;
 }
+
+// 게시글 검색 요청 DTO
 export class RequestGetPostsQueryDto extends PageNationDto {
   @IsNumber()
   @IsNotEmpty()

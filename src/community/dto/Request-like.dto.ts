@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsNotEmpty } from 'class-validator';
 
+// 좋아요/싫어요 생성 요청 DTO
 export class RequestCreateLikeDto {
   @IsBoolean()
   @IsNotEmpty()

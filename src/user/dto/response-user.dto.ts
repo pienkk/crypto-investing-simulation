@@ -21,11 +21,20 @@ export class ResponseUserDto {
   })
   description: string;
 
+  @IsString()
+  @ApiProperty({
+    description: '유저 프로필 이미지',
+    example:
+      'https://velog.velcdn.com/images/kisuk623/profile/8dc78e6c-5544-4b8a-8ebe-1ecd9dcb14fd/image.png',
+  })
+  profileImage: string;
+
   static fromEntity(entity: User): ResponseUserDto {
     const dto = new ResponseUserDto();
     dto.id = entity.id;
     dto.nickname = entity.nickname;
     dto.description = entity.description;
+    dto.profileImage = entity.profileImage;
     return dto;
   }
 }
