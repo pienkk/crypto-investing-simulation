@@ -17,6 +17,7 @@ import {
   ResponsePostPageNationDto,
   ResponsePostDetailDto,
   ResponsePostDto,
+  ResponseCreatePostDto,
 } from './dto/Response-post.dto';
 import {
   ResponseReplyPageNationDto,
@@ -152,7 +153,7 @@ export class CommunityService {
   async createPost(
     createPostDto: RequestCreatePostDto,
     userId: number,
-  ): Promise<{ postId: number }> {
+  ): Promise<ResponseCreatePostDto> {
     const post = this.postRepository.create({ ...createPostDto, userId });
 
     const savedPost = await this.postRepository.save(post);
@@ -167,13 +168,13 @@ export class CommunityService {
     postId: number,
     userId: number,
     updatePostDto: RequestUpdatePostDto,
-  ): Promise<boolean> {
+  ): Promise<ResponseCreatePostDto> {
     await this.postValidation(postId, userId);
 
     // 게시글 수정
-    const result = await this.postRepository.update(postId, updatePostDto);
+    await this.postRepository.update(postId, updatePostDto);
 
-    return result.affected === 1 ? true : false;
+    return { postId: postId };
   }
 
   /**

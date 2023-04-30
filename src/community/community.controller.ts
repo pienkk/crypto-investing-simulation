@@ -131,9 +131,10 @@ export class CommunityController {
     summary: '커뮤니티 게시글 수정 API',
     description: '게시글을 수정하고 결과 값을 반환한다.',
   })
+  @ApiExtraModels(ResponseCreatePostDto)
   @ApiResponse({
     status: 200,
-    schema: responseBooleanSchema(),
+    schema: responseObjectSchema(ResponseCreatePostDto),
   })
   @ApiNotFoundResponse({
     description: '수정하고자 하는 게시글이 존재하지 않을 때',
@@ -150,14 +151,14 @@ export class CommunityController {
     @CurrentUser() user: JwtPayload,
     @Param('postId') postId: number,
     @Body() updatePostDto: RequestUpdatePostDto,
-  ): Promise<Try<boolean>> {
-    const boolean = await this.communityService.updatePost(
+  ): Promise<Try<ResponseCreatePostDto>> {
+    const responsePostId = await this.communityService.updatePost(
       postId,
       user.id,
       updatePostDto,
     );
 
-    return createResponseForm(boolean);
+    return createResponseForm(responsePostId);
   }
 
   @Delete('post')

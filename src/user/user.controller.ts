@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ResponseMoneyRankDto } from 'src/ranking/dto/response.moneyRank.dto';
 import { UserService } from './user.service';
 import {
@@ -13,14 +21,21 @@ import { CurrentUser } from 'src/auth/security/auth.user.param';
 import { JwtPayload } from 'src/auth/jwt-payload.interface';
 import { JwtAuthGuard } from 'src/auth/security/auth.guard';
 import { RequestSignInDto } from './dto/request-user.dto';
-import { ResponseSignInDto } from './dto/response-user.dto';
-import { ResponsePostDto } from 'src/community/dto/Response-post.dto';
+import {
+  ResponseSignInDto,
+  ResponseUserInfoDto,
+} from './dto/response-user.dto';
+import {
+  ResponsePostDto,
+  ResponsePostPageNationDto,
+} from 'src/community/dto/Response-post.dto';
 import { Try, createResponseForm } from 'src/types';
 import {
   responseArraySchema,
   responseBooleanSchema,
   responseObjectSchema,
 } from 'src/types/swagger';
+import { PageNationDto } from 'src/community/dto/Request-query.dto';
 
 @Controller('user')
 export class UserController {
@@ -33,15 +48,16 @@ export class UserController {
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @ApiExtraModels(ResponsePostDto)
+  @ApiExtraModels(ResponsePostPageNationDto)
   @ApiResponse({
     status: 200,
-    schema: responseArraySchema(ResponsePostDto),
+    schema: responseObjectSchema(ResponsePostPageNationDto),
   })
   async getMyDeletePosts(
     @CurrentUser() user: JwtPayload,
-  ): Promise<Try<ResponsePostDto[]>> {
-    const posts = await this.userService.getMyDeletePosts(user.id);
+    @Query() pageNation: PageNationDto,
+  ): Promise<Try<ResponsePostPageNationDto>> {
+    const posts = await this.userService.getMyDeletePosts(user.id, pageNation);
 
     return createResponseForm(posts);
   }
@@ -68,15 +84,15 @@ export class UserController {
     summary: '유저 정보 조회 API',
     description: '유저ID에 해당하는 유저 정보를 조회한다.',
   })
-  @ApiExtraModels(ResponseMoneyRankDto)
+  @ApiExtraModels(ResponseUserInfoDto)
   @ApiResponse({
     status: 200,
-    schema: responseObjectSchema(ResponseMoneyRankDto),
+    schema: responseObjectSchema(ResponseUserInfoDto),
   })
   @ApiParam({ name: 'userId', description: '유저 ID' })
   async getUserInfo(
     @Param('userId') userId: number,
-  ): Promise<Try<ResponseMoneyRankDto>> {
+  ): Promise<Try<ResponseUserInfoDto>> {
     const user = await this.userService.getUserInfo(userId);
 
     return createResponseForm(user);

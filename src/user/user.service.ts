@@ -6,8 +6,15 @@ import { PostRepository } from 'src/community/entity/post.repository';
 import { User } from './entity/user.entity';
 import { ResponseMoneyRankDto } from 'src/ranking/dto/response.moneyRank.dto';
 import { RequestSignInDto } from './dto/request-user.dto';
-import { ResponsePostDto } from 'src/community/dto/Response-post.dto';
-import { ResponseSignInDto } from './dto/response-user.dto';
+import {
+  ResponsePostDto,
+  ResponsePostPageNationDto,
+} from 'src/community/dto/Response-post.dto';
+import {
+  ResponseSignInDto,
+  ResponseUserInfoDto,
+} from './dto/response-user.dto';
+import { PageNationDto } from 'src/community/dto/Request-query.dto';
 
 @Injectable()
 export class UserService {
@@ -36,12 +43,16 @@ export class UserService {
   /**
    * 유저 정보 조회
    */
-  async getUserInfo(userId: number): Promise<ResponseMoneyRankDto> {
+  async getUserInfo(userId: number): Promise<ResponseUserInfoDto> {
     await this.userValidation(userId);
 
+    const userInfo = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['posts'],
+    });
     const userRank = await this.userRepository.getRankByUser(userId);
 
-    return ResponseMoneyRankDto.fromEntity(userRank);
+    return ResponseUserInfoDto.fromEntity(userInfo, userRank);
   }
 
   /**
@@ -56,18 +67,27 @@ export class UserService {
   /**
    * 본인의 숨김 게시글 조회
    */
-  async getMyDeletePosts(userId: number) {
+  async getMyDeletePosts(
+    userId: number,
+    query: PageNationDto,
+  ): Promise<ResponsePostPageNationDto> {
     await this.userValidation(userId);
 
-    const posts = await this.postRepository.find({
+    const [posts, number] = await this.postRepository.findAndCount({
       where: {
         userId,
         isPublished: false,
       },
       relations: ['user', 'replies'],
+      take: query.number,
+      skip: (query.page - 1) * query.number,
     });
 
-    const responsePosts = ResponsePostDto.fromEntities(posts);
+    const postsToEntity = ResponsePostDto.fromEntities(posts);
+    const responsePosts: ResponsePostPageNationDto = {
+      post: postsToEntity,
+      number,
+    };
 
     return responsePosts;
   }
