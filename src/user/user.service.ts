@@ -4,7 +4,6 @@ import { UserRepository } from './entity/user.repository';
 import { JwtPayload } from 'src/auth/jwt-payload.interface';
 import { PostRepository } from 'src/community/entity/post.repository';
 import { User } from './entity/user.entity';
-import { ResponseMoneyRankDto } from 'src/ranking/dto/response.moneyRank.dto';
 import { RequestSignInDto } from './dto/request-user.dto';
 import {
   ResponsePostDto,
