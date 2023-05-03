@@ -25,16 +25,9 @@ import {
   ResponseSignInDto,
   ResponseUserInfoDto,
 } from './dto/response-user.dto';
-import {
-  ResponsePostDto,
-  ResponsePostPageNationDto,
-} from 'src/community/dto/Response-post.dto';
+import { ResponsePostPageNationDto } from 'src/community/dto/Response-post.dto';
 import { Try, createResponseForm } from 'src/types';
-import {
-  responseArraySchema,
-  responseBooleanSchema,
-  responseObjectSchema,
-} from 'src/types/swagger';
+import { responseBooleanSchema, responseObjectSchema } from 'src/types/swagger';
 import { PageNationDto } from 'src/community/dto/Request-query.dto';
 
 @Controller('user')

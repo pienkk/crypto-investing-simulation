@@ -47,7 +47,7 @@ export class UserService {
 
     const userInfo = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['posts'],
+      relations: ['posts', 'replies'],
     });
     const userRank = await this.userRepository.getRankByUser(userId);
 

@@ -20,19 +20,24 @@ import {
   ResponseCreatePostDto,
 } from './dto/Response-post.dto';
 import {
-  ResponseReplyPageNationDto,
   ResponseReplyDto,
+  ResponseReplyByUserDto,
+  ResponseReplyByUserPageNationDto,
 } from './dto/Response-reply.dto';
 import { Posts } from './entity/post.entity';
 import { PostRepository } from './entity/post.repository';
 import { Reply } from './entity/reply.entity';
 import { ReplyRepository } from './entity/reply.repository';
-import { RequestCreateLikeDto } from './dto/Request-like.dto';
+import {
+  RequestCreateLikeDto,
+  RequestDeleteLikeDto,
+} from './dto/Request-like.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Likes } from './entity/like.entity';
 import { Repository, In, MoreThan, LessThan } from 'typeorm';
 import { UserRepository } from '../user/entity/user.repository';
 import { User } from '../user/entity/user.entity';
+import { ResponseDeleteLikesDto } from './dto/Response-like-dto';
 
 /**
  * 커뮤니티 비즈니스 로직
@@ -372,6 +377,30 @@ export class CommunityService {
   }
 
   /**
+   * 좋아요 / 싫어요 다중 삭제
+   */
+  async deleteLikeByPosts(
+    userId: number,
+    { postId }: RequestDeleteLikeDto,
+  ): Promise<ResponseDeleteLikesDto> {
+    const likes = await this.likeRepository.find({
+      where: { userId, postId: In(postId) },
+    });
+
+    // 좋아요 / 싫어요 이력이 없을 경우
+    if (likes.length !== postId.length) {
+      throw new HttpException(
+        '좋아요/싫어요를 하지 않은 게시글이 포함되어 있습니다.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    await this.likeRepository.delete(postId);
+
+    return { postId };
+  }
+
+  /**
    * 좋아요 / 싫어요 삭제, 게시글 상세 정보 반환
    */
   async deleteLike(
@@ -403,7 +432,7 @@ export class CommunityService {
   async getUserReplies(
     userId: number,
     query: PageNationDto,
-  ): Promise<ResponseReplyPageNationDto> {
+  ): Promise<ResponseReplyByUserPageNationDto> {
     await this.userValidation(userId);
 
     const [replies, number] = await this.replyRepository.getReplyByUser(
@@ -413,8 +442,8 @@ export class CommunityService {
     );
 
     // 댓글 리스트 반환
-    const replyDto = ResponseReplyDto.fromEntities(replies);
-    return { replies: replyDto, number } as ResponseReplyPageNationDto;
+    const replyDto = ResponseReplyByUserDto.fromEntities(replies);
+    return { replies: replyDto, number } as ResponseReplyByUserPageNationDto;
   }
 
   /**

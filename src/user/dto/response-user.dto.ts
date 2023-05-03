@@ -95,6 +95,10 @@ export class ResponseUserInfoDto {
   @ApiProperty({ description: '작성글 갯수', example: 1000 })
   publishedPost: number;
 
+  @IsNumber()
+  @ApiProperty({ description: '작성 댓글 갯수', example: 1000 })
+  publishedReply: number;
+
   static fromEntity(
     entity: User,
     userRankInfo: ExistingUserRank,
@@ -109,6 +113,9 @@ export class ResponseUserInfoDto {
 
     if (entity.posts && entity.posts.length !== 0) {
       dto.publishedPost = entity.posts.length;
+    }
+    if (entity.replies && entity.replies.length !== 0) {
+      dto.publishedReply = entity.replies.length;
     }
 
     return dto;
