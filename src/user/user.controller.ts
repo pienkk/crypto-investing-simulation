@@ -7,7 +7,6 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ResponseMoneyRankDto } from 'src/ranking/dto/response.moneyRank.dto';
 import { UserService } from './user.service';
 import {
   ApiBearerAuth,

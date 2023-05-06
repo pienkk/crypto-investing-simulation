@@ -395,7 +395,7 @@ export class CommunityService {
       );
     }
 
-    await this.likeRepository.delete(postId);
+    await this.likeRepository.remove(likes);
 
     return { postId };
   }
