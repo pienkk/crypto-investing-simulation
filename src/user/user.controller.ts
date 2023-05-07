@@ -22,6 +22,7 @@ import { JwtAuthGuard } from 'src/auth/security/auth.guard';
 import { RequestSignInDto } from './dto/request-user.dto';
 import {
   ResponseSignInDto,
+  ResponseUserCountDto,
   ResponseUserInfoDto,
 } from './dto/response-user.dto';
 import { ResponsePostPageNationDto } from 'src/community/dto/Response-post.dto';
@@ -104,5 +105,21 @@ export class UserController {
     const user = await this.userService.socialLogin(socialLoginDto);
 
     return createResponseForm(user);
+  }
+
+  @Get('count')
+  @ApiOperation({
+    summary: '유저 수 조회 API',
+    description: '현재 가입되어 있는 유저수를 조회한다.',
+  })
+  @ApiExtraModels(ResponseUserCountDto)
+  @ApiResponse({
+    status: 200,
+    schema: responseObjectSchema(ResponseUserCountDto),
+  })
+  async getUserCount(): Promise<Try<ResponseUserCountDto>> {
+    const count = await this.userService.getUserCount();
+
+    return createResponseForm(count);
   }
 }

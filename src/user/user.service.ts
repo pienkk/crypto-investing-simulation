@@ -11,6 +11,7 @@ import {
 } from 'src/community/dto/Response-post.dto';
 import {
   ResponseSignInDto,
+  ResponseUserCountDto,
   ResponseUserInfoDto,
 } from './dto/response-user.dto';
 import { PageNationDto } from 'src/community/dto/Request-query.dto';
@@ -122,5 +123,14 @@ export class UserService {
       nickname: user.nickname,
       id: user.id,
     };
+  }
+
+  /**
+   * 유저수 조회
+   */
+  async getUserCount(): Promise<ResponseUserCountDto> {
+    const userCount = await this.userRepository.count();
+
+    return { count: userCount };
   }
 }

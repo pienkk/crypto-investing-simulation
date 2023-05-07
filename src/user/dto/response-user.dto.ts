@@ -121,3 +121,12 @@ export class ResponseUserInfoDto {
     return dto;
   }
 }
+
+/**
+ * 유저수 반환 DTO
+ */
+export class ResponseUserCountDto {
+  @IsNumber()
+  @ApiProperty({ description: '유저 수', example: 1 })
+  count: number;
+}
