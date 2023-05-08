@@ -29,7 +29,9 @@ export class RequestCreateReplyDto {
   readonly replyId?: number;
 }
 
-// 댓글 수정 요청 DTO
+/**
+ * 댓글 수정 요청 DTO
+ */
 export class RequestUpdateReplyDto {
   @IsString()
   @IsNotEmpty()
@@ -41,7 +43,9 @@ export class RequestUpdateReplyDto {
   readonly comment: string;
 }
 
-// 댓글 삭제 요청 DTO
+/**
+ * 댓글 삭제 요청 DTO
+ */
 export class RequestDeleteReplyDto {
   @IsNotEmpty()
   @IsArray()

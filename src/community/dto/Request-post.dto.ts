@@ -51,7 +51,9 @@ export class RequestUpdatePostDto {
   readonly categoryId: number;
 }
 
-// 게시글 삭제 요청 DTO
+/**
+ * 게시글 삭제 요청 DTO
+ */
 export class RequestDeletePostDto {
   @IsNotEmpty()
   @IsArray()

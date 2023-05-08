@@ -15,6 +15,7 @@ export class RequestCreateLikeDto {
 /**
  * 좋아요/싫어요 삭제 요청 DTO
  */
+
 export class RequestDeleteLikeDto {
   @IsArray()
   @IsNumber({ allowNaN: false }, { each: true })
