@@ -45,6 +45,7 @@ export class RequestUpdateReplyDto {
 export class RequestDeleteReplyDto {
   @IsNotEmpty()
   @IsArray()
+  @IsNumber({ allowNaN: false }, { each: true })
   @ApiProperty({
     description: '삭제할 댓글 id리스트',
     required: true,

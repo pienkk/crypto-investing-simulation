@@ -55,6 +55,7 @@ export class RequestUpdatePostDto {
 export class RequestDeletePostDto {
   @IsNotEmpty()
   @IsArray()
+  @IsNumber({ allowNaN: false }, { each: true })
   @ApiProperty({
     description: '삭제할 게시글 id 리스트',
     required: true,

@@ -14,25 +14,25 @@ import {
   RequestCreatePostDto,
   RequestDeletePostDto,
   RequestUpdatePostDto,
-} from './dto/Request-post.dto';
+} from './dto/request-post.dto';
 import {
   RequestCreateReplyDto,
   RequestDeleteReplyDto,
   RequestUpdateReplyDto,
-} from './dto/Request-reply.dto';
+} from './dto/request-reply.dto';
 import {
   PageNationDto,
   RequestGetPostsQueryDto,
-} from './dto/Request-query.dto';
+} from './dto/request-query.dto';
 import {
   ResponsePostPageNationDto,
   ResponseCreatePostDto,
   ResponsePostDetailDto,
-} from './dto/Response-post.dto';
+} from './dto/response-post.dto';
 import {
   ResponseReplyByUserPageNationDto,
   ResponseReplyDto,
-} from './dto/Response-reply.dto';
+} from './dto/response-reply.dto';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -50,7 +50,7 @@ import { OptionalJwtAuthGuard } from 'src/auth/security/optionalAuth.guard';
 import {
   RequestCreateLikeDto,
   RequestDeleteLikeDto,
-} from './dto/Request-like.dto';
+} from './dto/request-like.dto';
 import { createResponseForm, Try } from 'src/types';
 import {
   responseArraySchema,
@@ -58,7 +58,7 @@ import {
   responseErrorSchema,
   responseObjectSchema,
 } from 'src/types/swagger';
-import { ResponseDeleteLikesDto } from './dto/Response-like-dto';
+import { ResponseDeleteLikesDto } from './dto/response-like-dto';
 
 @ApiTags('Community')
 @Controller('community')

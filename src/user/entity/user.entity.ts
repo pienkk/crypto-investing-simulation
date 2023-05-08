@@ -4,7 +4,15 @@ import { Reply } from 'src/community/entity/reply.entity';
 import { ColumnTransform } from 'src/config/database/columnTrans';
 import { Trade } from 'src/trade/entity/trade.entity';
 import { Wallet } from 'src/wallet/entity/wallet.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('users')
 export class User {
@@ -50,6 +58,29 @@ export class User {
     name: 'profile_image',
   })
   profileImage: string;
+
+  @CreateDateColumn({
+    type: 'timestamp',
+    name: 'created_at',
+    comment: '생성일',
+  })
+  createdAt: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    name: 'updated_at',
+    comment: '수정일',
+    nullable: true,
+  })
+  updatedAt: Date;
+
+  @DeleteDateColumn({
+    type: 'timestamp',
+    name: 'deleted_at',
+    comment: '삭제일',
+    nullable: true,
+  })
+  deletedAt: Date;
 
   @OneToMany(() => Posts, (post) => post.user)
   posts: Posts[];

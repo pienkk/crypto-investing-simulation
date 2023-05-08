@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsNotEmpty } from 'class-validator';
+import { IsArray, IsBoolean, IsNotEmpty, IsNumber } from 'class-validator';
 
 // 좋아요/싫어요 생성 요청 DTO
 export class RequestCreateLikeDto {
@@ -17,6 +17,7 @@ export class RequestCreateLikeDto {
  */
 export class RequestDeleteLikeDto {
   @IsArray()
+  @IsNumber({ allowNaN: false }, { each: true })
   @IsNotEmpty()
   @ApiProperty({
     description: '좋아요 삭제할 게시글 id 리스트',

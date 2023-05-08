@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsDate, IsNumber, IsString } from 'class-validator';
 import { ResponseUserDto } from 'src/user/dto/response-user.dto';
 import { Reply } from '../entity/reply.entity';
-import { ResponsePostDto } from './Response-post.dto';
+import { ResponsePostDto } from './response-post.dto';
 
 // 댓글 응답 DTO
 export class ResponseReplyDto {

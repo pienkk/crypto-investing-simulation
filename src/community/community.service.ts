@@ -3,27 +3,27 @@ import {
   RequestCreatePostDto,
   RequestDeletePostDto,
   RequestUpdatePostDto,
-} from './dto/Request-post.dto';
+} from './dto/request-post.dto';
 import {
   RequestCreateReplyDto,
   RequestDeleteReplyDto,
   RequestUpdateReplyDto,
-} from './dto/Request-reply.dto';
+} from './dto/request-reply.dto';
 import {
   PageNationDto,
   RequestGetPostsQueryDto,
-} from './dto/Request-query.dto';
+} from './dto/request-query.dto';
 import {
   ResponsePostPageNationDto,
   ResponsePostDetailDto,
   ResponsePostDto,
   ResponseCreatePostDto,
-} from './dto/Response-post.dto';
+} from './dto/response-post.dto';
 import {
   ResponseReplyDto,
   ResponseReplyByUserDto,
   ResponseReplyByUserPageNationDto,
-} from './dto/Response-reply.dto';
+} from './dto/response-reply.dto';
 import { Posts } from './entity/post.entity';
 import { PostRepository } from './entity/post.repository';
 import { Reply } from './entity/reply.entity';
@@ -31,13 +31,13 @@ import { ReplyRepository } from './entity/reply.repository';
 import {
   RequestCreateLikeDto,
   RequestDeleteLikeDto,
-} from './dto/Request-like.dto';
+} from './dto/request-like.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Likes } from './entity/like.entity';
 import { Repository, In, MoreThan, LessThan } from 'typeorm';
 import { UserRepository } from '../user/entity/user.repository';
 import { User } from '../user/entity/user.entity';
-import { ResponseDeleteLikesDto } from './dto/Response-like-dto';
+import { ResponseDeleteLikesDto } from './dto/response-like-dto';
 
 /**
  * 커뮤니티 비즈니스 로직
@@ -116,21 +116,25 @@ export class CommunityService {
       relations: ['user', 'replies'],
     });
 
-    // 좋아요 여부, 좋아요, 싫어요 카운트
+    // 좋아요 여부 확인
     const like = await this.likeRepository.findOneBy({ postId, userId });
+    // 좋아요 횟수 카운트
     const likeCount = await this.likeRepository.countBy({
       postId,
       isLike: true,
     });
+    // 싫어요 횟수 카운트
     const unlikeCount = await this.likeRepository.countBy({
       postId,
       isLike: false,
     });
 
+    // 다음 글 정보
     const nextPost = await this.postRepository.findOne({
       where: { id: MoreThan(postId) },
     });
 
+    // 이전 글 정보
     const prevPost = await this.postRepository.findOne({
       where: { id: LessThan(postId) },
       order: { id: 'DESC' },
@@ -201,11 +205,10 @@ export class CommunityService {
       );
     }
 
-    await Promise.all(
-      posts.map(async (post) => {
-        await this.postRepository.save({ ...post, isPublished: false });
-      }),
-    );
+    // 게시글 비활성화 처리
+    for await (const post of posts) {
+      await this.postRepository.update(post.id, { isPublished: false });
+    }
 
     return true;
   }

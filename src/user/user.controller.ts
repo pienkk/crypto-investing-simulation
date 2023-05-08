@@ -25,10 +25,10 @@ import {
   ResponseUserCountDto,
   ResponseUserInfoDto,
 } from './dto/response-user.dto';
-import { ResponsePostPageNationDto } from 'src/community/dto/Response-post.dto';
+import { ResponsePostPageNationDto } from 'src/community/dto/response-post.dto';
 import { Try, createResponseForm } from 'src/types';
 import { responseBooleanSchema, responseObjectSchema } from 'src/types/swagger';
-import { PageNationDto } from 'src/community/dto/Request-query.dto';
+import { PageNationDto } from 'src/community/dto/request-query.dto';
 
 @Controller('user')
 export class UserController {
@@ -72,6 +72,22 @@ export class UserController {
     return createResponseForm(isNickname);
   }
 
+  @Get('count')
+  @ApiOperation({
+    summary: '유저 수 조회 API',
+    description: '현재 가입되어 있는 유저수를 조회한다.',
+  })
+  @ApiExtraModels(ResponseUserCountDto)
+  @ApiResponse({
+    status: 200,
+    schema: responseObjectSchema(ResponseUserCountDto),
+  })
+  async getUserCount(): Promise<Try<ResponseUserCountDto>> {
+    const count = await this.userService.getUserCount();
+
+    return createResponseForm(count);
+  }
+
   @Get(':userId')
   @ApiOperation({
     summary: '유저 정보 조회 API',
@@ -105,21 +121,5 @@ export class UserController {
     const user = await this.userService.socialLogin(socialLoginDto);
 
     return createResponseForm(user);
-  }
-
-  @Get('count')
-  @ApiOperation({
-    summary: '유저 수 조회 API',
-    description: '현재 가입되어 있는 유저수를 조회한다.',
-  })
-  @ApiExtraModels(ResponseUserCountDto)
-  @ApiResponse({
-    status: 200,
-    schema: responseObjectSchema(ResponseUserCountDto),
-  })
-  async getUserCount(): Promise<Try<ResponseUserCountDto>> {
-    const count = await this.userService.getUserCount();
-
-    return createResponseForm(count);
   }
 }

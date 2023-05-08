@@ -8,13 +8,13 @@ import { RequestSignInDto } from './dto/request-user.dto';
 import {
   ResponsePostDto,
   ResponsePostPageNationDto,
-} from 'src/community/dto/Response-post.dto';
+} from 'src/community/dto/response-post.dto';
 import {
   ResponseSignInDto,
   ResponseUserCountDto,
   ResponseUserInfoDto,
 } from './dto/response-user.dto';
-import { PageNationDto } from 'src/community/dto/Request-query.dto';
+import { PageNationDto } from 'src/community/dto/request-query.dto';
 
 @Injectable()
 export class UserService {

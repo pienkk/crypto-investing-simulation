@@ -1,6 +1,6 @@
 import { CustomRepository } from 'src/config/typeorm/typeorm-ex.decorator';
 import { Brackets, Repository } from 'typeorm';
-import { RequestGetPostsQueryDto } from '../dto/Request-query.dto';
+import { RequestGetPostsQueryDto } from '../dto/request-query.dto';
 import { Posts } from './post.entity';
 
 /**
