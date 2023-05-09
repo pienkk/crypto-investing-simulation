@@ -233,7 +233,7 @@ export class CommunityService {
   }
 
   /**
-   * 댓글 리스트 반환
+   * 댓글 리스트 조회
    */
   async getReplies(postId: number): Promise<ResponseReplyDto[]> {
     await this.postValidation(postId);
@@ -491,7 +491,7 @@ export class CommunityService {
     const user = await this.userRepository.findOneBy({ id: userId });
 
     if (!user) {
-      throw new HttpException('유저를 찾을 수 않습니다.', HttpStatus.NOT_FOUND);
+      throw new HttpException('유저를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
     }
 
     return user;

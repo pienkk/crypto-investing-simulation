@@ -4,7 +4,10 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from 'src/user/entity/user.entity';
 import { In, Repository } from 'typeorm';
 import { CommunityService } from './community.service';
-import { RequestGetPostsQueryDto } from './dto/request-query.dto';
+import {
+  PageNationDto,
+  RequestGetPostsQueryDto,
+} from './dto/request-query.dto';
 import {
   RequestCreatePostDto,
   RequestDeletePostDto,
@@ -407,6 +410,7 @@ describe('CommunityService', () => {
       expect(result).toBe(true);
     });
 
+    // 실패
     it('권한이 없는 게시글은 삭제할 수 없다.', async () => {
       const postRepositoryFindSpy = jest
         .spyOn(postRepository, 'find')
@@ -425,83 +429,191 @@ describe('CommunityService', () => {
     });
   });
 
-  // describe('getReplies', () => {
-  //   const postId = 1;
-  //   const user: User = User.of({
-  //     id: 1,
-  //     nickname: '피엔',
-  //     description: '',
-  //   });
-  //   const existingReplies: Reply[] = [
-  //     Reply.of({
-  //       id: 1,
-  //       comment: '첫번째 댓글',
-  //       userId: 1,
-  //       postId: 1,
-  //       replyId: 1,
-  //       created_at: new Date('2023-02-02'),
-  //       deleted_at: null,
-  //       user,
-  //     }),
-  //     Reply.of({
-  //       id: 2,
-  //       comment: '두번째 댓글',
-  //       userId: 1,
-  //       postId: 1,
-  //       replyId: 1,
-  //       created_at: new Date('2023-02-02'),
-  //       deleted_at: null,
-  //       user,
-  //     }),
-  //   ];
-  //   const responseReplies: ResponseReplyDto[] = [
-  //     {
-  //       id: 1,
-  //       comment: '첫번째 댓글',
-  //       replyId: 1,
-  //       created_at: new Date('2023-02-02'),
-  //       deleted_at: null,
-  //       user,
-  //     },
-  //     {
-  //       id: 2,
-  //       comment: '두번째 댓글',
-  //       replyId: 1,
-  //       created_at: new Date('2023-02-02'),
-  //       deleted_at: null,
-  //       user,
-  //     },
-  //   ];
+  describe('getReplies 댓글 리스트 조회', () => {
+    const postId = 1;
+    const user: User = User.of({
+      id: 1,
+      nickname: '피엔',
+      description: '자기소개',
+    });
+    const existingPost = Posts.of({
+      id: 1,
+      title: '첫번째 게시글',
+      description: '첫번째 내용',
+      hits: 3,
+      categoryId: 1,
+      userId: 1,
+      created_at: new Date('2023-02-02'),
+    });
 
-  //   it('게시글에 대한 댓글 요청시 해당 게시글에 대한 댓글리스트를 반환한다.', async () => {
-  //     const postRepositoryfindOneBySpy = jest
-  //       .spyOn(postRepository, 'findOneBy')
-  //       .mockResolvedValue(existingPost);
-  //     const replyRepositoryGetReplyListsSpy = jest
-  //       .spyOn(replyRepository, 'getReplyLists')
-  //       .mockResolvedValue(existingReplies);
+    const existingReplies: Reply[] = [
+      Reply.of({
+        id: 1,
+        comment: '첫번째 댓글',
+        userId: 1,
+        postId: 1,
+        replyId: 1,
+        created_at: new Date('2023-02-02'),
+        deleted_at: null,
+        user,
+      }),
+      Reply.of({
+        id: 2,
+        comment: '두번째 댓글',
+        userId: 1,
+        postId: 1,
+        replyId: 1,
+        created_at: new Date('2023-02-02'),
+        deleted_at: null,
+        user,
+      }),
+    ];
+    const responseReplies: ResponseReplyDto[] = [
+      {
+        id: 1,
+        comment: '첫번째 댓글',
+        replyId: 1,
+        created_at: new Date('2023-02-02'),
+        deleted_at: null,
+        user,
+      },
+      {
+        id: 2,
+        comment: '두번째 댓글',
+        replyId: 1,
+        created_at: new Date('2023-02-02'),
+        deleted_at: null,
+        user,
+      },
+    ];
 
-  //     const result = await communityService.getReplies(postId);
+    // 성공
+    it('게시글 id에 해당하는 댓글을 조회한다.', async () => {
+      const postRepositoryFindOneBySpy = jest
+        .spyOn(postRepository, 'findOneBy')
+        .mockResolvedValue(existingPost);
+      const replyRepositoryGetReplyListsSpy = jest
+        .spyOn(replyRepository, 'getReplyLists')
+        .mockResolvedValue(existingReplies);
 
-  //     expect(postRepositoryfindOneBySpy).toHaveBeenCalledWith({ id: postId });
-  //     expect(replyRepositoryGetReplyListsSpy).toHaveBeenCalledWith(postId);
-  //     expect(result).toEqual(responseReplies);
-  //   });
+      const result = await communityService.getReplies(postId);
 
-  //   it('댓글 요청에 대한 게시글이 존재하지 않을 시 게시글이 없다는 예외를 던진다.', async () => {
-  //     const postRepositoryfindOneBySpy = jest
-  //       .spyOn(postRepository, 'findOneBy')
-  //       .mockResolvedValue(undefined);
+      expect(postRepositoryFindOneBySpy).toHaveBeenCalledWith({ id: postId });
+      expect(replyRepositoryGetReplyListsSpy).toHaveBeenCalledWith(postId);
+      expect(result).toEqual(responseReplies);
+    });
 
-  //     const result = async () => {
-  //       return await communityService.getReplies(postId);
-  //     };
+    // 실패
+    it('게시글이 없으면 댓글 조회를 할 수 없다.', async () => {
+      const postRepositoryFindOneBySpy = jest
+        .spyOn(postRepository, 'findOneBy')
+        .mockResolvedValue(null);
 
-  //     expect(result).rejects.toThrow(
-  //       new HttpException('Post not found', HttpStatus.NOT_FOUND),
-  //     );
-  //   });
-  // });
+      const result = async () => {
+        return await communityService.getReplies(postId);
+      };
+
+      expect(result).rejects.toThrow(
+        new HttpException('게시글을 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
+      );
+    });
+  });
+
+  describe('getUserPosts 유저가 작성한 게시글리스트 조회', () => {
+    const userId = 1;
+    const pageNationDto: PageNationDto = { page: 1, number: 10 };
+    const existingUser = User.of({
+      id: 1,
+      nickname: '피엔',
+      description: '안녕하세요',
+      profileImage: 'https://www.naver.com',
+    });
+    const existingPosts: Posts[] = [
+      Posts.of({
+        id: 1,
+        title: '첫번째 게시글',
+        description: '첫번째 내용',
+        hits: 22,
+        categoryId: 1,
+        created_at: new Date('2023-02-01'),
+        isPublished: true,
+        replies: [],
+        user: existingUser,
+      }),
+      Posts.of({
+        id: 2,
+        title: '두번째 게시글',
+        description: '두번째 내용',
+        hits: 22,
+        categoryId: 1,
+        created_at: new Date('2023-02-01'),
+        isPublished: true,
+        replies: [],
+        user: existingUser,
+      }),
+    ];
+    const responsePosts: ResponsePostDto[] = [
+      {
+        id: 1,
+        title: '첫번째 게시글',
+        description: '첫번째 내용',
+        hits: 22,
+        categoryId: 1,
+        created_at: new Date('2023-02-01'),
+        repliesCount: 0,
+        isPublished: true,
+        user: existingUser,
+      },
+      {
+        id: 2,
+        title: '두번째 게시글',
+        description: '두번째 내용',
+        hits: 22,
+        categoryId: 1,
+        created_at: new Date('2023-02-01'),
+        repliesCount: 0,
+        isPublished: true,
+        user: existingUser,
+      },
+    ];
+
+    // 성공
+    it('유저가 작성한 게시글을 조회한다.', async () => {
+      const userRepositoryFindOneBySpy = jest
+        .spyOn(userRepository, 'findOneBy')
+        .mockResolvedValue(existingUser);
+      const postRepositoryGetUserPostsSpy = jest
+        .spyOn(postRepository, 'getUserPosts')
+        .mockResolvedValue([existingPosts, 2]);
+
+      const result = await communityService.getUserPosts(userId, pageNationDto);
+
+      expect(userRepositoryFindOneBySpy).toHaveBeenCalledWith({
+        id: existingUser.id,
+      });
+      expect(postRepositoryGetUserPostsSpy).toHaveBeenCalledWith(
+        userId,
+        pageNationDto.page,
+        pageNationDto.number,
+      );
+      expect(result).toEqual({ post: responsePosts, number: 2 });
+    });
+
+    // 실패
+    it('유저가 없으면 게시글 조회를 할 수 없다.', async () => {
+      const userRepositoryFindOneBySpy = jest
+        .spyOn(userRepository, 'findOneBy')
+        .mockResolvedValue(null);
+
+      const result = async () => {
+        return await communityService.getUserPosts(userId, pageNationDto);
+      };
+
+      expect(result).rejects.toThrow(
+        new HttpException('유저를 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
+      );
+    });
+  });
 
   //   describe('createReply', () => {
   //     const userId = 1;
