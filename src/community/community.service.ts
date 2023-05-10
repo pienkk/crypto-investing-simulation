@@ -261,17 +261,21 @@ export class CommunityService {
 
       // 대댓글 요청할 때 원본 댓글이 없는 경우
       if (!reply)
-        throw new HttpException('Reply is not found', HttpStatus.NOT_FOUND);
+        throw new HttpException(
+          '부모 댓글이 존재하지 않습니다.',
+          HttpStatus.NOT_FOUND,
+        );
     }
 
     // 댓글 생성
-    const reply = this.replyRepository.create({ ...createReplyDto, userId });
-    const savedReply = await this.replyRepository.save(reply);
+    const savedReply = await this.replyRepository.save({
+      ...createReplyDto,
+      userId,
+    });
 
     // 원본 댓글 작성시 자기 자신의 id를 replyId로 가진다
     if (!savedReply.replyId) {
-      await this.replyRepository.save({
-        ...savedReply,
+      await this.replyRepository.update(savedReply.id, {
         replyId: savedReply.id,
       });
     }
@@ -316,7 +320,9 @@ export class CommunityService {
   ): Promise<boolean> {
     await this.replyValidation(replyId, userId);
 
-    const result = await this.replyRepository.update(replyId, updateReplyDto);
+    const result = await this.replyRepository.update(replyId, {
+      comment: updateReplyDto.comment,
+    });
 
     return result.affected === 1 ? true : false;
   }

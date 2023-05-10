@@ -245,6 +245,10 @@ export class CommunityController {
     description: '게시글이 존재하지 않을 때',
     schema: responseErrorSchema('게시글이 존재하지 않습니다'),
   })
+  @ApiNotFoundResponse({
+    description: '부모 댓글이 존재하지 않을 때',
+    schema: responseErrorSchema('부모 댓글이 존재하지 않습니다.'),
+  })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async createReply(
