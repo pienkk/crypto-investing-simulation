@@ -131,12 +131,12 @@ export class CommunityService {
 
     // 다음 글 정보
     const nextPost = await this.postRepository.findOne({
-      where: { id: MoreThan(postId) },
+      where: { id: MoreThan(postId), isPublished: true },
     });
 
     // 이전 글 정보
     const prevPost = await this.postRepository.findOne({
-      where: { id: LessThan(postId) },
+      where: { id: LessThan(postId), isPublished: true },
       order: { id: 'DESC' },
     });
 
