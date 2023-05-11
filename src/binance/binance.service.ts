@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
 import { CoinRepository } from 'src/market/entity/coin.repository';
-import { Coin } from 'src/market/entity/coin.entity';
+import { CoinEntity } from 'src/market/entity/coin.entity';
 import { CoinValueDto } from 'src/market/dto/coin-value.dto';
 import { AxiosError } from 'axios';
 import { CoinHistoryRepository } from 'src/market/entity/coinHistory.repository';
@@ -13,11 +13,11 @@ const FOURHOUR = 14400;
 
 @Injectable()
 export class BinanceService {
-  // async getBinance(coin: Coin[]) {
+  // async getBinance(coin: CoinEntity[]) {
   //   const date = new Date().getTime();
   // try {
   // return await Promise.all(
-  //   coin.map(async (el: Coin) => {
+  //   coin.map(async (el: CoinEntity) => {
   //     return (
   //       await firstValueFrom(
   //         this.http

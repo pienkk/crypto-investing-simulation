@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsString } from 'class-validator';
-import { User } from '../entity/user.entity';
+import { UserEntity } from '../entity/user.entity';
 import { ExistingUserRank } from './rank-user.dto';
 
 /**
@@ -30,7 +30,7 @@ export class ResponseUserDto {
   })
   profileImage: string;
 
-  static fromEntity(entity: User): ResponseUserDto {
+  static fromEntity(entity: UserEntity): ResponseUserDto {
     const dto = new ResponseUserDto();
     dto.id = entity.id;
     dto.nickname = entity.nickname;
@@ -100,7 +100,7 @@ export class ResponseUserInfoDto {
   publishedReply: number;
 
   static fromEntity(
-    entity: User,
+    entity: UserEntity,
     userRankInfo: ExistingUserRank,
   ): ResponseUserInfoDto {
     const dto = new ResponseUserInfoDto();

@@ -1,13 +1,13 @@
 import { CustomRepository } from 'src/config/typeorm/typeorm-ex.decorator';
 import { Brackets, Repository } from 'typeorm';
 import { RequestGetPostsQueryDto } from '../dto/request-query.dto';
-import { Posts } from './post.entity';
+import { PostEntity } from './post.entity';
 
 /**
  * 게시글 커스텀 Repository
  */
-@CustomRepository(Posts)
-export class PostRepository extends Repository<Posts> {
+@CustomRepository(PostEntity)
+export class PostRepository extends Repository<PostEntity> {
   /**
    * 조건에 맞는 게시글 리스트, 게시글 갯수 반환
    */
@@ -17,7 +17,7 @@ export class PostRepository extends Repository<Posts> {
     categoryId,
     search,
     filter,
-  }: RequestGetPostsQueryDto): Promise<[Posts[], number]> {
+  }: RequestGetPostsQueryDto): Promise<[PostEntity[], number]> {
     const posts = this.createQueryBuilder('post')
       .innerJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.replies', 'reply')
@@ -70,7 +70,7 @@ export class PostRepository extends Repository<Posts> {
     userId: number,
     page: number,
     number: number,
-  ): Promise<[Posts[], number]> {
+  ): Promise<[PostEntity[], number]> {
     return await this.createQueryBuilder('post')
       .innerJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.replies', 'reply')
@@ -89,7 +89,7 @@ export class PostRepository extends Repository<Posts> {
     userId: number,
     page: number,
     number: number,
-  ): Promise<[Posts[], number]> {
+  ): Promise<[PostEntity[], number]> {
     return await this.createQueryBuilder('post')
       .innerJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.replies', 'reply')
@@ -107,7 +107,7 @@ export class PostRepository extends Repository<Posts> {
     userId: number,
     page: number,
     number: number,
-  ): Promise<[Posts[], number]> {
+  ): Promise<[PostEntity[], number]> {
     return await this.createQueryBuilder('post')
       .innerJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.replies', 'reply')

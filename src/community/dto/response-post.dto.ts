@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
 import { ResponseUserDto } from 'src/user/dto/response-user.dto';
-import { Likes } from '../entity/like.entity';
-import { Posts } from '../entity/post.entity';
+import { LikeEntity } from '../entity/like.entity';
+import { PostEntity } from '../entity/post.entity';
 
 // 게시글 응답 DTO
 export class ResponsePostDto {
@@ -41,7 +41,7 @@ export class ResponsePostDto {
   @ApiProperty({ type: ResponseUserDto })
   user: ResponseUserDto;
 
-  static fromEntity(entity: Posts): ResponsePostDto {
+  static fromEntity(entity: PostEntity): ResponsePostDto {
     const dto = new ResponsePostDto();
     dto.id = entity.id;
     dto.title = entity.title;
@@ -61,7 +61,7 @@ export class ResponsePostDto {
     return dto;
   }
 
-  static fromEntities(entities: Posts[]): ResponsePostDto[] {
+  static fromEntities(entities: PostEntity[]): ResponsePostDto[] {
     return entities.map((entity) => ResponsePostDto.fromEntity(entity));
   }
 }
@@ -137,8 +137,8 @@ export class ResponsePostDetailDto {
   user: ResponseUserDto;
 
   static fromEntity(
-    entity: Posts,
-    like: Likes,
+    entity: PostEntity,
+    like: LikeEntity,
     likeCount: number,
     unlikeCount: number,
     prevPostId: number,

@@ -1,9 +1,9 @@
-import { Likes } from 'src/community/entity/like.entity';
-import { Posts } from 'src/community/entity/post.entity';
-import { Reply } from 'src/community/entity/reply.entity';
+import { LikeEntity } from 'src/community/entity/like.entity';
+import { PostEntity } from 'src/community/entity/post.entity';
+import { ReplyEntity } from 'src/community/entity/reply.entity';
 import { ColumnTransform } from 'src/config/database/columnTrans';
-import { Trade } from 'src/trade/entity/trade.entity';
-import { Wallet } from 'src/wallet/entity/wallet.entity';
+import { TradeEntity } from 'src/trade/entity/trade.entity';
+import { WalletEntity } from 'src/wallet/entity/wallet.entity';
 import {
   Column,
   CreateDateColumn,
@@ -15,7 +15,7 @@ import {
 } from 'typeorm';
 
 @Entity('users')
-export class User {
+export class UserEntity {
   @PrimaryGeneratedColumn({
     type: 'int',
     comment: '유저 id',
@@ -82,23 +82,23 @@ export class User {
   })
   deletedAt: Date;
 
-  @OneToMany(() => Posts, (post) => post.user)
-  posts: Posts[];
+  @OneToMany(() => PostEntity, (post) => post.user)
+  posts: PostEntity[];
 
-  @OneToMany(() => Reply, (reply) => reply.user)
-  replies: Reply[];
+  @OneToMany(() => ReplyEntity, (reply) => reply.user)
+  replies: ReplyEntity[];
 
-  @OneToMany(() => Wallet, (wallet) => wallet.user)
-  wallet: Wallet[];
+  @OneToMany(() => WalletEntity, (wallet) => wallet.user)
+  wallet: WalletEntity[];
 
-  @OneToMany(() => Trade, (trade) => trade.user)
-  trade: Trade[];
+  @OneToMany(() => TradeEntity, (trade) => trade.user)
+  trade: TradeEntity[];
 
-  @OneToMany(() => Likes, (likes) => likes.user)
-  likes: Likes[];
+  @OneToMany(() => LikeEntity, (likes) => likes.user)
+  likes: LikeEntity[];
 
-  static of(params: Partial<User>): User {
-    const user = new User();
+  static of(params: Partial<UserEntity>): UserEntity {
+    const user = new UserEntity();
     Object.assign(user, params);
 
     return user;

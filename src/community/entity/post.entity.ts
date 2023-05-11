@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from 'src/user/entity/user.entity';
+import { UserEntity } from 'src/user/entity/user.entity';
 import {
   Column,
   CreateDateColumn,
@@ -10,11 +10,11 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Likes } from './like.entity';
-import { Reply } from './reply.entity';
+import { LikeEntity } from './like.entity';
+import { ReplyEntity } from './reply.entity';
 
 @Entity('posts')
-export class Posts {
+export class PostEntity {
   @PrimaryGeneratedColumn({
     type: 'int',
     comment: '게시글 id',
@@ -30,7 +30,7 @@ export class Posts {
   @ApiProperty({ description: '게시글 제목' })
   title: string;
 
-  @Column({ type: 'varchar', length: 1000, comment: '게시글 내용' })
+  @Column({ type: 'varchar', length: 3000, comment: '게시글 내용' })
   @ApiProperty({ description: '게시글 내용' })
   description: string;
 
@@ -74,18 +74,18 @@ export class Posts {
   @ApiProperty({ description: '게시글 삭제 시간' })
   deleted_at: Date;
 
-  @OneToMany(() => Reply, (reply) => reply.post, { cascade: true })
-  replies: Reply[];
+  @OneToMany(() => ReplyEntity, (reply) => reply.post, { cascade: true })
+  replies: ReplyEntity[];
 
-  @ManyToOne(() => User, (user) => user.posts)
+  @ManyToOne(() => UserEntity, (user) => user.posts)
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user: UserEntity;
 
-  @OneToMany(() => Likes, (likes) => likes.post)
-  likes: Likes[];
+  @OneToMany(() => LikeEntity, (likes) => likes.post)
+  likes: LikeEntity[];
 
-  static of(params: Partial<Posts>): Posts {
-    const post = new Posts();
+  static of(params: Partial<PostEntity>): PostEntity {
+    const post = new PostEntity();
     Object.assign(post, params);
 
     return post;

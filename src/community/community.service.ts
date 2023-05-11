@@ -24,19 +24,19 @@ import {
   ResponseReplyByUserDto,
   ResponseReplyByUserPageNationDto,
 } from './dto/response-reply.dto';
-import { Posts } from './entity/post.entity';
+import { PostEntity } from './entity/post.entity';
 import { PostRepository } from './entity/post.repository';
-import { Reply } from './entity/reply.entity';
+import { ReplyEntity } from './entity/reply.entity';
 import { ReplyRepository } from './entity/reply.repository';
 import {
   RequestCreateLikeDto,
   RequestDeleteLikeDto,
 } from './dto/request-like.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Likes } from './entity/like.entity';
+import { LikeEntity } from './entity/like.entity';
 import { Repository, In, MoreThan, LessThan } from 'typeorm';
 import { UserRepository } from '../user/entity/user.repository';
-import { User } from '../user/entity/user.entity';
+import { UserEntity } from '../user/entity/user.entity';
 import { ResponseDeleteLikesDto } from './dto/response-like-dto';
 
 /**
@@ -47,8 +47,8 @@ export class CommunityService {
   constructor(
     private readonly postRepository: PostRepository,
     private readonly replyRepository: ReplyRepository,
-    @InjectRepository(Likes)
-    private readonly likeRepository: Repository<Likes>,
+    @InjectRepository(LikeEntity)
+    private readonly likeRepository: Repository<LikeEntity>,
     private readonly userRepository: UserRepository,
   ) {}
 
@@ -59,7 +59,7 @@ export class CommunityService {
   private async postValidation(
     postId: number,
     userId?: number,
-  ): Promise<Posts> {
+  ): Promise<PostEntity> {
     const post = await this.postRepository.findOneBy({
       id: postId,
     });
@@ -292,7 +292,7 @@ export class CommunityService {
   private async replyValidation(
     replyId: number,
     userId: number,
-  ): Promise<Reply> {
+  ): Promise<ReplyEntity> {
     const reply = await this.replyRepository.findOneBy({ id: replyId });
 
     // 댓글이 존재하지 않거나, soft delete 상태일 경우
@@ -493,7 +493,7 @@ export class CommunityService {
     return { post: postDto, number };
   }
 
-  async userValidation(userId: number): Promise<User> {
+  async userValidation(userId: number): Promise<UserEntity> {
     const user = await this.userRepository.findOneBy({ id: userId });
 
     if (!user) {

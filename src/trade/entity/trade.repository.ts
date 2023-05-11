@@ -1,10 +1,10 @@
 import { CustomRepository } from 'src/config/typeorm/typeorm-ex.decorator';
-import { Wallet } from 'src/wallet/entity/wallet.entity';
+import { WalletEntity } from 'src/wallet/entity/wallet.entity';
 import { Repository } from 'typeorm';
-import { Trade } from './trade.entity';
+import { TradeEntity } from './trade.entity';
 
-@CustomRepository(Trade)
-export class TradeRepository extends Repository<Trade> {
+@CustomRepository(TradeEntity)
+export class TradeRepository extends Repository<TradeEntity> {
   async getTradeAll(userId: number) {
     return await this.createQueryBuilder('trade')
       .innerJoinAndSelect('trade.coin', 'coin')
@@ -27,7 +27,7 @@ export class TradeRepository extends Repository<Trade> {
       .execute();
   }
 
-  async sellCoin(trade: Trade, wallet: Wallet) {
+  async sellCoin(trade: TradeEntity, wallet: WalletEntity) {
     return await this.createQueryBuilder('trade')
       .update()
       .set({

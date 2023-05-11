@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from 'src/user/entity/user.entity';
+import { UserEntity } from 'src/user/entity/user.entity';
 import {
   Column,
   Entity,
@@ -7,10 +7,10 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Posts } from './post.entity';
+import { PostEntity } from './post.entity';
 
 @Entity('likes')
-export class Likes {
+export class LikeEntity {
   @PrimaryGeneratedColumn({
     type: 'int',
     comment: '좋아요 id',
@@ -41,16 +41,16 @@ export class Likes {
   })
   isLike: boolean;
 
-  @ManyToOne(() => User, (user) => user.likes)
+  @ManyToOne(() => UserEntity, (user) => user.likes)
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user: UserEntity;
 
-  @ManyToOne(() => Posts, (posts) => posts.likes)
+  @ManyToOne(() => PostEntity, (posts) => posts.likes)
   @JoinColumn({ name: 'post_id' })
-  post: Posts;
+  post: PostEntity;
 
-  static of(params: Partial<Likes>): Likes {
-    const like = new Likes();
+  static of(params: Partial<LikeEntity>): LikeEntity {
+    const like = new LikeEntity();
     Object.assign(like, params);
 
     return like;

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ColumnTransform } from 'src/config/database/columnTrans';
-import { Trade } from 'src/trade/entity/trade.entity';
-import { Wallet } from 'src/wallet/entity/wallet.entity';
+import { TradeEntity } from 'src/trade/entity/trade.entity';
+import { WalletEntity } from 'src/wallet/entity/wallet.entity';
 import {
   Column,
   Entity,
@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 
 @Entity('coins')
-export class Coin {
+export class CoinEntity {
   @PrimaryGeneratedColumn({
     type: 'int',
     comment: '코인 id',
@@ -94,9 +94,9 @@ export class Coin {
   })
   quantity: number;
 
-  @OneToOne(() => Trade, (trade) => trade.coin)
-  trade: Trade;
+  @OneToOne(() => TradeEntity, (trade) => trade.coin)
+  trade: TradeEntity;
 
-  @OneToMany(() => Wallet, (wallet) => wallet.coin)
-  wallet: Wallet[];
+  @OneToMany(() => WalletEntity, (wallet) => wallet.coin)
+  wallet: WalletEntity[];
 }

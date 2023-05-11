@@ -1,16 +1,16 @@
 import { CustomRepository } from 'src/config/typeorm/typeorm-ex.decorator';
 import { Repository } from 'typeorm';
-import { Reply } from './reply.entity';
+import { ReplyEntity } from './reply.entity';
 
 /**
  * 댓글 커스텀 Repository
  */
-@CustomRepository(Reply)
-export class ReplyRepository extends Repository<Reply> {
+@CustomRepository(ReplyEntity)
+export class ReplyRepository extends Repository<ReplyEntity> {
   /**
    * 게시글에 대한 댓글 리스트 반환
    */
-  async getReplyLists(postId: number): Promise<Reply[]> {
+  async getReplyLists(postId: number): Promise<ReplyEntity[]> {
     return await this.createQueryBuilder('reply')
       .innerJoinAndSelect('reply.user', 'user')
       .where('reply.postId = :postId', { postId })
@@ -27,7 +27,7 @@ export class ReplyRepository extends Repository<Reply> {
     userId: number,
     page: number,
     number: number,
-  ): Promise<[Reply[], number]> {
+  ): Promise<[ReplyEntity[], number]> {
     return await this.createQueryBuilder('reply')
       .leftJoinAndSelect('reply.post', 'post')
       .leftJoinAndSelect('post.replies', 'replies')

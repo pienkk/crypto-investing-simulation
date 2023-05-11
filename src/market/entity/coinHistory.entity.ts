@@ -2,7 +2,7 @@ import { ColumnTransform } from 'src/config/database/columnTrans';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('coinHistories')
-export class CoinHistory {
+export class CoinHistoryEntity {
   @PrimaryGeneratedColumn({
     type: 'int',
     comment: '코인 히스토리 id',

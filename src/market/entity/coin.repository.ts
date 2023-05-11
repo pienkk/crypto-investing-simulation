@@ -1,12 +1,12 @@
 import { CustomRepository } from 'src/config/typeorm/typeorm-ex.decorator';
 import { Repository } from 'typeorm';
 import { MarketQueryDto } from '../dto/market-query.dto';
-import { Coin } from './coin.entity';
-import { CoinHistory } from './coinHistory.entity';
+import { CoinEntity } from './coin.entity';
+import { CoinHistoryEntity } from './coinHistory.entity';
 
-@CustomRepository(Coin)
-export class CoinRepository extends Repository<Coin> {
-  async getCoinList(): Promise<Coin[]> {
+@CustomRepository(CoinEntity)
+export class CoinRepository extends Repository<CoinEntity> {
+  async getCoinList(): Promise<CoinEntity[]> {
     return await this.find();
   }
 
@@ -19,10 +19,10 @@ export class CoinRepository extends Repository<Coin> {
       .getOne();
   }
 
-  async updateCoinByREST(coinInfo: Coin[]): Promise<void> {
+  async updateCoinByREST(coinInfo: CoinEntity[]): Promise<void> {
     coinInfo.forEach(async (el) => {
       await this.createQueryBuilder()
-        .update(Coin)
+        .update(CoinEntity)
         .set(el)
         .where('symbol = :symbol', { symbol: el.symbol })
         .execute();
@@ -32,7 +32,7 @@ export class CoinRepository extends Repository<Coin> {
   async updateCoinByWS(coinInfo) {
     coinInfo.forEach(async (el) => {
       await this.createQueryBuilder()
-        .update(Coin)
+        .update(CoinEntity)
         .set({
           price: el.curDayClose,
           oneDayPrice: el.open,
@@ -43,7 +43,7 @@ export class CoinRepository extends Repository<Coin> {
     });
   }
 
-  updateBeforePrice(beforePrice: CoinHistory[], hour: number) {
+  updateBeforePrice(beforePrice: CoinHistoryEntity[], hour: number) {
     beforePrice.forEach((el) => {
       const qb = this.createQueryBuilder().update();
 

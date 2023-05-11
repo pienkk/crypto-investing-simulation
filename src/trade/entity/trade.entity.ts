@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ColumnTransform } from 'src/config/database/columnTrans';
-import { Coin } from 'src/market/entity/coin.entity';
-import { User } from 'src/user/entity/user.entity';
+import { CoinEntity } from 'src/market/entity/coin.entity';
+import { UserEntity } from 'src/user/entity/user.entity';
 import {
   Column,
   CreateDateColumn,
@@ -14,7 +14,7 @@ import {
 import { PurchaseStatus, TradeStatus } from '../enum/trade.status.enum';
 
 @Entity('tradeHistories')
-export class Trade {
+export class TradeEntity {
   @PrimaryGeneratedColumn({
     type: 'int',
     comment: '거래 내역 id',
@@ -108,11 +108,11 @@ export class Trade {
   @ApiProperty({ description: '거래 일자' })
   created_at: Date;
 
-  @OneToOne(() => Coin, (coin) => coin.trade)
+  @OneToOne(() => CoinEntity, (coin) => coin.trade)
   @JoinColumn({ name: 'coin_id' })
-  coin: Coin;
+  coin: CoinEntity;
 
-  @ManyToOne(() => User, (user) => user.trade)
+  @ManyToOne(() => UserEntity, (user) => user.trade)
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user: UserEntity;
 }

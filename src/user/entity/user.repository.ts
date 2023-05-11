@@ -1,10 +1,10 @@
 import { CustomRepository } from 'src/config/typeorm/typeorm-ex.decorator';
 import { Repository } from 'typeorm';
-import { User } from './user.entity';
+import { UserEntity } from './user.entity';
 import { ExistingUserRank } from '../dto/rank-user.dto';
 
-@CustomRepository(User)
-export class UserRepository extends Repository<User> {
+@CustomRepository(UserEntity)
+export class UserRepository extends Repository<UserEntity> {
   async updateMoney(userMoney: number, userId: number) {
     return await this.createQueryBuilder('u')
       .update()

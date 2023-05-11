@@ -1,12 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CoinRepository } from 'src/market/entity/coin.repository';
 import { UserRepository } from 'src/user/entity/user.repository';
-import { Wallet } from 'src/wallet/entity/wallet.entity';
+import { WalletEntity } from 'src/wallet/entity/wallet.entity';
 import { WalletRepository } from 'src/wallet/entity/wallet.repository';
 import { CreateTradeDto } from './dto/create.trade.dto';
 import { ResponseAmountDto } from './dto/response.amount.dto';
 import { ResponseTradeDto } from './dto/response.trade.dto';
-import { Trade } from './entity/trade.entity';
+import { TradeEntity } from './entity/trade.entity';
 import { TradeRepository } from './entity/trade.repository';
 
 @Injectable()
@@ -33,7 +33,7 @@ export class TradeService {
   async createTrade(
     createTradeDto: CreateTradeDto,
     userId: number,
-  ): Promise<Trade> {
+  ): Promise<TradeEntity> {
     const tradeEntity = CreateTradeDto.toEntity(createTradeDto, userId);
 
     return await this.tradeRepository.save(tradeEntity);
@@ -60,7 +60,7 @@ export class TradeService {
     return true;
   }
 
-  insertCoin(tradeEntity: Trade) {
+  insertCoin(tradeEntity: TradeEntity) {
     const wallet = this.walletRepository.create({
       coinId: tradeEntity.coinId,
       userId: tradeEntity.userId,
@@ -70,7 +70,7 @@ export class TradeService {
     this.walletRepository.save(wallet);
   }
 
-  updateCoin(tradeEntity: Trade, wallet: Wallet) {
+  updateCoin(tradeEntity: TradeEntity, wallet: WalletEntity) {
     if (tradeEntity.isPurchase === 0) {
       wallet.purchasePrice =
         (tradeEntity.coin.price * tradeEntity.quantity +

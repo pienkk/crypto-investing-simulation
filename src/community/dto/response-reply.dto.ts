@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDate, IsNumber, IsString } from 'class-validator';
 import { ResponseUserDto } from 'src/user/dto/response-user.dto';
-import { Reply } from '../entity/reply.entity';
+import { ReplyEntity } from '../entity/reply.entity';
 import { ResponsePostDto } from './response-post.dto';
 
 // 댓글 응답 DTO
@@ -31,7 +31,7 @@ export class ResponseReplyDto {
   @ApiProperty({ description: '유저 정보' })
   user: ResponseUserDto;
 
-  static fromEntity(entity: Reply): ResponseReplyDto {
+  static fromEntity(entity: ReplyEntity): ResponseReplyDto {
     const dto = new ResponseReplyDto();
     dto.id = entity.id;
     dto.comment = entity.comment;
@@ -45,7 +45,7 @@ export class ResponseReplyDto {
     return dto;
   }
 
-  static fromEntities(entities: Reply[]): ResponseReplyDto[] {
+  static fromEntities(entities: ReplyEntity[]): ResponseReplyDto[] {
     return entities.map((entity) => ResponseReplyDto.fromEntity(entity));
   }
 }
@@ -57,7 +57,7 @@ export class ResponseReplyByUserDto extends ResponseReplyDto {
   @ApiProperty({ description: '게시글 정보' })
   post: ResponsePostDto;
 
-  static fromEntity(entity: Reply): ResponseReplyByUserDto {
+  static fromEntity(entity: ReplyEntity): ResponseReplyByUserDto {
     const dto = new ResponseReplyByUserDto();
     dto.id = entity.id;
     dto.comment = entity.comment;
@@ -74,7 +74,7 @@ export class ResponseReplyByUserDto extends ResponseReplyDto {
     return dto;
   }
 
-  static fromEntities(entities: Reply[]): ResponseReplyByUserDto[] {
+  static fromEntities(entities: ReplyEntity[]): ResponseReplyByUserDto[] {
     return entities.map((entity) => ResponseReplyByUserDto.fromEntity(entity));
   }
 }

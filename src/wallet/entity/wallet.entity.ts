@@ -1,6 +1,6 @@
 import { ColumnTransform } from 'src/config/database/columnTrans';
-import { Coin } from 'src/market/entity/coin.entity';
-import { User } from 'src/user/entity/user.entity';
+import { CoinEntity } from 'src/market/entity/coin.entity';
+import { UserEntity } from 'src/user/entity/user.entity';
 import {
   Column,
   Entity,
@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 
 @Entity('wallets')
-export class Wallet {
+export class WalletEntity {
   @PrimaryGeneratedColumn({
     type: 'int',
     comment: '지갑 id',
@@ -45,11 +45,11 @@ export class Wallet {
   })
   quantity: number;
 
-  @ManyToOne(() => User, (user) => user.wallet)
+  @ManyToOne(() => UserEntity, (user) => user.wallet)
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user: UserEntity;
 
-  @ManyToOne(() => Coin, (coin) => coin.wallet)
+  @ManyToOne(() => CoinEntity, (coin) => coin.wallet)
   @JoinColumn({ name: 'coin_id' })
-  coin: Coin;
+  coin: CoinEntity;
 }

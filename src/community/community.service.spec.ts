@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from 'src/user/entity/user.entity';
+import { UserEntity } from 'src/user/entity/user.entity';
 import { In, Repository } from 'typeorm';
 import { CommunityService } from './community.service';
 import {
@@ -23,10 +23,10 @@ import {
   ResponsePostDto,
 } from './dto/response-post.dto';
 import { ResponseReplyDto } from './dto/response-reply.dto';
-import { Likes } from './entity/like.entity';
-import { Posts } from './entity/post.entity';
+import { LikeEntity } from './entity/like.entity';
+import { PostEntity } from './entity/post.entity';
 import { PostRepository } from './entity/post.repository';
-import { Reply } from './entity/reply.entity';
+import { ReplyEntity } from './entity/reply.entity';
 import { ReplyRepository } from './entity/reply.repository';
 import { UserRepository } from 'src/user/entity/user.repository';
 
@@ -34,7 +34,7 @@ describe('CommunityService', () => {
   let communityService: CommunityService;
   let postRepository: PostRepository;
   let replyRepository: ReplyRepository;
-  let likesRepository: Repository<Likes>;
+  let likesRepository: Repository<LikeEntity>;
   let userRepository: UserRepository;
 
   beforeAll(async () => {
@@ -44,27 +44,29 @@ describe('CommunityService', () => {
         PostRepository,
         ReplyRepository,
         UserRepository,
-        { provide: getRepositoryToken(Likes), useClass: Repository },
+        { provide: getRepositoryToken(LikeEntity), useClass: Repository },
       ],
     }).compile();
 
     communityService = module.get<CommunityService>(CommunityService);
     postRepository = module.get<PostRepository>(PostRepository);
     replyRepository = module.get<ReplyRepository>(ReplyRepository);
-    likesRepository = module.get<Repository<Likes>>(getRepositoryToken(Likes));
+    likesRepository = module.get<Repository<LikeEntity>>(
+      getRepositoryToken(LikeEntity),
+    );
     userRepository = module.get<UserRepository>(UserRepository);
   });
 
   describe('getPosts 게시글 리스트 조회', () => {
     const fetchQueryDto: RequestGetPostsQueryDto = { page: 1, categoryId: 1 };
-    const existingUser = User.of({
+    const existingUser = UserEntity.of({
       id: 1,
       nickname: '피엔',
       description: '안녕하세요',
       profileImage: 'https://www.naver.com',
     });
-    const existingPosts: Posts[] = [
-      Posts.of({
+    const existingPosts: PostEntity[] = [
+      PostEntity.of({
         id: 1,
         title: '첫번째 게시글',
         description: '첫번째 내용',
@@ -75,7 +77,7 @@ describe('CommunityService', () => {
         replies: [],
         user: existingUser,
       }),
-      Posts.of({
+      PostEntity.of({
         id: 2,
         title: '두번째 게시글',
         description: '두번째 내용',
@@ -127,14 +129,14 @@ describe('CommunityService', () => {
 
   describe('getPostDetail 게시글 상세조회', () => {
     const postId = 1;
-    const existingUser = User.of({
+    const existingUser = UserEntity.of({
       id: 1,
       nickname: '피엔',
       description: '안녕하세요',
       profileImage: 'https://www.naver.com',
     });
-    const existingPosts: Posts[] = [
-      Posts.of({
+    const existingPosts: PostEntity[] = [
+      PostEntity.of({
         id: 1,
         title: '첫번째 게시글',
         description: '첫번째 내용',
@@ -144,7 +146,7 @@ describe('CommunityService', () => {
         isPublished: true,
         user: existingUser,
       }),
-      Posts.of({
+      PostEntity.of({
         id: 2,
         title: '두번째 게시글',
         description: '두번째 내용',
@@ -155,7 +157,7 @@ describe('CommunityService', () => {
         user: existingUser,
       }),
     ];
-    const existingRelationsPost: Posts = Posts.of({
+    const existingRelationsPost: PostEntity = PostEntity.of({
       ...existingPosts[0],
       user: existingUser,
       replies: [],
@@ -247,8 +249,8 @@ describe('CommunityService', () => {
       description: '첫번째 내용',
       categoryId: 1,
     };
-    const createPost = Posts.of({ ...RequestCreatePostDto, userId });
-    const savedPost = Posts.of({
+    const createPost = PostEntity.of({ ...RequestCreatePostDto, userId });
+    const savedPost = PostEntity.of({
       ...createPost,
       id: 1,
       hits: 0,
@@ -287,7 +289,7 @@ describe('CommunityService', () => {
       description: '수정한 내용',
       categoryId: 1,
     };
-    const existingPost = Posts.of({
+    const existingPost = PostEntity.of({
       id: 1,
       title: '첫번째 게시글',
       description: '첫번째 내용',
@@ -366,7 +368,7 @@ describe('CommunityService', () => {
     const requestDeletePostDto: RequestDeletePostDto = { postId: [1, 2] };
     const userId = 1;
     const existingPosts = [
-      Posts.of({
+      PostEntity.of({
         id: 1,
         title: '첫번째 게시글',
         description: '첫번째 내용',
@@ -375,7 +377,7 @@ describe('CommunityService', () => {
         userId: 1,
         created_at: new Date('2023-02-02'),
       }),
-      Posts.of({
+      PostEntity.of({
         id: 2,
         title: '두번째 게시글',
         description: '두번재 내용',
@@ -431,12 +433,12 @@ describe('CommunityService', () => {
 
   describe('getReplies 댓글 리스트 조회', () => {
     const postId = 1;
-    const user: User = User.of({
+    const user: UserEntity = UserEntity.of({
       id: 1,
       nickname: '피엔',
       description: '자기소개',
     });
-    const existingPost = Posts.of({
+    const existingPost = PostEntity.of({
       id: 1,
       title: '첫번째 게시글',
       description: '첫번째 내용',
@@ -446,8 +448,8 @@ describe('CommunityService', () => {
       created_at: new Date('2023-02-02'),
     });
 
-    const existingReplies: Reply[] = [
-      Reply.of({
+    const existingReplies: ReplyEntity[] = [
+      ReplyEntity.of({
         id: 1,
         comment: '첫번째 댓글',
         userId: 1,
@@ -457,7 +459,7 @@ describe('CommunityService', () => {
         deleted_at: null,
         user,
       }),
-      Reply.of({
+      ReplyEntity.of({
         id: 2,
         comment: '두번째 댓글',
         userId: 1,
@@ -522,14 +524,14 @@ describe('CommunityService', () => {
   describe('getUserPosts 유저가 작성한 게시글리스트 조회', () => {
     const userId = 1;
     const pageNationDto: PageNationDto = { page: 1, number: 10 };
-    const existingUser = User.of({
+    const existingUser = UserEntity.of({
       id: 1,
       nickname: '피엔',
       description: '안녕하세요',
       profileImage: 'https://www.naver.com',
     });
-    const existingPosts: Posts[] = [
-      Posts.of({
+    const existingPosts: PostEntity[] = [
+      PostEntity.of({
         id: 1,
         title: '첫번째 게시글',
         description: '첫번째 내용',
@@ -540,7 +542,7 @@ describe('CommunityService', () => {
         replies: [],
         user: existingUser,
       }),
-      Posts.of({
+      PostEntity.of({
         id: 2,
         title: '두번째 게시글',
         description: '두번째 내용',
@@ -617,13 +619,13 @@ describe('CommunityService', () => {
 
   describe('createReply 댓글 작성', () => {
     const userId = 1;
-    const user: User = User.of({
+    const user: UserEntity = UserEntity.of({
       id: 1,
       nickname: '피엔',
       description: '',
     });
-    const existingReplies: Reply[] = [
-      Reply.of({
+    const existingReplies: ReplyEntity[] = [
+      ReplyEntity.of({
         id: 1,
         comment: '첫번째 댓글',
         userId: 1,
@@ -633,7 +635,7 @@ describe('CommunityService', () => {
         deleted_at: null,
         user,
       }),
-      Reply.of({
+      ReplyEntity.of({
         id: 2,
         comment: '두번째 댓글',
         userId: 1,
@@ -644,7 +646,7 @@ describe('CommunityService', () => {
         user,
       }),
     ];
-    const existingPost: Posts = Posts.of({
+    const existingPost: PostEntity = PostEntity.of({
       id: 1,
       title: '첫번째 게시글',
       description: '첫번째 내용',
@@ -665,7 +667,7 @@ describe('CommunityService', () => {
       postId: 1,
       replyId: 1,
     };
-    const savedReply = Reply.of({
+    const savedReply = ReplyEntity.of({
       id: 2,
       comment: '두번째 댓글',
       userId: 1,
@@ -820,7 +822,7 @@ describe('CommunityService', () => {
     const updateReplyDto: RequestUpdateReplyDto = {
       comment: '수정된 댓글',
     };
-    const existingReply: Reply = Reply.of({
+    const existingReply: ReplyEntity = ReplyEntity.of({
       id: 1,
       comment: '첫번째 댓글',
       userId: 1,
@@ -908,51 +910,73 @@ describe('CommunityService', () => {
     });
   });
 
-  //   describe('removeReply', () => {
-  //     const time = new Date('2023-02-02');
-  //     jest.useFakeTimers();
-  //     jest.setSystemTime(time);
-  //     const replyId: RequestDeleteReplyDto = { replyId: [1] };
-  //     const userId = 1;
+  describe('removeReply 댓글 삭제', () => {
+    const replyId: RequestDeleteReplyDto = { replyId: [1, 2] };
+    const userId = 1;
+    const existingReplies: ReplyEntity[] = [
+      ReplyEntity.of({
+        id: 1,
+        comment: '첫번째 댓글',
+        userId: 1,
+        postId: 1,
+        replyId: 1,
+        created_at: new Date('2023-02-02'),
+      }),
+      ReplyEntity.of({
+        id: 2,
+        comment: '두번째 댓글',
+        userId: 1,
+        postId: 1,
+        replyId: 2,
+        created_at: new Date('2023-02-02'),
+      }),
+    ];
 
-  //     it('댓글 삭제 성공 시 status:true 값을 반환한다.', async () => {
-  //       const replyRepositoryfindOneBySpy = jest
-  //         .spyOn(replyRepository, 'findOneBy')
-  //         .mockResolvedValue(existingReply);
-  //       const replyRepositorySaveSpy = jest
-  //         .spyOn(replyRepository, 'save')
-  //         .mockResolvedValue({
-  //           ...existingReply,
-  //           deleted_at: new Date('2023-02-02'),
-  //         });
+    // 성공
+    it('댓글 삭제 성공 시 status:true 값을 반환한다.', async () => {
+      const replyRepositoryFindSpy = jest
+        .spyOn(replyRepository, 'find')
+        .mockResolvedValue(existingReplies);
+      const replyRepositorySoftDeleteSpy = jest
+        .spyOn(replyRepository, 'softDelete')
+        .mockResolvedValue({ raw: 0, affected: 2, generatedMaps: null });
 
-  //       const result = await communityService.removeReply(replyId, userId);
+      const result = await communityService.removeReply(replyId, userId);
 
-  //       expect(replyRepositoryfindOneBySpy).toHaveBeenCalledWith({
-  //         id: replyId,
-  //       });
-  //       expect(replyRepositorySaveSpy).toHaveBeenCalledWith({
-  //         ...existingReply,
-  //         deleted_at: new Date('2023-02-02'),
-  //       });
-  //       expect(result).toEqual({ status: true });
-  //     });
+      expect(replyRepositorySoftDeleteSpy).toHaveBeenCalledWith([1, 2]);
+      expect(result).toBe(true);
+    });
 
-  //     it('댓글 삭제 실패 시 잘못된 접근이라는 예외를 던진다.', async () => {
-  //       const replyRepositoryfindOneBySpy = jest
-  //         .spyOn(replyRepository, 'findOneBy')
-  //         .mockResolvedValue(existingReply);
-  //       const replyRepositorySaveSpy = jest
-  //         .spyOn(replyRepository, 'save')
-  //         .mockResolvedValue({ ...existingReply, deleted_at: null });
+    // 삭제
+    it('권한이 없는 댓글은 삭제할 수 없다..', async () => {
+      const replyRepositoryFindSpy = jest
+        .spyOn(replyRepository, 'find')
+        .mockResolvedValue([existingReplies[0]]);
 
-  //       const result = async () => {
-  //         return await communityService.removeReply(replyId, userId);
-  //       };
-  //       expect(result).rejects.toThrow(
-  //         new HttpException('INVALID ACCESS', HttpStatus.FORBIDDEN),
-  //       );
-  //     });
+      const result = async () => {
+        return await communityService.removeReply(replyId, userId);
+      };
+      expect(result).rejects.toThrow(
+        new HttpException(
+          '삭제 요청된 댓글 중 권한이 없는 댓글이 존재합니다.',
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
+    });
+  });
+
+  // describe('createLike 좋아요/싫어요 생성', () => {
+  //   const existingPost:PostEntity =PostEntity.of({
+  //     id: 1,
+  //     title: '첫번째 게시글',
+  //     description: '첫번째 내용',
+  //     hits: 22,
+  //     categoryId: 1,
+  //     created_at: new Date('2023-02-01'),
+  //     isPublished: true,
+  //     replies: [],
+  //     userId: 1,
   //   });
+  //   const existingLike: LikeEntity = Like.of({});
   // });
 });

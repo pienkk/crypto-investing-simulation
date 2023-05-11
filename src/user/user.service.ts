@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserRepository } from './entity/user.repository';
 import { JwtPayload } from 'src/auth/jwt-payload.interface';
 import { PostRepository } from 'src/community/entity/post.repository';
-import { User } from './entity/user.entity';
+import { UserEntity } from './entity/user.entity';
 import { RequestSignInDto } from './dto/request-user.dto';
 import {
   ResponsePostDto,
@@ -27,7 +27,7 @@ export class UserService {
   /**
    * 유저 유효성 검사
    */
-  async userValidation(userId: number): Promise<User> {
+  async userValidation(userId: number): Promise<UserEntity> {
     const user = await this.userRepository.findOneBy({ id: userId });
 
     if (!user) {
