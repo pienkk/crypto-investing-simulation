@@ -12,6 +12,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiExtraModels,
+  ApiNotFoundResponse,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -27,7 +28,11 @@ import {
 } from './dto/response-user.dto';
 import { ResponsePostPageNationDto } from 'src/community/dto/response-post.dto';
 import { Try, createResponseForm } from 'src/types';
-import { responseBooleanSchema, responseObjectSchema } from 'src/types/swagger';
+import {
+  responseBooleanSchema,
+  responseErrorSchema,
+  responseObjectSchema,
+} from 'src/types/swagger';
 import { PageNationDto } from 'src/community/dto/request-query.dto';
 
 @Controller('user')
@@ -46,6 +51,10 @@ export class UserController {
     status: 200,
     schema: responseObjectSchema(ResponsePostPageNationDto),
   })
+  @ApiNotFoundResponse({
+    description: '유저 정보가 없을 경우',
+    schema: responseErrorSchema('유저가 존재하지 않습니다.'),
+  })
   async getMyDeletePosts(
     @CurrentUser() user: JwtPayload,
     @Query() pageNation: PageNationDto,
@@ -58,7 +67,8 @@ export class UserController {
   @Post('check')
   @ApiOperation({
     summary: '닉네임 중복체크 API',
-    description: '해당 닉네임이 중복되어 있는지 확인한다 (중복가입불가)',
+    description:
+      '해당 닉네임이 중복되어 있는지 확인한다. 중복된 유저가 없으면 true를 반환한다.',
   })
   @ApiResponse({
     status: 200,
@@ -98,6 +108,10 @@ export class UserController {
     status: 200,
     schema: responseObjectSchema(ResponseUserInfoDto),
   })
+  @ApiNotFoundResponse({
+    description: '유저 정보가 없을 경우',
+    schema: responseErrorSchema('유저가 존재하지 않습니다.'),
+  })
   @ApiParam({ name: 'userId', description: '유저 ID' })
   async getUserInfo(
     @Param('userId') userId: number,
@@ -115,6 +129,10 @@ export class UserController {
   @ApiExtraModels(ResponseSignInDto)
   @ApiBody({ type: RequestSignInDto })
   @ApiResponse({ status: 200, schema: responseObjectSchema(ResponseSignInDto) })
+  @ApiNotFoundResponse({
+    description: '유저 정보가 없을 경우',
+    schema: responseErrorSchema('유저가 존재하지 않습니다.'),
+  })
   async socialLogin(
     @Body() socialLoginDto: RequestSignInDto,
   ): Promise<Try<ResponseSignInDto>> {

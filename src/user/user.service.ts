@@ -61,7 +61,7 @@ export class UserService {
   async checkNickname(nickname: string): Promise<boolean> {
     const user = await this.userRepository.findOneBy({ nickname });
 
-    return user ? true : false;
+    return user ? false : true;
   }
 
   /**
