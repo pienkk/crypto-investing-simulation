@@ -47,8 +47,16 @@ export class UserService {
     await this.userValidation(userId);
 
     const userInfo = await this.userRepository.findOne({
-      where: { id: userId },
-      relations: ['posts', 'replies'],
+      where: {
+        id: userId,
+        posts: {
+          isPublished: true,
+        },
+      },
+      relations: {
+        posts: true,
+        replies: true,
+      },
     });
     const userRank = await this.userRepository.getRankByUser(userId);
 
@@ -81,6 +89,9 @@ export class UserService {
       relations: ['user', 'replies'],
       take: query.number,
       skip: (query.page - 1) * query.number,
+      order: {
+        created_at: 'DESC',
+      },
     });
 
     const postsToEntity = ResponsePostDto.fromEntities(posts);
