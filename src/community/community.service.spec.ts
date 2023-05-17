@@ -29,6 +29,10 @@ import { PostRepository } from './entity/post.repository';
 import { ReplyEntity } from './entity/reply.entity';
 import { ReplyRepository } from './entity/reply.repository';
 import { UserRepository } from 'src/user/entity/user.repository';
+import {
+  RequestCreateLikeDto,
+  RequestDeleteLikeDto,
+} from './dto/request-like.dto';
 
 describe('CommunityService', () => {
   let communityService: CommunityService;
@@ -242,7 +246,7 @@ describe('CommunityService', () => {
     });
   });
 
-  describe('createPost', () => {
+  describe('createPost 게시글 생성', () => {
     const userId = 1;
     const RequestCreatePostDto: RequestCreatePostDto = {
       title: '작성 글',
@@ -947,7 +951,7 @@ describe('CommunityService', () => {
       expect(result).toBe(true);
     });
 
-    // 삭제
+    // 실패
     it('권한이 없는 댓글은 삭제할 수 없다..', async () => {
       const replyRepositoryFindSpy = jest
         .spyOn(replyRepository, 'find')
@@ -965,18 +969,190 @@ describe('CommunityService', () => {
     });
   });
 
-  // describe('createLike 좋아요/싫어요 생성', () => {
-  //   const existingPost:PostEntity =PostEntity.of({
-  //     id: 1,
-  //     title: '첫번째 게시글',
-  //     description: '첫번째 내용',
-  //     hits: 22,
-  //     categoryId: 1,
-  //     created_at: new Date('2023-02-01'),
-  //     isPublished: true,
-  //     replies: [],
-  //     userId: 1,
-  //   });
-  //   const existingLike: LikeEntity = Like.of({});
-  // });
+  describe('createLike 좋아요/싫어요 생성', () => {
+    const existingUser = UserEntity.of({
+      id: 1,
+      nickname: '피엔',
+      description: '안녕하세요',
+      profileImage: 'https://www.naver.com',
+    });
+    const existingPost: PostEntity = PostEntity.of({
+      id: 1,
+      title: '첫번째 게시글',
+      description: '첫번째 내용',
+      hits: 22,
+      categoryId: 1,
+      created_at: new Date('2023-02-01'),
+      isPublished: true,
+      replies: [],
+      userId: 1,
+    });
+    const existingLike: LikeEntity = LikeEntity.of({
+      postId: 1,
+      userId: 1,
+      isLike: true,
+    });
+    const requestCreateLikeDto: RequestCreateLikeDto = {
+      isLike: true,
+    };
+    const existingRelationsPost: PostEntity = PostEntity.of({
+      ...existingPost,
+      user: existingUser,
+      replies: [],
+    });
+
+    // 성공
+    it('좋아요를 생성하고 게시글 정보를 반환한다.', async () => {
+      const postRepositoryFindOneBySpy = jest
+        .spyOn(postRepository, 'findOneBy')
+        .mockResolvedValue(existingPost);
+      const likeRepositoryFindOneSpy = jest
+        .spyOn(likesRepository, 'findOne')
+        .mockResolvedValue(null);
+      const likeRepositorySaveSpy = jest
+        .spyOn(likesRepository, 'save')
+        .mockResolvedValue(existingLike);
+      const postRepositoryFindOneWithUserSpy = jest
+        .spyOn(postRepository, 'findOne')
+        .mockResolvedValueOnce(existingRelationsPost);
+      const likeRepositoryFindOneBySpy = jest
+        .spyOn(likesRepository, 'findOneBy')
+        .mockResolvedValue(existingLike);
+      const likeRepositoryCountBySpyOne = jest
+        .spyOn(likesRepository, 'countBy')
+        .mockResolvedValueOnce(1);
+      const likeRepositoryCountBySpyTwo = jest
+        .spyOn(likesRepository, 'countBy')
+        .mockResolvedValueOnce(0);
+      const postRepositoryFindOneSpy = jest
+        .spyOn(postRepository, 'findOne')
+        .mockResolvedValue(null);
+
+      const result = await communityService.createLike(
+        1,
+        1,
+        requestCreateLikeDto,
+      );
+
+      expect(result).toEqual({
+        id: 1,
+        title: '첫번째 게시글',
+        description: '첫번째 내용',
+        hits: 22,
+        categoryId: 1,
+        created_at: new Date('2023-02-01'),
+        isPublished: true,
+        repliesCount: 0,
+        isLike: true,
+        likeCount: 1,
+        unLikeCount: 0,
+        prevPostId: null,
+        nextPostId: null,
+        user: {
+          id: 1,
+          nickname: '피엔',
+          description: '안녕하세요',
+          profileImage: 'https://www.naver.com',
+        },
+      });
+    });
+
+    // 실패
+    it('같은 좋아요 상태를 연속해서 할수 없다.', async () => {
+      const postRepositoryFindOneBySpy = jest
+        .spyOn(postRepository, 'findOneBy')
+        .mockResolvedValue(existingPost);
+      const likeRepositoryFindOneSpy = jest
+        .spyOn(likesRepository, 'findOne')
+        .mockResolvedValue(existingLike);
+
+      const result = async () => {
+        return await communityService.createLike(1, 1, requestCreateLikeDto);
+      };
+
+      expect(result).rejects.toThrow(
+        new HttpException(
+          '이전과 같은 상태의 좋아요/싫어요 요청입니다.',
+          HttpStatus.BAD_REQUEST,
+        ),
+      );
+    });
+
+    // 실패
+    it('존재하지 않는 게시글에 좋아요/싫어요를 생성할 수 없다.', async () => {
+      const postRepositoryFindOneBySpy = jest
+        .spyOn(postRepository, 'findOneBy')
+        .mockResolvedValue(null);
+
+      const result = async () => {
+        return await communityService.createLike(1, 1, requestCreateLikeDto);
+      };
+
+      expect(result).rejects.toThrow(
+        new HttpException('게시글을 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
+      );
+    });
+  });
+
+  describe('deleteLikeByPosts 좋아요/싫어요 다중 삭제', () => {
+    const userId = 1;
+    const existingLikes: LikeEntity[] = [
+      LikeEntity.of({
+        postId: 1,
+        userId: 1,
+        isLike: true,
+      }),
+      LikeEntity.of({
+        postId: 2,
+        userId: 1,
+        isLike: true,
+      }),
+      LikeEntity.of({
+        postId: 3,
+        userId: 1,
+        isLike: true,
+      }),
+    ];
+    const requestDeleteLikeDto: RequestDeleteLikeDto = {
+      postId: [1, 2, 3],
+    };
+
+    // 성공
+    it('리스트로 받은 게시글들의 좋아요/싫어요를 삭제한다.', async () => {
+      const likesRepositoryFindSpy = jest
+        .spyOn(likesRepository, 'find')
+        .mockResolvedValue(existingLikes);
+      const likeRepositoryRemoveSpy = jest
+        .spyOn(likesRepository, 'remove')
+        .mockImplementation();
+
+      const result = await communityService.deleteLikeByPosts(
+        userId,
+        requestDeleteLikeDto,
+      );
+
+      expect(result).toEqual({ postId: [1, 2, 3] });
+    });
+
+    // 실패
+    it('좋아요/ 싫어요를 하지 않은 게시글은 좋아요/싫어요를 삭제할 수 없다.', async () => {
+      const likesRepositoryFindSpy = jest
+        .spyOn(likesRepository, 'find')
+        .mockResolvedValue([existingLikes[0]]);
+
+      const result = async () => {
+        return await communityService.deleteLikeByPosts(
+          userId,
+          requestDeleteLikeDto,
+        );
+      };
+
+      expect(result).rejects.toThrow(
+        new HttpException(
+          '좋아요/싫어요를 하지 않은 게시글이 포함되어 있습니다.',
+          HttpStatus.NOT_FOUND,
+        ),
+      );
+    });
+  });
 });
