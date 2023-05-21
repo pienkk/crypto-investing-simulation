@@ -1155,4 +1155,452 @@ describe('CommunityService', () => {
       );
     });
   });
+
+  describe('deleteLike 좋아요 삭제', () => {
+    const existingUser = UserEntity.of({
+      id: 1,
+      nickname: '피엔',
+      description: '안녕하세요',
+      profileImage: 'https://www.naver.com',
+    });
+    const existingPost: PostEntity = PostEntity.of({
+      id: 1,
+      title: '첫번째 게시글',
+      description: '첫번째 내용',
+      hits: 22,
+      categoryId: 1,
+      created_at: new Date('2023-02-01'),
+      isPublished: true,
+      replies: [],
+      userId: 1,
+    });
+    const existingLike: LikeEntity = LikeEntity.of({
+      postId: 1,
+      userId: 1,
+      isLike: true,
+    });
+    const existingRelationsPost: PostEntity = PostEntity.of({
+      ...existingPost,
+      user: existingUser,
+      replies: [],
+    });
+
+    // 성공
+    it('좋아요를 삭제하고 게시글 정보를 반환한다.', async () => {
+      const postRepositoryFindOneBySpy = jest
+        .spyOn(postRepository, 'findOneBy')
+        .mockResolvedValue(existingPost);
+      const likeRepositoryFindOneSpy = jest
+        .spyOn(likesRepository, 'findOne')
+        .mockResolvedValue(existingLike);
+      const likeRepositorySaveSpy = jest
+        .spyOn(likesRepository, 'delete')
+        .mockImplementation();
+      const postRepositoryFindOneWithUserSpy = jest
+        .spyOn(postRepository, 'findOne')
+        .mockResolvedValueOnce(existingRelationsPost);
+      const likeRepositoryFindOneBySpy = jest
+        .spyOn(likesRepository, 'findOneBy')
+        .mockResolvedValue(existingLike);
+      const likeRepositoryCountBySpyOne = jest
+        .spyOn(likesRepository, 'countBy')
+        .mockResolvedValueOnce(1);
+      const likeRepositoryCountBySpyTwo = jest
+        .spyOn(likesRepository, 'countBy')
+        .mockResolvedValueOnce(0);
+      const postRepositoryFindOneSpy = jest
+        .spyOn(postRepository, 'findOne')
+        .mockResolvedValue(null);
+
+      const result = await communityService.deleteLike(1, 1);
+
+      expect(result).toEqual({
+        id: 1,
+        title: '첫번째 게시글',
+        description: '첫번째 내용',
+        hits: 22,
+        categoryId: 1,
+        created_at: new Date('2023-02-01'),
+        isPublished: true,
+        repliesCount: 0,
+        isLike: true,
+        likeCount: 1,
+        unLikeCount: 0,
+        prevPostId: null,
+        nextPostId: null,
+        user: {
+          id: 1,
+          nickname: '피엔',
+          description: '안녕하세요',
+          profileImage: 'https://www.naver.com',
+        },
+      });
+    });
+
+    // 실패
+    it('좋아요를 하지 않은 게시글은 좋아요를 삭제할 수 없다.', async () => {
+      const postRepositoryFindOneBySpy = jest
+        .spyOn(postRepository, 'findOneBy')
+        .mockResolvedValue(existingPost);
+      const likeRepositoryFindOneSpy = jest
+        .spyOn(likesRepository, 'findOne')
+        .mockResolvedValue(null);
+
+      const result = async () => {
+        return await communityService.deleteLike(1, 1);
+      };
+
+      expect(result).rejects.toThrow(
+        new HttpException(
+          '좋아요/싫어요 한 이력이 없습니다.',
+          HttpStatus.NOT_FOUND,
+        ),
+      );
+    });
+  });
+
+  describe('getUserReplies 유저가 작성한 댓글 조회', () => {
+    const existingUser = UserEntity.of({
+      id: 1,
+      nickname: '피엔',
+      description: '안녕하세요',
+      profileImage: 'https://www.naver.com',
+    });
+    const existingPost: PostEntity = PostEntity.of({
+      id: 1,
+      title: '첫번째 게시글',
+      description: '첫번째 내용',
+      hits: 22,
+      categoryId: 1,
+      created_at: new Date('2023-02-01'),
+      isPublished: true,
+      userId: 1,
+    });
+    const existingReplies: ReplyEntity[] = [
+      ReplyEntity.of({
+        id: 1,
+        comment: '첫번째 댓글',
+        userId: 1,
+        postId: 1,
+        replyId: 1,
+        created_at: new Date('2023-02-02'),
+        deleted_at: null,
+        user: existingUser,
+        post: existingPost,
+      }),
+      ReplyEntity.of({
+        id: 2,
+        comment: '두번째 댓글',
+        userId: 1,
+        postId: 1,
+        replyId: 1,
+        created_at: new Date('2023-02-02'),
+        deleted_at: null,
+        user: existingUser,
+        post: existingPost,
+      }),
+    ];
+    const requestPageNationDto: PageNationDto = {
+      page: 1,
+      number: 10,
+    };
+
+    // 성공
+    it('유저가 작성한 댓글을 반환한다.', async () => {
+      const userRepositoryFindOneBySpy = jest
+        .spyOn(userRepository, 'findOneBy')
+        .mockResolvedValue(existingUser);
+      const replyRepositoryGetReplyByUserSpy = jest
+        .spyOn(replyRepository, 'getReplyByUser')
+        .mockResolvedValue([existingReplies, 2]);
+
+      const result = await communityService.getUserReplies(
+        1,
+        requestPageNationDto,
+      );
+
+      expect(result).toEqual({
+        replies: [
+          {
+            id: 1,
+            comment: '첫번째 댓글',
+            replyId: 1,
+            created_at: new Date('2023-02-02'),
+            deleted_at: null,
+            user: {
+              id: 1,
+              nickname: '피엔',
+              description: '안녕하세요',
+              profileImage: 'https://www.naver.com',
+            },
+            post: {
+              id: 1,
+              title: '첫번째 게시글',
+              description: '첫번째 내용',
+              isPublished: true,
+              hits: 22,
+              categoryId: 1,
+              created_at: new Date('2023-02-01'),
+            },
+          },
+          {
+            id: 2,
+            comment: '두번째 댓글',
+            replyId: 1,
+            created_at: new Date('2023-02-02'),
+            deleted_at: null,
+            user: {
+              id: 1,
+              nickname: '피엔',
+              description: '안녕하세요',
+              profileImage: 'https://www.naver.com',
+            },
+            post: {
+              id: 1,
+              title: '첫번째 게시글',
+              description: '첫번째 내용',
+              isPublished: true,
+              hits: 22,
+              categoryId: 1,
+              created_at: new Date('2023-02-01'),
+            },
+          },
+        ],
+        number: 2,
+      });
+    });
+
+    // 실패
+    it('존재하지 않는 유저의 댓글을 조회할 수 없다.', async () => {
+      const userRepositoryFindOneBySpy = jest
+        .spyOn(userRepository, 'findOneBy')
+        .mockResolvedValue(null);
+
+      const result = async () => {
+        return await communityService.getUserReplies(1, requestPageNationDto);
+      };
+
+      expect(result).rejects.toThrow(
+        new HttpException('유저를 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
+      );
+    });
+  });
+
+  describe('getUserReplyPosts 유저가 작성한 댓글의 게시글 리스트 조회', () => {
+    const userId = 1;
+    const requestPageNationDto: PageNationDto = {
+      page: 1,
+      number: 10,
+    };
+    const existingUser = UserEntity.of({
+      id: 1,
+      nickname: '피엔',
+      description: '안녕하세요',
+      profileImage: 'https://www.naver.com',
+    });
+    const existingPosts: PostEntity[] = [
+      PostEntity.of({
+        id: 1,
+        title: '첫번째 게시글',
+        description: '첫번째 내용',
+        hits: 22,
+        categoryId: 1,
+        created_at: new Date('2023-02-01'),
+        isPublished: true,
+        replies: [],
+        user: existingUser,
+      }),
+      PostEntity.of({
+        id: 2,
+        title: '두번째 게시글',
+        description: '두번째 내용',
+        hits: 22,
+        categoryId: 1,
+        created_at: new Date('2023-02-01'),
+        isPublished: true,
+        replies: [],
+        user: existingUser,
+      }),
+    ];
+
+    // 성공
+    it('유저가 작성한 댓글의 게시글 리스트를 반환한다.', async () => {
+      const userRepositoryFindOneBySpy = jest
+        .spyOn(userRepository, 'findOneBy')
+        .mockResolvedValue(existingUser);
+      const postRepositoryGetUserReplyByPostSpy = jest
+        .spyOn(postRepository, 'getUserReplyByPosts')
+        .mockResolvedValue([existingPosts, 2]);
+
+      const result = await communityService.getUserReplyPosts(
+        userId,
+        requestPageNationDto,
+      );
+
+      expect(result).toEqual({
+        post: [
+          {
+            id: 1,
+            title: '첫번째 게시글',
+            description: '첫번째 내용',
+            isPublished: true,
+            hits: 22,
+            categoryId: 1,
+            created_at: new Date('2023-02-01'),
+            repliesCount: 0,
+            user: {
+              id: 1,
+              nickname: '피엔',
+              description: '안녕하세요',
+              profileImage: 'https://www.naver.com',
+            },
+          },
+          {
+            id: 2,
+            title: '두번째 게시글',
+            description: '두번째 내용',
+            isPublished: true,
+            hits: 22,
+            categoryId: 1,
+            created_at: new Date('2023-02-01'),
+            repliesCount: 0,
+            user: {
+              id: 1,
+              nickname: '피엔',
+              description: '안녕하세요',
+              profileImage: 'https://www.naver.com',
+            },
+          },
+        ],
+        number: 2,
+      });
+    });
+
+    // 실패
+    it('존재하지 않는 유저의 댓글의 게시글 리스트를 조회할 수 없다.', async () => {
+      const userRepositoryFindOneBySpy = jest
+        .spyOn(userRepository, 'findOneBy')
+        .mockResolvedValue(null);
+
+      const result = async () => {
+        return await communityService.getUserReplyPosts(
+          userId,
+          requestPageNationDto,
+        );
+      };
+
+      expect(result).rejects.toThrow(
+        new HttpException('유저를 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
+      );
+    });
+  });
+
+  describe('getUserLikes 유저가 좋아요한 게시글 리스트 조회', () => {
+    const userId = 1;
+    const requestPageNationDto: PageNationDto = {
+      page: 1,
+      number: 10,
+    };
+    const existingUser = UserEntity.of({
+      id: 1,
+      nickname: '피엔',
+      description: '안녕하세요',
+      profileImage: 'https://www.naver.com',
+    });
+    const existingPosts: PostEntity[] = [
+      PostEntity.of({
+        id: 1,
+        title: '첫번째 게시글',
+        description: '첫번째 내용',
+        hits: 22,
+        categoryId: 1,
+        created_at: new Date('2023-02-01'),
+        isPublished: true,
+        replies: [],
+        user: existingUser,
+      }),
+      PostEntity.of({
+        id: 2,
+        title: '두번째 게시글',
+        description: '두번째 내용',
+        hits: 22,
+        categoryId: 1,
+        created_at: new Date('2023-02-01'),
+        isPublished: true,
+        replies: [],
+        user: existingUser,
+      }),
+    ];
+
+    // 성공
+    it('유저가 좋아요한 게시글 리스트를 반환한다.', async () => {
+      const userRepositoryFindOneBySpy = jest
+        .spyOn(userRepository, 'findOneBy')
+        .mockResolvedValue(existingUser);
+      const postRepositoryGetUserLikesSpy = jest
+        .spyOn(postRepository, 'getLikePosts')
+        .mockResolvedValue([existingPosts, 2]);
+
+      const result = await communityService.getUserLikes(
+        userId,
+        requestPageNationDto,
+      );
+
+      expect(result).toEqual({
+        post: [
+          {
+            id: 1,
+            title: '첫번째 게시글',
+            description: '첫번째 내용',
+            isPublished: true,
+            hits: 22,
+            categoryId: 1,
+            created_at: new Date('2023-02-01'),
+            repliesCount: 0,
+            user: {
+              id: 1,
+              nickname: '피엔',
+              description: '안녕하세요',
+              profileImage: 'https://www.naver.com',
+            },
+          },
+          {
+            id: 2,
+            title: '두번째 게시글',
+            description: '두번째 내용',
+            isPublished: true,
+            hits: 22,
+            categoryId: 1,
+            created_at: new Date('2023-02-01'),
+            repliesCount: 0,
+            user: {
+              id: 1,
+              nickname: '피엔',
+              description: '안녕하세요',
+              profileImage: 'https://www.naver.com',
+            },
+          },
+        ],
+        number: 2,
+      });
+    });
+
+    // 실패
+    it('존재하지 않는 유저의 좋아요한 게시글 리스트를 조회할 수 없다.', async () => {
+      const userRepositoryFindOneBySpy = jest
+        .spyOn(userRepository, 'findOneBy')
+        .mockResolvedValue(null);
+
+      const result = async () => {
+        return await communityService.getUserLikes(
+          userId,
+          requestPageNationDto,
+        );
+      };
+
+      expect(result).rejects.toThrow(
+        new HttpException('유저를 찾을 수 없습니다.', HttpStatus.NOT_FOUND),
+      );
+    });
+  });
 });
