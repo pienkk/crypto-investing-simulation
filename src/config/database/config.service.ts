@@ -1,14 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
-import { LikeEntity } from 'src/community/entity/like.entity';
-import { PostEntity } from 'src/community/entity/post.entity';
-import { ReplyEntity } from 'src/community/entity/reply.entity';
-import { CoinEntity } from 'src/market/entity/coin.entity';
-import { CoinHistoryEntity } from 'src/market/entity/coinHistory.entity';
-import { TradeEntity } from 'src/trade/entity/trade.entity';
-import { UserEntity } from 'src/user/entity/user.entity';
-import { WalletEntity } from 'src/wallet/entity/wallet.entity';
+import { join } from 'path';
 
 @Injectable()
 export class MySqlConfigService implements TypeOrmOptionsFactory {
@@ -23,17 +16,9 @@ export class MySqlConfigService implements TypeOrmOptionsFactory {
       database: this.configService.get<string>('DB_DATABASE'),
       logging: true,
       synchronize: true,
+      entities: [join(__dirname, '../../**/*.entity.{ts,js}')],
+
       // dropSchema: true,
-      entities: [
-        PostEntity,
-        ReplyEntity,
-        UserEntity,
-        CoinEntity,
-        CoinHistoryEntity,
-        TradeEntity,
-        WalletEntity,
-        LikeEntity,
-      ],
     };
   }
 }

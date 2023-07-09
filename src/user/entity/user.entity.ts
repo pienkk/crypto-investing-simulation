@@ -1,3 +1,6 @@
+import { ChatParticipantEntity } from 'src/chat-room/entity/chat_participant.entity';
+import { ChatEntity } from 'src/chat/entity/chat.entity';
+import { UserReadChatEntity } from 'src/chat/entity/user-read-chat.entity';
 import { LikeEntity } from 'src/community/entity/like.entity';
 import { PostEntity } from 'src/community/entity/post.entity';
 import { ReplyEntity } from 'src/community/entity/reply.entity';
@@ -9,6 +12,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -96,6 +100,18 @@ export class UserEntity {
 
   @OneToMany(() => LikeEntity, (likes) => likes.user)
   likes: LikeEntity[];
+
+  @OneToMany(
+    () => ChatParticipantEntity,
+    (chatParticipant) => chatParticipant.user,
+  )
+  chatParticipants: ChatParticipantEntity[];
+
+  @OneToMany(() => ChatEntity, (chat) => chat.user)
+  chats: ChatEntity[];
+
+  @OneToMany(() => UserReadChatEntity, (userReadChat) => userReadChat.user)
+  userReadChats: UserReadChatEntity[];
 
   static of(params: Partial<UserEntity>): UserEntity {
     const user = new UserEntity();

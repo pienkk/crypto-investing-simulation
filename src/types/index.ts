@@ -9,5 +9,5 @@ export function createResponseForm<T>(data: T): Try<T> {
   return {
     isSuccess: true,
     data,
-  } as const;
+  };
 }
