@@ -255,8 +255,9 @@ export class CommunityService {
 
     // 대댓글 작성 요청 시
     if (createReplyDto.replyId) {
-      const reply = await this.replyRepository.findOneBy({
-        id: createReplyDto.replyId,
+      const reply = await this.replyRepository.findOne({
+        where: { id: createReplyDto.replyId },
+        withDeleted: true,
       });
 
       // 대댓글 요청할 때 원본 댓글이 없는 경우
