@@ -1,9 +1,9 @@
 import { CustomRepository } from 'src/config/typeorm/typeorm-ex.decorator';
 import { Repository } from 'typeorm';
-import { Wallet } from './wallet.entity';
+import { WalletEntity } from './wallet.entity';
 
-@CustomRepository(Wallet)
-export class WalletRepository extends Repository<Wallet> {
+@CustomRepository(WalletEntity)
+export class WalletRepository extends Repository<WalletEntity> {
   async getWallet(userId: number) {
     return await this.createQueryBuilder('w')
       .leftJoin('w.coin', 'coin')

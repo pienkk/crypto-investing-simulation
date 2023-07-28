@@ -17,6 +17,8 @@ import { GlobalExceptionFilter } from 'src/util/exception/http-exception.filter'
 import { APP_FILTER } from '@nestjs/core';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { AuthModule } from './auth/auth.module';
+import { ChatRoomModule } from './chat-room/chat-room.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -45,6 +47,8 @@ import { AuthModule } from './auth/auth.module';
     WalletModule,
     RankingModule,
     AuthModule,
+    ChatRoomModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [

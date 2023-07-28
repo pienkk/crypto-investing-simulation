@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDate, IsEnum, IsNumber, IsString } from 'class-validator';
-import { Trade } from '../entity/trade.entity';
+import { TradeEntity } from '../entity/trade.entity';
 import { PurchaseStatus, TradeStatus } from '../enum/trade.status.enum';
 
 export class ResponseTradeDto {
@@ -56,7 +56,7 @@ export class ResponseTradeDto {
   @ApiProperty({ description: '생성 시간' })
   private created_at: Date;
 
-  static fromEntity(entity: Trade): ResponseTradeDto {
+  static fromEntity(entity: TradeEntity): ResponseTradeDto {
     const dto = new ResponseTradeDto();
     dto.id = entity.id;
     dto.name = entity.coin.name;
@@ -75,7 +75,7 @@ export class ResponseTradeDto {
     return dto;
   }
 
-  static fromEntities(entities: Trade[]): ResponseTradeDto[] {
+  static fromEntities(entities: TradeEntity[]): ResponseTradeDto[] {
     return entities.map((entity) => ResponseTradeDto.fromEntity(entity));
   }
 }

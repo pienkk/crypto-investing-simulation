@@ -3,35 +3,41 @@ import {
   RequestCreatePostDto,
   RequestDeletePostDto,
   RequestUpdatePostDto,
-} from './dto/Request-post.dto';
+} from './dto/request-post.dto';
 import {
   RequestCreateReplyDto,
   RequestDeleteReplyDto,
   RequestUpdateReplyDto,
-} from './dto/Request-reply.dto';
+} from './dto/request-reply.dto';
 import {
   PageNationDto,
   RequestGetPostsQueryDto,
-} from './dto/Request-query.dto';
+} from './dto/request-query.dto';
 import {
   ResponsePostPageNationDto,
   ResponsePostDetailDto,
   ResponsePostDto,
-} from './dto/Response-post.dto';
+  ResponseCreatePostDto,
+} from './dto/response-post.dto';
 import {
-  ResponseReplyPageNationDto,
   ResponseReplyDto,
-} from './dto/Response-reply.dto';
-import { Posts } from './entity/post.entity';
+  ResponseReplyByUserDto,
+  ResponseReplyByUserPageNationDto,
+} from './dto/response-reply.dto';
+import { PostEntity } from './entity/post.entity';
 import { PostRepository } from './entity/post.repository';
-import { Reply } from './entity/reply.entity';
+import { ReplyEntity } from './entity/reply.entity';
 import { ReplyRepository } from './entity/reply.repository';
-import { RequestCreateLikeDto } from './dto/Request-like.dto';
+import {
+  RequestCreateLikeDto,
+  RequestDeleteLikeDto,
+} from './dto/request-like.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Likes } from './entity/like.entity';
+import { LikeEntity } from './entity/like.entity';
 import { Repository, In, MoreThan, LessThan } from 'typeorm';
 import { UserRepository } from '../user/entity/user.repository';
-import { User } from '../user/entity/user.entity';
+import { UserEntity } from '../user/entity/user.entity';
+import { ResponseDeleteLikesDto } from './dto/response-like-dto';
 
 /**
  * 커뮤니티 비즈니스 로직
@@ -41,8 +47,8 @@ export class CommunityService {
   constructor(
     private readonly postRepository: PostRepository,
     private readonly replyRepository: ReplyRepository,
-    @InjectRepository(Likes)
-    private readonly likeRepository: Repository<Likes>,
+    @InjectRepository(LikeEntity)
+    private readonly likeRepository: Repository<LikeEntity>,
     private readonly userRepository: UserRepository,
   ) {}
 
@@ -53,7 +59,7 @@ export class CommunityService {
   private async postValidation(
     postId: number,
     userId?: number,
-  ): Promise<Posts> {
+  ): Promise<PostEntity> {
     const post = await this.postRepository.findOneBy({
       id: postId,
     });
@@ -110,23 +116,27 @@ export class CommunityService {
       relations: ['user', 'replies'],
     });
 
-    // 좋아요 여부, 좋아요, 싫어요 카운트
+    // 좋아요 여부 확인
     const like = await this.likeRepository.findOneBy({ postId, userId });
+    // 좋아요 횟수 카운트
     const likeCount = await this.likeRepository.countBy({
       postId,
       isLike: true,
     });
+    // 싫어요 횟수 카운트
     const unlikeCount = await this.likeRepository.countBy({
       postId,
       isLike: false,
     });
 
+    // 다음 글 정보
     const nextPost = await this.postRepository.findOne({
-      where: { id: MoreThan(postId) },
+      where: { id: MoreThan(postId), isPublished: true },
     });
 
+    // 이전 글 정보
     const prevPost = await this.postRepository.findOne({
-      where: { id: LessThan(postId) },
+      where: { id: LessThan(postId), isPublished: true },
       order: { id: 'DESC' },
     });
 
@@ -152,7 +162,7 @@ export class CommunityService {
   async createPost(
     createPostDto: RequestCreatePostDto,
     userId: number,
-  ): Promise<{ postId: number }> {
+  ): Promise<ResponseCreatePostDto> {
     const post = this.postRepository.create({ ...createPostDto, userId });
 
     const savedPost = await this.postRepository.save(post);
@@ -167,13 +177,13 @@ export class CommunityService {
     postId: number,
     userId: number,
     updatePostDto: RequestUpdatePostDto,
-  ): Promise<boolean> {
+  ): Promise<ResponseCreatePostDto> {
     await this.postValidation(postId, userId);
 
     // 게시글 수정
-    const result = await this.postRepository.update(postId, updatePostDto);
+    await this.postRepository.update(postId, updatePostDto);
 
-    return result.affected === 1 ? true : false;
+    return { postId: postId };
   }
 
   /**
@@ -195,11 +205,10 @@ export class CommunityService {
       );
     }
 
-    await Promise.all(
-      posts.map(async (post) => {
-        await this.postRepository.save({ ...post, isPublished: false });
-      }),
-    );
+    // 게시글 비활성화 처리
+    for await (const post of posts) {
+      await this.postRepository.update(post.id, { isPublished: false });
+    }
 
     return true;
   }
@@ -224,7 +233,7 @@ export class CommunityService {
   }
 
   /**
-   * 댓글 리스트 반환
+   * 댓글 리스트 조회
    */
   async getReplies(postId: number): Promise<ResponseReplyDto[]> {
     await this.postValidation(postId);
@@ -246,23 +255,28 @@ export class CommunityService {
 
     // 대댓글 작성 요청 시
     if (createReplyDto.replyId) {
-      const reply = await this.replyRepository.findOneBy({
-        id: createReplyDto.replyId,
+      const reply = await this.replyRepository.findOne({
+        where: { id: createReplyDto.replyId },
+        withDeleted: true,
       });
 
       // 대댓글 요청할 때 원본 댓글이 없는 경우
       if (!reply)
-        throw new HttpException('Reply is not found', HttpStatus.NOT_FOUND);
+        throw new HttpException(
+          '부모 댓글이 존재하지 않습니다.',
+          HttpStatus.NOT_FOUND,
+        );
     }
 
     // 댓글 생성
-    const reply = this.replyRepository.create({ ...createReplyDto, userId });
-    const savedReply = await this.replyRepository.save(reply);
+    const savedReply = await this.replyRepository.save({
+      ...createReplyDto,
+      userId,
+    });
 
     // 원본 댓글 작성시 자기 자신의 id를 replyId로 가진다
     if (!savedReply.replyId) {
-      await this.replyRepository.save({
-        ...savedReply,
+      await this.replyRepository.update(savedReply.id, {
         replyId: savedReply.id,
       });
     }
@@ -279,7 +293,7 @@ export class CommunityService {
   private async replyValidation(
     replyId: number,
     userId: number,
-  ): Promise<Reply> {
+  ): Promise<ReplyEntity> {
     const reply = await this.replyRepository.findOneBy({ id: replyId });
 
     // 댓글이 존재하지 않거나, soft delete 상태일 경우
@@ -307,7 +321,9 @@ export class CommunityService {
   ): Promise<boolean> {
     await this.replyValidation(replyId, userId);
 
-    const result = await this.replyRepository.update(replyId, updateReplyDto);
+    const result = await this.replyRepository.update(replyId, {
+      comment: updateReplyDto.comment,
+    });
 
     return result.affected === 1 ? true : false;
   }
@@ -371,6 +387,30 @@ export class CommunityService {
   }
 
   /**
+   * 좋아요 / 싫어요 다중 삭제
+   */
+  async deleteLikeByPosts(
+    userId: number,
+    { postId }: RequestDeleteLikeDto,
+  ): Promise<ResponseDeleteLikesDto> {
+    const likes = await this.likeRepository.find({
+      where: { userId, postId: In(postId) },
+    });
+
+    // 좋아요 / 싫어요 이력이 없을 경우
+    if (likes.length !== postId.length) {
+      throw new HttpException(
+        '좋아요/싫어요를 하지 않은 게시글이 포함되어 있습니다.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    await this.likeRepository.remove(likes);
+
+    return { postId };
+  }
+
+  /**
    * 좋아요 / 싫어요 삭제, 게시글 상세 정보 반환
    */
   async deleteLike(
@@ -402,7 +442,7 @@ export class CommunityService {
   async getUserReplies(
     userId: number,
     query: PageNationDto,
-  ): Promise<ResponseReplyPageNationDto> {
+  ): Promise<ResponseReplyByUserPageNationDto> {
     await this.userValidation(userId);
 
     const [replies, number] = await this.replyRepository.getReplyByUser(
@@ -412,8 +452,8 @@ export class CommunityService {
     );
 
     // 댓글 리스트 반환
-    const replyDto = ResponseReplyDto.fromEntities(replies);
-    return { replies: replyDto, number } as ResponseReplyPageNationDto;
+    const replyDto = ResponseReplyByUserDto.fromEntities(replies);
+    return { replies: replyDto, number } as ResponseReplyByUserPageNationDto;
   }
 
   /**
@@ -454,11 +494,11 @@ export class CommunityService {
     return { post: postDto, number };
   }
 
-  async userValidation(userId: number): Promise<User> {
+  async userValidation(userId: number): Promise<UserEntity> {
     const user = await this.userRepository.findOneBy({ id: userId });
 
     if (!user) {
-      throw new HttpException('유저를 찾을 수 않습니다.', HttpStatus.NOT_FOUND);
+      throw new HttpException('유저를 찾을 수 없습니다.', HttpStatus.NOT_FOUND);
     }
 
     return user;

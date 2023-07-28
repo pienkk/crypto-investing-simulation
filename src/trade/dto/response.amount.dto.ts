@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsString } from 'class-validator';
-import { Coin } from 'src/market/entity/coin.entity';
+import { CoinEntity } from 'src/market/entity/coin.entity';
 
 export class ResponseAmountDto {
   @IsNumber()
@@ -19,7 +19,7 @@ export class ResponseAmountDto {
   @ApiProperty({ description: '소지 금액' })
   private money: number;
 
-  static fromDto(entity: Coin): ResponseAmountDto {
+  static fromDto(entity: CoinEntity): ResponseAmountDto {
     const dto = new ResponseAmountDto();
     dto.id = entity.id;
     dto.name = entity.name;

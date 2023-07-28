@@ -14,25 +14,25 @@ import {
   RequestCreatePostDto,
   RequestDeletePostDto,
   RequestUpdatePostDto,
-} from './dto/Request-post.dto';
+} from './dto/request-post.dto';
 import {
   RequestCreateReplyDto,
   RequestDeleteReplyDto,
   RequestUpdateReplyDto,
-} from './dto/Request-reply.dto';
+} from './dto/request-reply.dto';
 import {
   PageNationDto,
   RequestGetPostsQueryDto,
-} from './dto/Request-query.dto';
+} from './dto/request-query.dto';
 import {
   ResponsePostPageNationDto,
   ResponseCreatePostDto,
   ResponsePostDetailDto,
-} from './dto/Response-post.dto';
+} from './dto/response-post.dto';
 import {
-  ResponseReplyPageNationDto,
+  ResponseReplyByUserPageNationDto,
   ResponseReplyDto,
-} from './dto/Response-reply.dto';
+} from './dto/response-reply.dto';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -47,7 +47,10 @@ import { JwtAuthGuard } from 'src/auth/security/auth.guard';
 import { CurrentUser } from 'src/auth/security/auth.user.param';
 import { JwtPayload } from 'src/auth/jwt-payload.interface';
 import { OptionalJwtAuthGuard } from 'src/auth/security/optionalAuth.guard';
-import { RequestCreateLikeDto } from './dto/Request-like.dto';
+import {
+  RequestCreateLikeDto,
+  RequestDeleteLikeDto,
+} from './dto/request-like.dto';
 import { createResponseForm, Try } from 'src/types';
 import {
   responseArraySchema,
@@ -55,6 +58,7 @@ import {
   responseErrorSchema,
   responseObjectSchema,
 } from 'src/types/swagger';
+import { ResponseDeleteLikesDto } from './dto/response-like-dto';
 
 @ApiTags('Community')
 @Controller('community')
@@ -131,9 +135,10 @@ export class CommunityController {
     summary: '커뮤니티 게시글 수정 API',
     description: '게시글을 수정하고 결과 값을 반환한다.',
   })
+  @ApiExtraModels(ResponseCreatePostDto)
   @ApiResponse({
     status: 200,
-    schema: responseBooleanSchema(),
+    schema: responseObjectSchema(ResponseCreatePostDto),
   })
   @ApiNotFoundResponse({
     description: '수정하고자 하는 게시글이 존재하지 않을 때',
@@ -150,14 +155,14 @@ export class CommunityController {
     @CurrentUser() user: JwtPayload,
     @Param('postId') postId: number,
     @Body() updatePostDto: RequestUpdatePostDto,
-  ): Promise<Try<boolean>> {
-    const boolean = await this.communityService.updatePost(
+  ): Promise<Try<ResponseCreatePostDto>> {
+    const responsePostId = await this.communityService.updatePost(
       postId,
       user.id,
       updatePostDto,
     );
 
-    return createResponseForm(boolean);
+    return createResponseForm(responsePostId);
   }
 
   @Delete('post')
@@ -240,6 +245,10 @@ export class CommunityController {
     description: '게시글이 존재하지 않을 때',
     schema: responseErrorSchema('게시글이 존재하지 않습니다'),
   })
+  @ApiNotFoundResponse({
+    description: '부모 댓글이 존재하지 않을 때',
+    schema: responseErrorSchema('부모 댓글이 존재하지 않습니다.'),
+  })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async createReply(
@@ -317,10 +326,10 @@ export class CommunityController {
     summary: '유저 댓글 조회 API',
     description: '특정 유저가 작성한 댓글 리스트를 반환한다.',
   })
-  @ApiExtraModels(ResponseReplyPageNationDto)
+  @ApiExtraModels(ResponseReplyByUserPageNationDto)
   @ApiResponse({
     status: 200,
-    schema: responseObjectSchema(ResponseReplyPageNationDto),
+    schema: responseObjectSchema(ResponseReplyByUserPageNationDto),
   })
   @ApiNotFoundResponse({
     description: '유저가 존재하지 않을 때',
@@ -329,7 +338,7 @@ export class CommunityController {
   async getUserReplies(
     @Param('userId') userId: number,
     @Query() pageNation: PageNationDto,
-  ): Promise<Try<ResponseReplyPageNationDto>> {
+  ): Promise<Try<ResponseReplyByUserPageNationDto>> {
     const replies = await this.communityService.getUserReplies(
       userId,
       pageNation,
@@ -399,6 +408,36 @@ export class CommunityController {
     return createResponseForm(post);
   }
 
+  @Delete('like')
+  @ApiOperation({
+    summary: '게시글 좋아요/싫어요 다중 삭제 API',
+    description:
+      '게시글에 했던 좋아요/싫어요 기록을 삭제한 후 삭제한 게시글 id 리스트를 반환한다.',
+  })
+  @ApiExtraModels(ResponseDeleteLikesDto)
+  @ApiResponse({
+    status: 204,
+    schema: responseObjectSchema(ResponseDeleteLikesDto),
+  })
+  @ApiNotFoundResponse({
+    description: '좋아요/싫어요를 하지 않은 게시글이 존재할 때',
+    schema: responseErrorSchema(
+      '좋아요/싫어요를 하지 않은 게시글이 포함되어 있습니다.',
+    ),
+  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async deleteLikeByPost(
+    @CurrentUser() user: JwtPayload,
+    @Body() requestDeleteLikeDto: RequestDeleteLikeDto,
+  ): Promise<Try<ResponseDeleteLikesDto>> {
+    const deletedPostIds = await this.communityService.deleteLikeByPosts(
+      user.id,
+      requestDeleteLikeDto,
+    );
+
+    return createResponseForm(deletedPostIds);
+  }
   @Delete('like/:postId')
   @ApiOperation({
     summary: '게시글 좋아요/싫어요 삭제 API',

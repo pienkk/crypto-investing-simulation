@@ -1,10 +1,9 @@
-import { symbol } from 'joi';
 import { CustomRepository } from 'src/config/typeorm/typeorm-ex.decorator';
 import { Repository } from 'typeorm';
-import { CoinHistory } from './coinHistory.entity';
+import { CoinHistoryEntity } from './coinHistory.entity';
 
-@CustomRepository(CoinHistory)
-export class CoinHistoryRepository extends Repository<CoinHistory> {
+@CustomRepository(CoinHistoryEntity)
+export class CoinHistoryRepository extends Repository<CoinHistoryEntity> {
   async insertCoinHistoriesByWS(coinInfo) {
     const bulk = coinInfo.map((el) => {
       return this.create({

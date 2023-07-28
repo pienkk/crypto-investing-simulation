@@ -1,10 +1,18 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { ResponseMoneyRankDto } from 'src/ranking/dto/response.moneyRank.dto';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import {
   ApiBearerAuth,
   ApiBody,
   ApiExtraModels,
+  ApiNotFoundResponse,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -13,14 +21,19 @@ import { CurrentUser } from 'src/auth/security/auth.user.param';
 import { JwtPayload } from 'src/auth/jwt-payload.interface';
 import { JwtAuthGuard } from 'src/auth/security/auth.guard';
 import { RequestSignInDto } from './dto/request-user.dto';
-import { ResponseSignInDto } from './dto/response-user.dto';
-import { ResponsePostDto } from 'src/community/dto/Response-post.dto';
+import {
+  ResponseSignInDto,
+  ResponseUserCountDto,
+  ResponseUserInfoDto,
+} from './dto/response-user.dto';
+import { ResponsePostPageNationDto } from 'src/community/dto/response-post.dto';
 import { Try, createResponseForm } from 'src/types';
 import {
-  responseArraySchema,
   responseBooleanSchema,
+  responseErrorSchema,
   responseObjectSchema,
 } from 'src/types/swagger';
+import { PageNationDto } from 'src/community/dto/request-query.dto';
 
 @Controller('user')
 export class UserController {
@@ -33,15 +46,20 @@ export class UserController {
   })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @ApiExtraModels(ResponsePostDto)
+  @ApiExtraModels(ResponsePostPageNationDto)
   @ApiResponse({
     status: 200,
-    schema: responseArraySchema(ResponsePostDto),
+    schema: responseObjectSchema(ResponsePostPageNationDto),
+  })
+  @ApiNotFoundResponse({
+    description: '유저 정보가 없을 경우',
+    schema: responseErrorSchema('유저가 존재하지 않습니다.'),
   })
   async getMyDeletePosts(
     @CurrentUser() user: JwtPayload,
-  ): Promise<Try<ResponsePostDto[]>> {
-    const posts = await this.userService.getMyDeletePosts(user.id);
+    @Query() pageNation: PageNationDto,
+  ): Promise<Try<ResponsePostPageNationDto>> {
+    const posts = await this.userService.getMyDeletePosts(user.id, pageNation);
 
     return createResponseForm(posts);
   }
@@ -49,7 +67,8 @@ export class UserController {
   @Post('check')
   @ApiOperation({
     summary: '닉네임 중복체크 API',
-    description: '해당 닉네임이 중복되어 있는지 확인한다 (중복가입불가)',
+    description:
+      '해당 닉네임이 중복되어 있는지 확인한다. 중복된 유저가 없으면 true를 반환한다.',
   })
   @ApiResponse({
     status: 200,
@@ -63,20 +82,40 @@ export class UserController {
     return createResponseForm(isNickname);
   }
 
+  @Get('count')
+  @ApiOperation({
+    summary: '유저 수 조회 API',
+    description: '현재 가입되어 있는 유저수를 조회한다.',
+  })
+  @ApiExtraModels(ResponseUserCountDto)
+  @ApiResponse({
+    status: 200,
+    schema: responseObjectSchema(ResponseUserCountDto),
+  })
+  async getUserCount(): Promise<Try<ResponseUserCountDto>> {
+    const count = await this.userService.getUserCount();
+
+    return createResponseForm(count);
+  }
+
   @Get(':userId')
   @ApiOperation({
     summary: '유저 정보 조회 API',
     description: '유저ID에 해당하는 유저 정보를 조회한다.',
   })
-  @ApiExtraModels(ResponseMoneyRankDto)
+  @ApiExtraModels(ResponseUserInfoDto)
   @ApiResponse({
     status: 200,
-    schema: responseObjectSchema(ResponseMoneyRankDto),
+    schema: responseObjectSchema(ResponseUserInfoDto),
+  })
+  @ApiNotFoundResponse({
+    description: '유저 정보가 없을 경우',
+    schema: responseErrorSchema('유저가 존재하지 않습니다.'),
   })
   @ApiParam({ name: 'userId', description: '유저 ID' })
   async getUserInfo(
     @Param('userId') userId: number,
-  ): Promise<Try<ResponseMoneyRankDto>> {
+  ): Promise<Try<ResponseUserInfoDto>> {
     const user = await this.userService.getUserInfo(userId);
 
     return createResponseForm(user);
@@ -90,6 +129,10 @@ export class UserController {
   @ApiExtraModels(ResponseSignInDto)
   @ApiBody({ type: RequestSignInDto })
   @ApiResponse({ status: 200, schema: responseObjectSchema(ResponseSignInDto) })
+  @ApiNotFoundResponse({
+    description: '유저 정보가 없을 경우',
+    schema: responseErrorSchema('유저가 존재하지 않습니다.'),
+  })
   async socialLogin(
     @Body() socialLoginDto: RequestSignInDto,
   ): Promise<Try<ResponseSignInDto>> {

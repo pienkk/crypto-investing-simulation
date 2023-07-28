@@ -22,7 +22,7 @@ import { CurrentUser } from 'src/auth/security/auth.user.param';
 import { CreateTradeDto } from './dto/create.trade.dto';
 import { ResponseAmountDto } from './dto/response.amount.dto';
 import { ResponseTradeDto } from './dto/response.trade.dto';
-import { Trade } from './entity/trade.entity';
+import { TradeEntity } from './entity/trade.entity';
 import { TradeService } from './trade.service';
 import { Try, createResponseForm } from 'src/types';
 import {
@@ -32,7 +32,7 @@ import {
   responseObjectSchema,
 } from 'src/types/swagger';
 
-@ApiTags('Trade')
+@ApiTags('TradeEntity')
 @Controller('trade')
 export class TradeController {
   constructor(private readonly tradeService: TradeService) {}
@@ -77,15 +77,15 @@ export class TradeController {
     summary: '코인 거래 API',
     description: '코인 구매, 판매 주문을 실행한다.',
   })
-  @ApiExtraModels(Trade)
-  @ApiResponse({ status: 201, schema: responseObjectSchema(Trade) })
+  @ApiExtraModels(TradeEntity)
+  @ApiResponse({ status: 201, schema: responseObjectSchema(TradeEntity) })
   @ApiBody({ type: CreateTradeDto })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async createTrade(
     @CurrentUser() user: JwtPayload,
     @Body() createTradeDto: CreateTradeDto,
-  ): Promise<Try<Trade>> {
+  ): Promise<Try<TradeEntity>> {
     const trade = await this.tradeService.createTrade(createTradeDto, user.id);
 
     return createResponseForm(trade);

@@ -1,9 +1,10 @@
 import { CustomRepository } from 'src/config/typeorm/typeorm-ex.decorator';
 import { Repository } from 'typeorm';
-import { User } from './user.entity';
+import { UserEntity } from './user.entity';
+import { ExistingUserRank } from '../dto/rank-user.dto';
 
-@CustomRepository(User)
-export class UserRepository extends Repository<User> {
+@CustomRepository(UserEntity)
+export class UserRepository extends Repository<UserEntity> {
   async updateMoney(userMoney: number, userId: number) {
     return await this.createQueryBuilder('u')
       .update()
@@ -61,7 +62,7 @@ export class UserRepository extends Repository<User> {
       .getRawMany();
   }
 
-  async getRankByUser(userId: number) {
+  async getRankByUser(userId: number): Promise<ExistingUserRank> {
     return await this.createQueryBuilder('user')
       .leftJoin('user.wallet', 'wallet')
       .leftJoin('wallet.coin', 'coin')
@@ -72,6 +73,7 @@ export class UserRepository extends Repository<User> {
         'user.money / 10000 AS yieldPercent',
         'rank() over (order by user.money desc) as ranking',
       ])
+      .where('user.id = :userId', { userId })
       .groupBy('user.id')
       .orderBy('ranking', 'ASC')
       .getRawOne();

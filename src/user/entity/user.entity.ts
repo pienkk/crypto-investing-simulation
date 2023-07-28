@@ -1,13 +1,25 @@
-import { Likes } from 'src/community/entity/like.entity';
-import { Posts } from 'src/community/entity/post.entity';
-import { Reply } from 'src/community/entity/reply.entity';
+import { ChatParticipantEntity } from 'src/chat-room/entity/chat_participant.entity';
+import { ChatEntity } from 'src/chat/entity/chat.entity';
+import { UserReadChatEntity } from 'src/chat/entity/user-read-chat.entity';
+import { LikeEntity } from 'src/community/entity/like.entity';
+import { PostEntity } from 'src/community/entity/post.entity';
+import { ReplyEntity } from 'src/community/entity/reply.entity';
 import { ColumnTransform } from 'src/config/database/columnTrans';
-import { Trade } from 'src/trade/entity/trade.entity';
-import { Wallet } from 'src/wallet/entity/wallet.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { TradeEntity } from 'src/trade/entity/trade.entity';
+import { WalletEntity } from 'src/wallet/entity/wallet.entity';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('users')
-export class User {
+export class UserEntity {
   @PrimaryGeneratedColumn({
     type: 'int',
     comment: '유저 id',
@@ -51,23 +63,58 @@ export class User {
   })
   profileImage: string;
 
-  @OneToMany(() => Posts, (post) => post.user)
-  posts: Posts[];
+  @CreateDateColumn({
+    type: 'timestamp',
+    name: 'created_at',
+    comment: '생성일',
+  })
+  createdAt: Date;
 
-  @OneToMany(() => Reply, (reply) => reply.user)
-  replies: Reply[];
+  @UpdateDateColumn({
+    type: 'timestamp',
+    name: 'updated_at',
+    comment: '수정일',
+    nullable: true,
+  })
+  updatedAt: Date;
 
-  @OneToMany(() => Wallet, (wallet) => wallet.user)
-  wallet: Wallet[];
+  @DeleteDateColumn({
+    type: 'timestamp',
+    name: 'deleted_at',
+    comment: '삭제일',
+    nullable: true,
+  })
+  deletedAt: Date;
 
-  @OneToMany(() => Trade, (trade) => trade.user)
-  trade: Trade[];
+  @OneToMany(() => PostEntity, (post) => post.user)
+  posts: PostEntity[];
 
-  @OneToMany(() => Likes, (likes) => likes.user)
-  likes: Likes[];
+  @OneToMany(() => ReplyEntity, (reply) => reply.user)
+  replies: ReplyEntity[];
 
-  static of(params: Partial<User>): User {
-    const user = new User();
+  @OneToMany(() => WalletEntity, (wallet) => wallet.user)
+  wallet: WalletEntity[];
+
+  @OneToMany(() => TradeEntity, (trade) => trade.user)
+  trade: TradeEntity[];
+
+  @OneToMany(() => LikeEntity, (likes) => likes.user)
+  likes: LikeEntity[];
+
+  @OneToMany(
+    () => ChatParticipantEntity,
+    (chatParticipant) => chatParticipant.user,
+  )
+  chatParticipants: ChatParticipantEntity[];
+
+  @OneToMany(() => ChatEntity, (chat) => chat.user)
+  chats: ChatEntity[];
+
+  @OneToMany(() => UserReadChatEntity, (userReadChat) => userReadChat.user)
+  userReadChats: UserReadChatEntity[];
+
+  static of(params: Partial<UserEntity>): UserEntity {
+    const user = new UserEntity();
     Object.assign(user, params);
 
     return user;

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from 'src/user/entity/user.entity';
+import { UserEntity } from 'src/user/entity/user.entity';
 import {
   Column,
   CreateDateColumn,
@@ -9,10 +9,10 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Posts } from './post.entity';
+import { PostEntity } from './post.entity';
 
 @Entity('replies')
-export class Reply {
+export class ReplyEntity {
   @PrimaryGeneratedColumn({
     type: 'int',
     comment: '댓글 id',
@@ -61,16 +61,16 @@ export class Reply {
   @ApiProperty({ description: '댓글 삭제 시간' })
   deleted_at: Date;
 
-  @ManyToOne(() => Posts, (post) => post.replies, { onDelete: 'CASCADE' })
+  @ManyToOne(() => PostEntity, (post) => post.replies, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'post_id' })
-  post: Posts;
+  post: PostEntity;
 
-  @ManyToOne(() => User, (user) => user.replies)
+  @ManyToOne(() => UserEntity, (user) => user.replies)
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user: UserEntity;
 
-  static of(params: Partial<Reply>): Reply {
-    const reply = new Reply();
+  static of(params: Partial<ReplyEntity>): ReplyEntity {
+    const reply = new ReplyEntity();
     Object.assign(reply, params);
 
     return reply;

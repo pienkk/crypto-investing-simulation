@@ -1,5 +1,5 @@
 import { IsNumber, IsString } from 'class-validator';
-import { Coin } from '../entity/coin.entity';
+import { CoinEntity } from '../entity/coin.entity';
 
 export class CoinValueDto {
   @IsNumber()
@@ -35,14 +35,14 @@ export class CoinValueDto {
   //   return dto;
   // }
 
-  // static fromEntities<T>(entities: Array<T[]>, coin: Coin[]): CoinValueDto[] {
+  // static fromEntities<T>(entities: Array<T[]>, coin: CoinEntity[]): CoinValueDto[] {
   //   return entities.map((entity, idx) =>
   //     CoinValueDto.fromEntity(entity, coin[idx].symbol),
   //   );
   // }
 
-  // static toEntity(dto: CoinValueDto): Coin {
-  //   const entity = new Coin();
+  // static toEntity(dto: CoinValueDto): CoinEntity {
+  //   const entity = new CoinEntity();
   //   entity.symbol = dto.symbol;
   //   entity.oneHourPrice = dto.oneHourPrice;
   //   entity.fourHourPrice = dto.fourHourPrice;
@@ -51,7 +51,7 @@ export class CoinValueDto {
   //   return entity;
   // }
 
-  // static toEntities(dtos: CoinValueDto[]): Coin[] {
+  // static toEntities(dtos: CoinValueDto[]): CoinEntity[] {
   //   return dtos.map((dto) => CoinValueDto.toEntity(dto));
   // }
 }
